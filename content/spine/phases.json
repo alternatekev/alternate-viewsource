@@ -1,0 +1,58 @@
+[
+  {
+    "key": "dialup",
+    "name": "Dial-up",
+    "start": "1991-01-01",
+    "end": "2000-12-31",
+    "web": "Modems and BBSes, HyperCard, then the hand-built page: HTML tables, view source, PHP3 and MySQL by 1999.",
+    "opens": {
+      "event": "The World Wide Web is announced to the public on alt.hypertext",
+      "date": "1991-08-06",
+      "source": { "label": "Tim Berners-Lee, alt.hypertext, August 6, 1991", "url": "https://www.w3.org/People/Berners-Lee/1991/08/art-6484.txt" }
+    }
+  },
+  {
+    "key": "broadband",
+    "name": "Broadband",
+    "start": "2001-01-01",
+    "end": "2007-06-28",
+    "web": "Flash against the standards movement, blogging, AJAX in 2005, Web 2.0.",
+    "opens": null
+  },
+  {
+    "key": "apps",
+    "name": "Apps",
+    "start": "2007-06-29",
+    "end": "2013-05-28",
+    "web": "The iPhone and the App Store, Twitter, the Facebook platform, the cloud, the Quantified Self.",
+    "opens": {
+      "event": "The iPhone goes on sale",
+      "date": "2007-06-29",
+      "source": { "label": "Apple press release, June 28, 2007", "url": "https://www.apple.com/newsroom/2007/06/28iPhone-Premieres-This-Friday-Night-at-Apple-Retail-Stores/" }
+    }
+  },
+  {
+    "key": "components",
+    "name": "Components",
+    "start": "2013-05-29",
+    "end": "2022-11-29",
+    "web": "React, npm and Node everywhere, design systems as a job, Next.js and Vercel, TypeScript.",
+    "opens": {
+      "event": "React is released as open source at JSConf US",
+      "date": "2013-05-29",
+      "source": { "label": "React blog, June 2, 2013", "url": "https://legacy.reactjs.org/blog/2013/06/05/why-react.html" }
+    }
+  },
+  {
+    "key": "agents",
+    "name": "Agents",
+    "start": "2022-11-30",
+    "end": "2026-12-31",
+    "web": "Large language models, coding agents, the Model Context Protocol, agentic development.",
+    "opens": {
+      "event": "ChatGPT is released",
+      "date": "2022-11-30",
+      "source": { "label": "OpenAI, Introducing ChatGPT", "url": "https://openai.com/index/chatgpt/" }
+    }
+  }
+]

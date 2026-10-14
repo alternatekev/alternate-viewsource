@@ -1,0 +1,91 @@
+import { z } from "zod";
+
+// The content model. Every file under content/ is validated against these at build
+// (scripts/validate-content.ts) and again when it is read, so a bad file fails loudly, early.
+
+export const PHASE_KEYS = ["dialup", "broadband", "apps", "components", "agents"] as const;
+export type PhaseKey = (typeof PHASE_KEYS)[number];
+
+// YAML parses a bare 2008-08-06 as a Date; accept both and keep the string form.
+const isoDate = z.preprocess(
+  (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : v),
+  z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "YYYY-MM-DD"),
+);
+
+export const Source = z.object({
+  label: z.string().min(1),
+  url: z.string().url().optional(),
+  // "Kevin's account" when there is no document yet; the site labels it as such.
+  note: z.string().optional(),
+});
+export type Source = z.infer<typeof Source>;
+
+export const Phase = z.object({
+  key: z.enum(PHASE_KEYS),
+  name: z.string(),
+  start: isoDate,
+  end: isoDate,
+  // What changed on the web in this phase, in one line.
+  web: z.string(),
+  // The event that opens the phase, when there is one hinge rather than a slow edge.
+  opens: z.object({ event: z.string(), date: isoDate, source: Source.optional() }).nullable(),
+});
+export type Phase = z.infer<typeof Phase>;
+
+export const Milestone = z.object({
+  key: z.string().regex(/^[a-z0-9-]+$/),
+  date: isoDate,
+  // true when the day or month is a placeholder for a year or season that is known
+  approximate: z.boolean().default(false),
+  label: z.string(),
+  phase: z.enum(PHASE_KEYS),
+  sources: z.array(Source).default([]),
+});
+export type Milestone = z.infer<typeof Milestone>;
+
+export const Design = z.object({
+  key: z.string().regex(/^[a-z0-9-]+$/),
+  // first seen, as "YYYY-MM-DD"; approximate when the capture is later than the launch
+  start: isoDate,
+  approximate: z.boolean().default(false),
+  name: z.string(),
+  tagline: z.string().optional(),
+  stack: z.string(),
+  snapshot: z.object({ url: z.string().url(), captured: isoDate, note: z.string().optional() }),
+});
+export type Design = z.infer<typeof Design>;
+
+// Where the chapter sits in the mood space the field and the instrument read.
+// valence: -1 (dark) .. 1 (bright); arousal: 0 (still) .. 1 (charged); x, y: a point in the frame, -0.5 .. 0.5.
+export const Mood = z.object({
+  valence: z.number().min(-1).max(1),
+  arousal: z.number().min(0).max(1),
+  x: z.number().min(-0.5).max(0.5).default(0),
+  y: z.number().min(-0.5).max(0.5).default(0),
+});
+export type Mood = z.infer<typeof Mood>;
+
+export const ChapterMeta = z.object({
+  title: z.string().min(1),
+  phase: z.enum(PHASE_KEYS),
+  order: z.number().int().nonnegative(),
+  start: isoDate,
+  end: isoDate.optional(),
+  // The glance line: what a phone shows between meetings. One sentence.
+  summary: z.string().min(1).max(240),
+  // stub: a labeled placeholder · draft: words on the page · told: Kevin has read or heard it
+  status: z.enum(["stub", "draft", "told"]).default("stub"),
+  // own: Kevin's to publish · review: needs an external review before it is public · cleared: reviewed
+  clearance: z.enum(["own", "review", "cleared"]).default("own"),
+  mood: Mood,
+  sources: z.array(Source).default([]),
+  // ids under content/objects this chapter places
+  objects: z.array(z.string()).default([]),
+  // set when a recording exists: the audio lives outside the repo, the word timings inside it
+  voice: z
+    .object({ audio: z.string().url(), alignment: z.string() })
+    .optional(),
+});
+export type ChapterMeta = z.infer<typeof ChapterMeta>;
+
+export type Chapter = ChapterMeta & { slug: string; body: string; path: string };

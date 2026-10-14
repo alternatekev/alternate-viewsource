@@ -1,0 +1,71 @@
+/* The glance tier's whole stylesheet. Inlined by Next at build; stays small on purpose.
+   Type is a system stack until Kevin picks the face; the phase accents are placeholders
+   sampled from the archive (#6699CC from 2001, #FE1300 from 2005) and are his call. */
+:root {
+  color-scheme: light dark;
+  --paper: #f6f4ef;
+  --ink: #15161a;
+  --quiet: #5c6068;
+  --rule: #d9d6cf;
+  --accent: #0d5f6a;
+  --dialup: #6699cc;
+  --broadband: #fe1300;
+  --apps: #e8a317;
+  --components: #2a9d8f;
+  --agents: #7c4dff;
+  --measure: 62ch;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b0c0f;
+    --ink: #e8e6e0;
+    --quiet: #9a9ea6;
+    --rule: #26282e;
+    --accent: #7ad3e0;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 17px/1.55 ui-serif, Georgia, "Times New Roman", serif;
+  font-feature-settings: "kern", "liga", "onum";
+}
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: .15em; }
+main { max-width: var(--measure); margin: 0 auto; padding: clamp(24px, 6vh, 64px) 16px 20vh; }
+h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 .5rem; }
+h2 { font-size: clamp(20px, 3.2vw, 26px); margin: 2.2rem 0 .6rem; }
+h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; }
+p { margin: 0 0 1rem; }
+small, .quiet { color: var(--quiet); }
+.kicker { font: 500 13px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); margin: 0 0 .4rem; }
+.lede { font-size: 1.15em; max-width: 46ch; }
+
+/* the spine, glance tier: five phases as a list the eye can scan in two minutes */
+.spine { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.spine > li { padding: 1rem 0 1.1rem; border-bottom: 1px solid var(--rule); }
+.phase-head { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+.phase-head h2 { margin: 0; }
+.phase-head .years { font-family: ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--quiet); }
+.phase-web { margin: .35rem 0 .6rem; color: var(--quiet); }
+.marks { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+.marks li { display: grid; grid-template-columns: 4.5ch 1fr; gap: .75rem; align-items: baseline; }
+.marks .year { font-family: ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--quiet); }
+.chapters { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.chapters a { font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.chapters .summary { display: block; color: var(--quiet); }
+.status { font: 500 11px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--quiet); border: 1px solid var(--rule); border-radius: 3px; padding: .2em .4em; margin-left: .4em; vertical-align: middle; }
+
+/* chapter pages */
+article header { margin-bottom: 2rem; }
+article .meta { color: var(--quiet); font-family: ui-sans-serif, system-ui, sans-serif; font-size: .9rem; }
+article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left: 1rem; color: var(--quiet); }
+.sources { font-size: .92rem; color: var(--quiet); }
+.sources ol { padding-left: 1.2em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
