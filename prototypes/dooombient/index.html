@@ -1,0 +1,669 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dooombient</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: full-bleed field of slow chord bands (height = pitch) behind a thin HUD; the career timeline at the foot is the main control.
+   Palette is re-dealt per composition; these are first-paint values. Single dark world by choice. */
+:root{
+  --bg:#10131c; --ink:#e9e4d8; --a1:#ff9a3c; --a2:#5fb3c9; --dim:rgba(233,228,216,.5);
+  --f-disp:"Major Mono Display", ui-monospace, Menlo, monospace;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-mono);font-size:12px;overflow:hidden;transition:background .8s}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;gap:12px;
+  padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mark{display:flex;flex-direction:column;gap:4px;min-width:0}
+.mark h1{margin:0;font-family:var(--f-disp);font-weight:400;font-size:clamp(18px,3.4vw,28px);letter-spacing:.02em;line-height:1}
+.serial{color:var(--dim);letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.serial b{color:var(--a1);font-weight:600}
+.sc{color:var(--dim);font-size:11px;text-decoration:none;pointer-events:auto;width:max-content}
+.sc:hover,.sc:focus-visible{color:var(--a2)}
+.ctl{display:flex;gap:8px;pointer-events:auto}
+button{font:600 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink);background:transparent;
+  border:1px solid var(--dim);padding:10px 12px;cursor:pointer}
+button:hover{border-color:var(--ink)}
+button:focus-visible,.timeline:focus-visible{outline:2px solid var(--a1);outline-offset:3px}
+button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.foot{display:flex;flex-direction:column;gap:12px}
+.read{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--dim);font-variant-numeric:tabular-nums}
+.read span b{color:var(--ink);font-weight:400}
+.meter{display:inline-block;width:64px;height:6px;border:1px solid var(--dim);vertical-align:middle;position:relative;margin-left:6px}
+.meter i{position:absolute;inset:0;right:auto;background:var(--a1);width:0}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;pointer-events:auto}
+.pedal{--amt:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:9px 10px;font-size:10px;text-align:left;min-width:0;
+  background:transparent;color:var(--ink);border-color:var(--dim);position:relative;overflow:hidden}
+.pedal .nm{display:flex;align-items:center;gap:7px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.pedal .nm::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;border:1px solid var(--a1);
+  background:var(--a1);opacity:calc(.15 + var(--amt) * .85);box-shadow:0 0 calc(var(--amt) * 10px) var(--a1)}
+.pedal .val{font-weight:400;letter-spacing:.04em;text-transform:none;color:var(--dim);font-variant-numeric:tabular-nums}
+.pedal::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:calc(var(--amt) * 100%);background:var(--a1)}
+.pedal[aria-pressed="false"]{opacity:.45}
+.pedal[aria-pressed="true"]{background:transparent;color:var(--ink);border-color:var(--dim)}
+.timeline{position:relative;pointer-events:auto;touch-action:none;cursor:ew-resize;padding-top:10px}
+.eras{display:flex;gap:2px;height:34px}
+.era{flex:var(--w) 1 0;min-width:0;border-top:2px solid var(--dim);padding-top:8px;color:var(--dim);font-size:10px;letter-spacing:.06em;
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .3s,border-color .3s}
+.era.on{border-color:var(--a1);color:var(--ink)}
+.cursor{position:absolute;top:0;width:2px;height:22px;margin-left:-1px;background:var(--a1);box-shadow:0 0 10px var(--a1)}
+.cursor::after{content:attr(data-year);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--a1);font-variant-numeric:tabular-nums}
+.start{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;width:min(88vw,340px)}
+.start button{font-size:13px;padding:16px 22px;border-color:var(--a1);color:var(--a1);background:color-mix(in srgb,var(--bg) 70%,transparent)}
+.start p{margin:0;color:var(--dim);line-height:1.5}
+@media (max-width:560px){ .board{grid-template-columns:repeat(2,minmax(0,1fr))} .meter{width:44px} .era{font-size:9px} }
+</style>
+
+<canvas id="cv" aria-label="Ambient chord field. Moving over it nudges the pedals; scrubbing the timeline below reshapes the sound."></canvas>
+
+<div class="hud">
+  <div class="top">
+    <div class="mark">
+      <h1>dooombient</h1>
+      <div class="serial">alternate.org · composition <b id="serial">—</b></div>
+      <a class="sc" href="https://soundcloud.com/alternatekev" target="_blank" rel="noopener">Kevin's music on SoundCloud ↗</a>
+    </div>
+    <div class="ctl">
+      <button id="snd" aria-pressed="false">Sound off</button>
+      <button id="new">New composition</button>
+    </div>
+  </div>
+  <div class="foot">
+    <div class="read">
+      <span>chord <b id="r-chord">—</b></span>
+      <span>key <b id="r-key">—</b></span>
+      <span>tempo <b id="r-bpm">—</b></span>
+      <span>clock <b id="r-clock">—</b></span>
+      <span>visit <b id="r-visit">—</b></span>
+      <span>time travel<span class="meter"><i id="r-rush"></i></span></span>
+    </div>
+    <div class="board" id="board" role="group" aria-label="Pedalboard"></div>
+    <div class="timeline" id="tl" tabindex="0" role="slider" aria-label="Year" aria-valuemin="1998" aria-valuemax="2026">
+      <div class="eras" id="eras"></div>
+      <div class="cursor" id="cursor" data-year="2026"></div>
+    </div>
+  </div>
+</div>
+
+<div class="start" id="start">
+  <button id="go">Listen</button>
+  <p>Ambient chords, scored from the hour, the date and your visit. Scrub the timeline. Bigger jumps move the pedals faster.</p>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, f) => a + (b - a) * f;
+
+/* ---------- data ---------- */
+let visits = 1;
+try { visits = (+localStorage.getItem('alt-instrument-visits') || 0) + 1; localStorage.setItem('alt-instrument-visits', visits); } catch (e) {}
+
+// Bright modes only. Lydian's raised fourth reads as wonder, Ionian as settled, Mixolydian as easygoing.
+const SCALES = { lydian:[0,2,4,6,7,9,11], ionian:[0,2,4,5,7,9,11], mixolydian:[0,2,4,5,7,9,10] };
+const pickMode = r => { const x = r(); return x < .45 ? 'lydian' : x < .75 ? 'ionian' : 'mixolydian'; };
+const NOTE = ['C','C♯','D','E♭','E','F','F♯','G','A♭','A','B♭','B'];
+const PALETTES = [
+  {bg:'#10131c', ink:'#e9e4d8', a1:'#ff9a3c', a2:'#5fb3c9'},
+  {bg:'#0d1630', ink:'#dfe6f5', a1:'#f2c94c', a2:'#ef7a6a'},
+  {bg:'#171018', ink:'#eedde6', a1:'#ff5fa8', a2:'#7ad3b0'},
+  {bg:'#120e08', ink:'#f3dfb8', a1:'#ffb000', a2:'#c86b3c'},
+  {bg:'#0e1414', ink:'#dfeee9', a1:'#ff5a36', a2:'#9fd8ff'}
+];
+const ERAS = [
+  {from:1998, to:2008, label:'1998 · the web', wave:'square',   loud:.2},
+  {from:2008, to:2025, label:'2008 · apps', wave:'triangle', loud:1},
+  {from:2025, to:2026, label:'2025 · manager', wave:'sawtooth', loud:.26},
+  {from:2026, to:2027, label:'2026 · agentic', wave:'sine',     loud:1}
+];
+const YMIN = 1998, YMAX = 2026.99;
+// Pedal settings each point in time leans toward. Values between anchors are blended.
+//   fl = Flanger (mix, rate Hz, depth s, feedback)   cc = Carbon Copy (mix, time s, feedback, mod depth)
+//   jt = Infinite Jets (mix, gates per beat, depth)  fa = Fathoms (mix, tone Hz, size 0 small → 1 huge)   cut = master tone
+// Base delay times stay at or under 400 ms so the longest layer (×1.5) stays inside the Carbon Copy's 600 ms.
+const ANCHORS = [
+  {y:1998,   p:{flMix:.8,  flRate:.5,  flDepth:.004, flFb:.6,  ccMix:.5,  ccTime:.12, ccFb:.35, ccMod:.0005, jtMix:0,   jtRate:4, jtDepth:.6,  faMix:.72, faTone:2025, faSize:.35, cut:1015}},
+  {y:2008,   p:{flMix:.3,  flRate:.2,  flDepth:.0025,flFb:.35, ccMix:.6,  ccTime:.3,  ccFb:.5,  ccMod:.0015, jtMix:0,   jtRate:2, jtDepth:.5,  faMix:.88, faTone:3105, faSize:.65, cut:1885}},
+  {y:2025,   p:{flMix:.15, flRate:.1,  flDepth:.002, flFb:.25, ccMix:.5,  ccTime:.35, ccFb:.55, ccMod:.002,  jtMix:.6,  jtRate:4, jtDepth:.75, faMix:.88, faTone:2700, faSize:.7, cut:1450}},
+  {y:2026.9, p:{flMix:.2,  flRate:.07, flDepth:.003, flFb:.4,  ccMix:.55, ccTime:.4,  ccFb:.62, ccMod:.0025, jtMix:.3,  jtRate:.5,jtDepth:.5,  faMix:1,   faTone:4590, faSize:1, cut:2610}}
+];
+// Three boards run at once. Their settings stay locked in simple ratios to the shared base,
+// so moving through time moves all three together and they stay in tune with each other.
+// Each board also runs a different Infinite Jets voice and sits at a different spot in Fathom's Sonar blend.
+const LAYERS = [
+  {name:'low', fl:1,   cc:.5,  ccMix:.6, jt:.5, jtMix:.8, size:.75, tone:.6,  sonar:.55, pre:.6,
+   jets:{voice:'blur',   oct:0,  shape:'sine',     envMode:'repeat', trigger:'poly', capture:.22}, dim:.35},
+  {name:'mid', fl:1.5, cc:1,   ccMix:1,  jt:1,  jtMix:1,  size:.9,  tone:1,   sonar:.75, pre:.8,
+   jets:{voice:'swell',  oct:0,  shape:'rampUp',   envMode:'repeat', trigger:'poly', capture:.18}, dim:.5},
+  {name:'air', fl:2,   cc:1.5, ccMix:1,  jt:2,  jtMix:1,  size:1,   tone:1.6, sonar:1,  pre:1,
+   jets:{voice:'blur',   oct:1,  shape:'triangle', envMode:'repeat', trigger:'poly', capture:.25}, dim:.45}
+];
+// Fathom mode by era: the dial-up years sound like a radio, the app years a plate, management a hall, agentic the octave-shimmering Sonar
+const FATHOM_MODE = ['lofi', 'plate', 'hall', 'sonar'];
+const MODE_NAME = {lofi:'Lo-Fi', plate:'Plate', hall:'Hall', sonar:'Sonar'};
+const layerOf = role => role === 'bass' ? 0 : role === 'mid' ? 1 : 2;
+const lp3 = (f, k) => LAYERS.map(L => f(L[k]));
+function presetAt(y){
+  let i = 0; while (i < ANCHORS.length - 2 && y >= ANCHORS[i + 1].y) i++;
+  const a = ANCHORS[i], b = ANCHORS[i + 1], f = clamp((y - a.y) / (b.y - a.y), 0, 1), s = f * f * (3 - 2 * f), o = {};
+  for (const k in a.p) o[k] = lerp(a.p[k], b.p[k], s);
+  return o;
+}
+const eraOf = y => ERAS.findIndex(e => y >= e.from && y < e.to);
+
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+
+let comp;
+function compose(seed){
+  const r = mulberry32(seed);
+  const now = new Date();
+  const hour = now.getHours() + now.getMinutes() / 60;
+  const doy = Math.floor((now - new Date(now.getFullYear(),0,0)) / 864e5);
+  const daylight = .5 - .5 * Math.cos(hour / 24 * Math.PI * 2);
+  const mode = pickMode(r);
+  const root = 29 + ((doy + visits + Math.floor(r() * 12)) % 12);   // F1 to E2: chords sit an octave lower than before
+  const bpm = 48;   // fixed: chords turn over every ten seconds
+  const palette = PALETTES[Math.floor(r() * PALETTES.length)];
+  const serial = `${now.getFullYear()}.${String(doy).padStart(3,'0')}.${(seed >>> 0).toString(36).slice(-4).toUpperCase()}`;
+  return {seed, r, mode, scale:SCALES[mode], root, bpm, palette, serial, daylight, deg:0, driftEvery: 5 + Math.floor(r() * 4), pendingExplore:false};
+}
+function applyPalette(p){
+  const s = document.documentElement.style;
+  s.setProperty('--bg', p.bg); s.setProperty('--ink', p.ink); s.setProperty('--a1', p.a1); s.setProperty('--a2', p.a2);
+  s.setProperty('--dim', hexA(p.ink, .5));
+}
+function hexA(h, a){ const n = parseInt(h.slice(1), 16); return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`; }
+
+/* ---------- timeline UI ---------- */
+const erasEl = $('#eras'), tl = $('#tl'), cursorEl = $('#cursor');
+ERAS.forEach((e, i) => {
+  const d = document.createElement('div');
+  d.className = 'era'; d.style.setProperty('--w', Math.max(2.5, e.to - e.from)); d.textContent = e.label;
+  erasEl.appendChild(d);
+});
+const eraEls = [...erasEl.children];
+function xToYear(clientX){
+  for (let i = 0; i < ERAS.length; i++){
+    const r = eraEls[i].getBoundingClientRect();
+    if (clientX <= r.right || i === ERAS.length - 1){
+      const f = clamp((clientX - r.left) / r.width, 0, 1);
+      return clamp(ERAS[i].from + f * (ERAS[i].to - ERAS[i].from), YMIN, YMAX);
+    }
+  }
+}
+function yearToX(y){
+  const i = Math.max(0, eraOf(y)), r = eraEls[i].getBoundingClientRect(), base = tl.getBoundingClientRect().left;
+  return r.left - base + (y - ERAS[i].from) / (ERAS[i].to - ERAS[i].from) * r.width;
+}
+
+/* ---------- pedalboard ---------- */
+const PEDALS = [
+  {id:'fl', name:'Flanger',       val: p => lp3(r => (p.flRate * r).toFixed(2), 'fl').join(' · ') + ' Hz'},
+  {id:'cc', name:'Carbon Copy',   val: p => lp3(r => Math.round(Math.min(.6, p.ccTime * r) * 1000), 'cc').join(' · ') + ' ms'},
+  {id:'jt', name:'Infinite Jets', val: p => lp3(r => { const v = p.jtRate * r; return v < 1 ? '1/' + Math.round(1 / v) : Math.round(v); }, 'jt').join(' · ') + ' /beat'},
+  {id:'fa', name:'Fathom',        val: p => MODE_NAME[FATHOM_MODE[Math.max(0, eraOf(year))]] + ' · ' + lp3(r => rt60(p, r).toFixed(1), 'size').join(' · ') + ' s'}
+];
+const live = {fl:true, cc:true, jt:true, fa:true};
+const boardEl = $('#board');
+PEDALS.forEach(p => {
+  const b = document.createElement('button');
+  b.className = 'pedal'; b.id = 'fx-' + p.id; b.setAttribute('aria-pressed', 'true');
+  b.innerHTML = `<span class="nm">${p.name}</span><span class="val">—</span>`;
+  b.addEventListener('click', () => { live[p.id] = !live[p.id]; b.setAttribute('aria-pressed', live[p.id]); });
+  boardEl.appendChild(b);
+});
+
+/* ---------- audio ---------- */
+let ac = null, master, analyser, layers = [], sound = false, sub = null, ready = false;
+// Pedal models live in pedals.js (published beside this page) and run in an AudioWorklet.
+async function loadPedals(){
+  try { await ac.audioWorklet.addModule('pedals.js'); }
+  catch (e) {
+    const src = await (await fetch('pedals.js')).text();
+    await ac.audioWorklet.addModule(URL.createObjectURL(new Blob([src], {type: 'application/javascript'})));
+  }
+}
+async function initAudio(){
+  ac = new (window.AudioContext || window.webkitAudioContext)();
+  master = ac.createGain(); master.gain.value = 0;
+  const dyn = ac.createDynamicsCompressor();
+  analyser = ac.createAnalyser(); analyser.fftSize = 1024;
+  master.connect(dyn); dyn.connect(analyser); analyser.connect(ac.destination);
+  if (!ac.audioWorklet) throw new Error('no-worklet');
+  await loadPedals();
+  const W = (name, opts = {}) => new AudioWorkletNode(ac, name, Object.assign({numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [1]}, opts));
+  const bus = ac.createGain(); bus.gain.value = .5; bus.connect(master);   // dry path kept low: the reverbs lead
+  layers = LAYERS.map((R) => {
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.Q.value = .5; lp.frequency.value = 1000;
+    const fl = W('flanger'), cc = W('carbon-copy'), jt = W('infinite-jets'), fa = W('fathom', {outputChannelCount: [2]});
+    const send = ac.createGain(), faOut = ac.createGain(); faOut.gain.value = 1.2;
+    lp.connect(fl); fl.connect(cc); cc.connect(jt); jt.connect(bus); jt.connect(send); send.connect(fa); fa.connect(faOut); faOut.connect(master);
+    fa.port.postMessage({mix: 1, mod: 8});
+    jt.port.postMessage(R.jets);
+    return {inp: lp, lp, fl, cc, jt, fa, send, last: {}};
+  });
+  buildSub();
+  ready = true;
+}
+// send only what changed, so the worklets aren't flooded
+function post(L, node, key, msg){
+  const prev = L.last[key] || {}, out = {};
+  let any = false;
+  for (const k in msg){
+    const v = msg[k], p = prev[k];
+    if (p === undefined || (typeof v === 'number' ? Math.abs(v - p) > Math.abs(p) * .004 + 1e-6 : v !== p)){ out[k] = v; any = true; }
+  }
+  if (any){ node.port.postMessage(out); L.last[key] = Object.assign(prev, out); }
+}
+// Amp drone, after Sunn O))): a sustained power chord (root, fifth, octave) through a cranked, dark amp.
+// It swells over many bars at rest and roars up with the surge when you leap through time.
+function buildSub(){
+  if (!layers.length) return;
+  const now = ac.currentTime;
+  if (sub){ sub.g.gain.cancelScheduledValues(now); sub.g.gain.setTargetAtTime(0, now, .8); sub.oscs.forEach(x => x.o.stop(now + 5)); }
+  const g = ac.createGain(), pre = ac.createGain(), sh = ac.createWaveShaper(), body = ac.createBiquadFilter(), cab = ac.createBiquadFilter();
+  const c = new Float32Array(2048);
+  for (let i = 0; i < 2048; i++){ const x = i / 2047 * 2 - 1; c[i] = Math.tanh(x * 3.5) * .8 + Math.tanh(x * 1.2) * .2; }
+  sh.curve = c; sh.oversample = '4x'; pre.gain.value = 1.4;
+  body.type = 'peaking'; body.frequency.value = 120; body.gain.value = 4; body.Q.value = .8;
+  cab.type = 'lowpass'; cab.frequency.value = 1400; cab.Q.value = .9;
+  const oscs = [[0, -4], [0, 5], [7, -2], [12, 3]].map(([iv, det]) => {
+    const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(comp.root + iv); o.detune.value = det;
+    o.connect(pre); o.start(); return {o, iv};
+  });
+  pre.connect(sh); sh.connect(body); body.connect(cab); cab.connect(g);
+  g.gain.value = 0; g.connect(layers[0].inp);
+  sub = {g, oscs};
+}
+function retuneDrone(){ if (sub) sub.oscs.forEach(x => x.o.frequency.setTargetAtTime(mtof(comp.root + x.iv), ac.currentTime, 3)); }
+
+// iOS routes Web Audio through the ringer switch. A playback session (Safari 17+) and a looping silent
+// <audio> element both move it to the media channel, which ignores the switch.
+let unlockEl = null;
+function silentWav(){
+  const n = 4410, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0,'RIFF'); v.setUint32(4, 36 + n*2, true); w(8,'WAVE'); w(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true);
+  v.setUint16(22,1,true); v.setUint32(24,44100,true); v.setUint32(28,88200,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  w(36,'data'); v.setUint32(40, n*2, true);
+  let s = ''; new Uint8Array(buf).forEach(b => s += String.fromCharCode(b));
+  return 'data:audio/wav;base64,' + btoa(s);
+}
+function unlockIOS(){
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  try { if (!unlockEl){ unlockEl = new Audio(silentWav()); unlockEl.loop = true; unlockEl.setAttribute('playsinline', ''); } unlockEl.play().catch(() => {}); } catch (e) {}
+}
+function setSound(on){
+  if (on){
+    unlockIOS();
+    const boot = ac ? Promise.resolve() : initAudio();
+    // the context has to exist and resume inside the tap; initAudio creates it synchronously before its first await
+    const b = ac.createBufferSource(); b.buffer = ac.createBuffer(1, 1, 22050); b.connect(ac.destination); b.start(0);
+    Promise.all([ac.resume(), boot]).then(() => {
+      sound = true; voices.length = 0; glints.length = 0; nextChordAt = 0; nextGlint = ac.currentTime + 5;
+      master.gain.setTargetAtTime(.9, ac.currentTime, .6);
+    }).catch(err => {
+      $('#start').hidden = false;
+      $('#start p').textContent = err && err.message === 'no-worklet'
+        ? 'This browser can\'t run the pedal models. Try a current Safari, Chrome or Firefox.'
+        : 'The pedal models didn\'t load. Tap Listen to try again.';
+      ac = null; ready = false; layers = [];
+    });
+    setTimeout(() => {
+      if (ac && ac.state !== 'running'){
+        $('#start').hidden = false;
+        $('#start p').textContent = 'Sound is still blocked. Tap Listen again. On an iPhone, also check the silent switch and volume.';
+      }
+    }, 1500);
+    $('#start').hidden = true;
+  } else if (ac){
+    sound = false; master.gain.setTargetAtTime(0, ac.currentTime, .3);
+  }
+  $('#snd').setAttribute('aria-pressed', on); $('#snd').textContent = on ? 'Sound on' : 'Sound off';
+}
+
+/* ---------- harmony ---------- */
+const t0 = performance.now();
+const clock = () => sound && ac && ready ? ac.currentTime : (performance.now() - t0) / 1000;
+const scaleAt = d => { const L = comp.scale.length; return comp.scale[((d % L) + L) % L] + 12 * Math.floor(d / L); };
+const voices = [];  // {midi, role, t, att, rel, end, lvl, nodes}
+let nextChordAt = 0, chordName = '—';
+
+const VOICINGS = [            // scale steps stacked above the chord root
+  {steps:[4, 8, 9],  name:'add9'},   // 5, 9, 10: open and warm
+  {steps:[5, 8, 11], name:'6/9'},    // 6, 9, 12
+  {steps:[4, 6, 9],  name:'maj7'},   // 5, 7, 10
+  {steps:[1, 4, 8],  name:'sus2'}    // 2, 5, 9: unresolved, still bright
+];
+const iv = (d, n) => ((scaleAt(d + n) - scaleAt(d)) % 12 + 12) % 12;
+const quality = d => iv(d, 4) === 6 ? 'dim' : iv(d, 2) === 3 ? 'min' : 'maj';
+let chordCount = 0;
+
+// Exploration: the home key drifts somewhere new now and then, and a big leap in time takes it there at once.
+function explore(){
+  // Every move is one step around the circle of fifths, so old and new keys share six of seven notes.
+  // Either the home note moves up or down a fifth, or the mode tilts one step on the same home note
+  // (Lydian sits one step sharp of Ionian, Mixolydian one step flat).
+  const NEIGHBOR_MODES = {lydian:['ionian'], ionian:['lydian', 'mixolydian'], mixolydian:['ionian']};
+  if (comp.r() < .35){ const m = NEIGHBOR_MODES[comp.mode]; comp.mode = m[Math.floor(comp.r() * m.length)]; comp.scale = SCALES[comp.mode]; }
+  else { comp.root += comp.r() < .5 ? 7 : -7; while (comp.root > 40) comp.root -= 12; while (comp.root < 29) comp.root += 12; }
+  comp.deg = 0;
+  retuneDrone();
+}
+function changeChord(t, att){
+  chordCount++;
+  let explored = false;
+  if (comp.pendingExplore || chordCount % comp.driftEvery === 0){ explore(); comp.pendingExplore = false; explored = true; }
+  const L = comp.scale.length, moves = [1, -1, 1, -1, 2, -2, 3, -3, 4];
+  let d = comp.deg;
+  // The first chord in a new key is its home chord. Its voicings never use the one note that changed,
+  // so it overlaps the fading chord from the old key without a clash. About one change in seven skips
+  // that pivot and lets the old chord rub against the new key for a moment as it fades.
+  const pivot = explored && comp.r() < .85;
+  for (let k = 0; !pivot && k < 10; k++){
+    d = ((comp.deg + moves[Math.floor(comp.r() * moves.length)]) % L + L) % L;
+    const q = quality(d);
+    if (q === 'maj' || (q === 'min' && comp.r() < .35)) break;       // minor chords are rare guests, diminished never
+  }
+  comp.deg = d;
+  const v0 = VOICINGS[Math.floor(comp.r() * VOICINGS.length)];
+  const pedal = comp.r() < .45;                                       // hold the home note under a moving chord
+  const bassDeg = pedal ? 0 : d;
+  const notes = [{midi: comp.root + 12 + scaleAt(bassDeg), role:'bass'}].concat(
+    v0.steps.map((st, i) => ({midi: comp.root + 24 + scaleAt(d + st), role: i === v0.steps.length - 1 ? 'top' : 'mid'})));
+  const rel = att * 1.5;
+  voices.forEach(v => { if (!v.end){ v.end = t; v.rel = rel; releaseVoice(v, t, rel); } });
+  const era = ERAS[Math.max(0, eraOf(year))];
+  notes.forEach((n, i) => {
+    const v = {midi: n.midi, role: n.role, t: t + i * att * .3, att, rel, end: 0, lvl: n.role === 'bass' ? .07 : .045, ph: comp.r() * 6.28};  // the chord blooms note by note
+    if (sound && ready) startVoice(v, era);
+    voices.push(v);
+  });
+  const rootPc = (comp.root + scaleAt(d)) % 12, label = v0.name === 'maj7' && iv(d, 6) === 10 ? '7' : v0.name;
+  chordName = NOTE[rootPc] + (quality(d) === 'min' ? 'm' : '') + label + (pedal && d !== 0 ? '/' + NOTE[comp.root % 12] : '');
+  if (sound && ready) layers.forEach((Ly, i) => setTimeout(() => Ly.jt.port.postMessage({trig: 1}), (att * .9 + i * .3) * 1000));
+}
+
+// Feedback swells: a rare high chord tone that blooms slowly and hangs, like a held note feeding back.
+const glints = [];
+let nextGlint = 6;
+function glint(t){
+  const ups = voices.filter(v => !v.end && v.role !== 'bass');
+  if (!ups.length) return;
+  const midi = ups[Math.floor(comp.r() * ups.length)].midi + 12;
+  glints.push({midi, t, x: .15 + comp.r() * .7});
+  if (!(sound && ready)) return;
+  const g = ac.createGain(), o = ac.createOscillator(), o2 = ac.createOscillator();
+  o.type = 'sine'; o2.type = 'triangle'; o.frequency.value = o2.frequency.value = mtof(midi); o2.detune.value = 4;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.022, t + 4); g.gain.setTargetAtTime(0, t + 5, 2.2);
+  o.connect(g); o2.connect(g); g.connect(layers[2].inp); o.start(t); o2.start(t); o.stop(t + 18); o2.stop(t + 18);
+}
+function startVoice(v, era){
+  const g = ac.createGain(), lvl = v.lvl * era.loud;
+  g.gain.setValueAtTime(0, v.t); g.gain.linearRampToValueAtTime(lvl, v.t + v.att);
+  const a = ac.createOscillator(), b = ac.createOscillator();
+  a.type = era.wave; b.type = 'triangle';
+  a.frequency.value = b.frequency.value = mtof(v.midi); a.detune.value = -3; b.detune.value = 3;
+  // warm analog pad: a soft detuned saw joins, and a filter opens slowly as the note swells in
+  const c = ac.createOscillator(), cg = ac.createGain(), lp = ac.createBiquadFilter();
+  c.type = 'sawtooth'; c.frequency.value = mtof(v.midi); c.detune.value = 7; cg.gain.value = .45;
+  lp.type = 'lowpass'; lp.Q.value = .7;
+  lp.frequency.setValueAtTime(300, v.t); lp.frequency.linearRampToValueAtTime(1100 + (v.midi - 40) * 15, v.t + v.att * 1.3);
+  a.connect(lp); b.connect(lp); c.connect(cg); cg.connect(lp); lp.connect(g); g.connect(layers[layerOf(v.role)].inp);
+  a.start(v.t); b.start(v.t); c.start(v.t);
+  v.nodes = {g, a, b, c};
+}
+function releaseVoice(v, t, rel){
+  if (!v.nodes) return;
+  const {g, a, b, c} = v.nodes;
+  g.gain.cancelScheduledValues(t); g.gain.setTargetAtTime(0, t, rel / 4);
+  [a, b, c].forEach(o => o.stop(t + rel + .2));
+}
+const envAt = (v, t) => {
+  if (t < v.t) return 0;
+  const up = Math.min(1, (t - v.t) / v.att);
+  return v.end && t > v.end ? up * Math.exp(-(t - v.end) / (v.rel / 4)) : up;
+};
+
+/* ---------- control loop: time travel drives the pedals ---------- */
+let year = 2026.6, rush = 0, energy = 0;
+const lg = LAYERS.map(() => ({gate: 1, ph: 0, mix: 0}));  // mirrors each board's Jets envelope for the visuals
+let cur = presetAt(year), lastT = performance.now();
+const ptr = {x: -1, y: -1, nx: .5, ny: .5, lx: 0, ly: 0, lt: 0};
+
+function setYear(y, fromKey){
+  y = clamp(y, YMIN, YMAX);
+  const jump = Math.abs(y - year), crossed = eraOf(y) !== eraOf(year);
+  year = y;
+  rush = Math.min(1, rush + jump / 8);   // a decade's leap is a full surge
+  if (jump > 6) comp.pendingExplore = true;
+  if (jump > 4 || crossed) nextChordAt = Math.min(nextChordAt, clock() + (jump > 4 ? 0 : .3));
+  syncTimeline();
+}
+function syncTimeline(){
+  cursorEl.style.left = yearToX(year) + 'px';
+  cursorEl.dataset.year = Math.floor(year);
+  tl.setAttribute('aria-valuenow', Math.floor(year));
+  const ei = eraOf(year); eraEls.forEach((el, i) => el.classList.toggle('on', i === ei));
+}
+
+function control(){
+  const nowMs = performance.now(), dt = Math.min(.25, (nowMs - lastT) / 1000); lastT = nowMs;
+  const t = clock();
+  rush *= Math.exp(-dt / 3);
+  energy *= Math.exp(-dt / 1.2);
+
+  // where the timeline points, plus the content nudges and the surge from jumping
+  const tgt = presetAt(year);
+  // At rest the swirl is held to about half; a jump through time lets it all the way back in.
+  const calm = .5 + .5 * rush;
+  tgt.flMix *= calm; tgt.flFb *= .6 + .4 * rush; tgt.flRate *= .7 + .3 * rush;
+  tgt.ccMod *= .4 + .6 * rush; tgt.jtMix *= calm;
+  tgt.flRate *= (.8 + ptr.nx * .4) * (1 + rush * 3);
+  tgt.flFb = Math.min(.85, tgt.flFb + rush * .3);
+  tgt.ccFb = Math.min(.9, tgt.ccFb + energy * .08 + rush * .35);
+  tgt.ccTime *= 1 - rush * .35;              // a quick leap bends the delay like a tape stop
+  tgt.jtRate *= 1 + rush * 3;
+  tgt.faTone *= (.8 + (1 - ptr.ny) * .4);
+  tgt.faMix = Math.min(1, tgt.faMix + rush * .3);
+  tgt.cut = tgt.cut * (.6 + comp.daylight * .4) + energy * 500 + rush * 3500;
+
+  // how fast the board follows: slow drift at rest, snappy after a big jump
+  const k = 1 - Math.exp(-dt * (.35 + rush * 7));
+  for (const key in cur) cur[key] = lerp(cur[key], tgt[key], k);
+
+  // chords
+  const beat = 60 / comp.bpm;
+  if (t >= nextChordAt){
+    const att = .35 + 3.6 * (1 - Math.min(1, rush * 1.2));
+    changeChord(t + .03, att);
+    nextChordAt = t + beat * 8 * (1 - rush * .75) * (.85 + comp.r() * .4);
+  }
+  for (let i = voices.length - 1; i >= 0; i--) if (voices[i].end && t > voices[i].end + voices[i].rel * 2) voices.splice(i, 1);
+  if (sub && sound && ready){
+    const swell = .55 + .45 * Math.sin(t * Math.PI * 2 / (beat * 32));       // one slow breath every 32 beats
+    sub.g.gain.setTargetAtTime(.03 * swell + rush * .035, ac.currentTime, .5);
+  }
+  if (t >= nextGlint){ glint(t + .02); nextGlint = t + (16 + comp.r() * 20) * (1 - rush * .6); }
+  for (let i = glints.length - 1; i >= 0; i--) if (t - glints[i].t > 16) glints.splice(i, 1);
+
+  // each board takes the shared settings through its own ratios and drives the real pedal controls
+  const on = id => live[id] ? 1 : 0;
+  const mode = FATHOM_MODE[Math.max(0, eraOf(year))];
+  LAYERS.forEach((R, i) => {
+    const g = lg[i], jtMix = cur.jtMix * R.jtMix * on('jt');
+    const rate = cur.jtRate * R.jt / (2 * beat);               // Repeat Waveform rate, Hz
+    g.ph = (g.ph + rate * dt) % 1;
+    const sh = R.jets.shape, p = g.ph;
+    g.gate = sh === 'square' ? (p < .5 ? 1 : 0) : sh === 'rampUp' ? p : .5 - .5 * Math.cos(Math.PI * 2 * p);
+    g.mix = jtMix;
+    if (!(sound && ready)) return;
+    const L = layers[i];
+    L.lp.frequency.setTargetAtTime(Math.min(9000, cur.cut * R.tone), ac.currentTime, .1);
+    post(L, L.fl, 'fl', {mix: cur.flMix * on('fl'), rate: cur.flRate * R.fl, width: cur.flDepth, regen: cur.flFb});
+    post(L, L.cc, 'cc', {time: Math.min(.6, cur.ccTime * R.cc), regen: cur.ccFb, mix: cur.ccMix * R.ccMix * on('cc'),
+                         width: cur.ccMod, rate: .45 * R.fl, slew: .15 + rush * .2});
+    post(L, L.jt, 'jt', {dry: 1 - jtMix * .5, rate, envTime: beat * 4, dimension: Math.min(1, R.dim + rush * .45),
+                         drive: .12 + (year < 2008 ? .25 : 0) + rush * .3, tone: 2500 + cur.faTone});
+    post(L, L.fa, 'fa', {mode, decay: rt60(cur, R.size), damp: cur.faTone * R.tone, sustain: rush > .55 ? 1 : 0,
+                         x: mode === 'sonar' ? R.sonar : mode === 'lofi' ? .35 * R.size : .2 * R.pre,
+                         scale: .6 + cur.faSize * R.size * .9, mod: (mode === 'sonar' ? 3 : 5) + rush * 20, shim: .16 + rush * .25});
+    L.send.gain.setTargetAtTime(cur.faMix * on('fa'), ac.currentTime, .2);
+  });
+}
+// Fathom's Decay, as an RT60 in seconds. Each board's room is a fixed ratio of the shared size.
+function rt60(p, r){ return 2.2 + Math.min(1, p.faSize * r) * 9; }
+setInterval(control, 40);
+
+/* ---------- visuals ---------- */
+let W = 0, H = 0;
+const lay = {top: 120, bot: 400};
+function measure(){
+  lay.top = $('.top').getBoundingClientRect().bottom + 28;
+  lay.bot = Math.max(lay.top + 120, $('.foot').getBoundingClientRect().top - 48);
+}
+function resize(){
+  const dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.fillStyle = comp.palette.bg; ctx.fillRect(0,0,W,H);
+  measure(); syncTimeline();
+}
+const yOf = m => lay.bot - clamp((m - (comp.root + 8)) / 50, 0, 1) * (lay.bot - lay.top);
+
+function draw(){
+  const t = clock(), P = comp.palette, sec = performance.now() / 1000;
+  const fa = live.fa ? cur.faMix : 0, fl = live.fl ? cur.flMix : 0, cc = live.cc ? cur.ccMix : 0, jt = live.jt ? cur.jtMix : 0;
+
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = hexA(P.bg, reduce ? .5 : .2 - fa * .14); ctx.fillRect(0, 0, W, H);
+
+  // the year, very large and faint
+  ctx.fillStyle = hexA(P.ink, .045 + rush * .08);
+  ctx.font = `400 ${Math.min(W * .32, H * .34)}px "Major Mono Display", ui-monospace, monospace`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(String(Math.floor(year)), W / 2, (lay.top + lay.bot) / 2);
+
+  // chord bands, each drawn through its own board's flanger, delay and gate
+  const x0 = W * .06, x1 = W * .94, segs = reduce ? 24 : 72;
+  for (const v of voices){
+    const e = envAt(v, t); if (e < .01) continue;
+    const li = layerOf(v.role), R = LAYERS[li], g = lg[li];
+    ctx.globalAlpha = 1 - (g.mix || 0) * (1 - g.gate) * .8;
+    const amp = (1.5 + fl * 7 + rush * 18) * (reduce ? .3 : 1), speed = .4 + cur.flRate * R.fl * 3;
+    const echoT = Math.min(.6, cur.ccTime * R.cc), ccl = cc * R.ccMix;
+    const y = yOf(v.midi), col = v.role === 'bass' ? P.a2 : v.role === 'top' ? P.a1 : P.ink;
+    const band = (alpha, dy, lw) => {
+      ctx.strokeStyle = hexA(col, alpha); ctx.lineWidth = lw; ctx.beginPath();
+      for (let i = 0; i <= segs; i++){
+        const f = i / segs, x = lerp(x0, x1, f);
+        const yy = y + dy + Math.sin(f * 9 + sec * speed + v.ph) * amp * Math.sin(f * Math.PI) * e;
+        i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy);
+      }
+      ctx.stroke();
+    };
+    band(e * .85, 0, 1 + e * 2.2);
+    if (ccl > .05) for (let k = 1; k <= 3; k++) band(e * ccl * .35 * Math.pow(cur.ccFb + .1, k), k * echoT * 26, 1);
+  }
+
+  // glints
+  for (const gl of glints){
+    const age = t - gl.t; if (age < 0) continue;
+    const a = Math.min(1, age / 4) * Math.exp(-Math.max(0, age - 4) / 3), r = 3 + age * 4;
+    ctx.globalAlpha = 1; ctx.strokeStyle = hexA(P.a1, a * .8); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(gl.x * W, yOf(gl.midi), r, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = hexA(P.ink, a); ctx.fillRect(gl.x * W - 1.5, yOf(gl.midi) - 1.5, 3, 3);
+  }
+
+  // scope
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = hexA(P.a2, .4); ctx.lineWidth = 1; ctx.beginPath();
+  const base = lay.bot + 22;
+  if (sound && analyser){
+    const buf = new Float32Array(analyser.fftSize); analyser.getFloatTimeDomainData(buf);
+    for (let i = 0; i < buf.length; i += 4){ const x = x0 + (i / buf.length) * (x1 - x0), y = base + buf[i] * 50; i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); }
+  } else {
+    for (let i = 0; i <= 120; i++){ const x = lerp(x0, x1, i / 120), y = base + Math.sin(i * .21 + sec * 1.3) * Math.sin(i * .05 - sec * .4) * (3 + rush * 14); i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); }
+  }
+  ctx.stroke();
+
+  if (ptr.x >= 0){
+    ctx.strokeStyle = hexA(P.a1, .15 + energy * .5);
+    ctx.beginPath(); ctx.arc(ptr.x, ptr.y, 10 + energy * 30, 0, Math.PI * 2); ctx.stroke();
+  }
+  requestAnimationFrame(draw);
+}
+
+/* ---------- input ---------- */
+cv.addEventListener('pointermove', e => {
+  const now = performance.now(), dtm = Math.max(8, now - ptr.lt);
+  if (ptr.lt) energy = Math.min(1, energy + Math.hypot(e.clientX - ptr.lx, e.clientY - ptr.ly) / dtm * .015);
+  ptr.lx = ptr.x = e.clientX; ptr.ly = ptr.y = e.clientY; ptr.lt = now;
+  ptr.nx = e.clientX / W; ptr.ny = e.clientY / H;
+});
+cv.addEventListener('pointerleave', () => { ptr.x = -1; });
+cv.addEventListener('click', () => { if (!sound) setSound(true); else energy = Math.min(1, energy + .3); });
+
+let dragging = false;
+tl.addEventListener('pointerdown', e => { dragging = true; tl.setPointerCapture(e.pointerId); setYear(xToYear(e.clientX)); });
+tl.addEventListener('pointermove', e => { if (dragging) setYear(xToYear(e.clientX)); });
+tl.addEventListener('pointerup', () => { dragging = false; if (!sound && !ac) setSound(true); });
+tl.addEventListener('pointercancel', () => { dragging = false; });
+tl.addEventListener('keydown', e => {
+  const step = e.shiftKey ? 5 : 1;
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setYear(year - step);
+  else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setYear(year + step);
+  else if (e.key === 'Home') setYear(YMIN);
+  else if (e.key === 'End') setYear(YMAX);
+  else return;
+  e.preventDefault();
+});
+
+$('#go').addEventListener('click', () => setSound(true));
+$('#snd').addEventListener('click', () => setSound(!sound));
+$('#new').addEventListener('click', () => start(Date.now() ^ (Math.random() * 1e9)));
+document.addEventListener('visibilitychange', () => { if (ac) document.hidden ? ac.suspend() : (sound && ac.resume()); });
+
+/* ---------- HUD ---------- */
+function hud(){
+  $('#r-chord').textContent = chordName;
+  $('#r-key').textContent = `${NOTE[comp.root % 12]} ${comp.mode}`;
+  $('#r-bpm').textContent = `${comp.bpm} bpm`;
+  $('#r-clock').textContent = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  $('#r-visit').textContent = `no. ${visits}`;
+  $('#r-rush').style.width = Math.round(rush * 100) + '%';
+  const mixes = {fl: cur.flMix, cc: cur.ccMix, jt: cur.jtMix, fa: cur.faMix};
+  PEDALS.forEach(p => {
+    const b = $('#fx-' + p.id);
+    b.style.setProperty('--amt', (live[p.id] ? mixes[p.id] : 0).toFixed(3));
+    b.querySelector('.val').textContent = p.val(cur);
+  });
+}
+setInterval(hud, 120);
+
+function start(seed){
+  comp = compose(seed);
+  applyPalette(comp.palette);
+  $('#serial').textContent = comp.serial;
+  voices.forEach(v => { if (!v.end){ v.end = clock(); v.rel = 3; releaseVoice(v, clock(), 3); } });
+  nextChordAt = clock() + .2;
+  if (ac) buildSub();
+  hud();
+}
+
+start((Date.now() ^ (visits * 2654435761)) >>> 0);
+resize(); addEventListener('resize', resize);
+document.fonts && document.fonts.ready.then(() => { measure(); syncTimeline(); });
+requestAnimationFrame(draw);
+})();
+</script>
+
+</body></html>

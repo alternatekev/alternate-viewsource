@@ -1,0 +1,676 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>doooomgaze</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Chakra+Petch:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: the shattered source art fills the whole background as a live, lit, lensed simulation; one column of reading content scrolls over it. Single deliberate dark look. */
+:root {
+  color-scheme: dark;
+  --void: #07090c;
+  --glass: rgba(9, 11, 15, 0.6);
+  --line: rgba(190, 205, 225, 0.14);
+  --line-hi: rgba(225, 232, 242, 0.4);
+  --ink: #e6eaf0;
+  --dim: #8a93a2;
+  --accent: #ffbf66;
+  --display: "Michroma", "Eurostile", "Arial Black", sans-serif;
+  --body: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--void); color: var(--ink); font: 15px/1.5 var(--body); }
+::selection { background: rgba(255, 191, 102, 0.32); }
+#field { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
+.nogl { position: fixed; inset: 0; display: grid; place-items: center; color: var(--dim); padding: 24px; text-align: center; }
+
+.content {
+  position: relative; z-index: 1;
+  max-width: 600px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 9vh 40vh;
+  margin-left: clamp(0px, 6vw, 96px);
+}
+.intro { min-height: 82vh; display: flex; flex-direction: column; justify-content: center; gap: 16px; }
+h1 { margin: 0; font: 400 clamp(26px, 4.6vw, 44px)/1.18 var(--display); letter-spacing: .02em; text-wrap: balance; }
+.lede { margin: 0; max-width: 46ch; color: #b9c1cd; font-size: 15.5px; }
+.small { font: 11.5px/1.5 var(--mono); color: var(--dim); }
+
+.beat { min-height: 90vh; display: flex; align-items: center; }
+.card {
+  width: 100%; display: grid; gap: 8px; padding: 20px 22px 18px;
+  background: var(--glass); border: 1px solid var(--line); border-radius: 3px;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+  transition: border-color 1.2s ease;
+}
+.card:has(details[open]) { border-color: var(--line-hi); }
+.card .era { font: 12px/1.3 var(--mono); color: var(--dim); }
+.card h2 { margin: 0; font: 400 19px/1.3 var(--display); letter-spacing: .02em; text-wrap: balance; }
+.card p { margin: 0; color: #c3cad5; max-width: 52ch; }
+.card details { margin-top: 4px; }
+.card summary { list-style: none; cursor: pointer; width: fit-content; font: 500 12.5px var(--body); color: var(--accent); padding: 4px 0; }
+.card summary::-webkit-details-marker { display: none; }
+.card summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+.card details[open] summary { color: var(--dim); }
+.card details p { margin-top: 8px; color: #aeb6c2; }
+
+/* Live numbers drawer (art direction only) */
+.tune-btn {
+  position: fixed; z-index: 3;
+  right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  font: 500 11px var(--mono); letter-spacing: .08em;
+  background: var(--glass); color: var(--dim); border: 1px solid var(--line); border-radius: 3px; padding: 8px 12px; cursor: pointer;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+}
+.tune-btn:hover, .tune-btn[aria-expanded="true"] { color: var(--ink); border-color: var(--line-hi); }
+.tune-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tune {
+  position: fixed; z-index: 3; width: min(300px, calc(100vw - 32px));
+  right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  max-height: calc(100% - 90px); overflow-y: auto;
+  background: rgba(9, 11, 15, 0.84); border: 1px solid var(--line); border-radius: 3px; padding: 14px;
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  display: grid; gap: 12px; font-size: 12.5px;
+}
+.tune h3 { margin: 0; font: 600 11px/1 var(--body); letter-spacing: .06em; color: var(--dim); }
+.nums { display: grid; grid-template-columns: auto 1fr auto; gap: 5px 10px; align-items: center; font: 11px var(--mono); color: var(--dim); }
+.nums .v { color: var(--ink); text-align: right; font-variant-numeric: tabular-nums; min-width: 6ch; }
+.nums .track { position: relative; height: 4px; background: rgba(255,255,255,.07); border-radius: 2px; }
+.nums .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 2px; }
+.tune label { display: flex; align-items: center; gap: 8px; color: #c3cad5; }
+.tune input[type=checkbox] { accent-color: var(--accent); }
+.tod { display: flex; align-items: center; gap: 8px; }
+.tod input { flex: 1; min-width: 0; accent-color: var(--accent); }
+.tod output { font: 11px var(--mono); width: 5ch; text-align: right; color: var(--ink); }
+@media (max-width: 760px) { .content { margin-left: 0; } }
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+
+<canvas id="field" aria-hidden="true"></canvas>
+<div class="nogl" id="nogl" hidden>This browser didn't give us a WebGL context. Try another browser or turn on hardware acceleration.</div>
+
+<main class="content">
+  <header class="intro" data-v="0.3" data-a="0.18">
+    <h1>An analog child, a digital adult.</h1>
+    <p class="lede">The background is the source art, shattered differently every time this page loads, and it never stops moving. How you read steers it: where you are, how fast you scroll, where you linger, what you open, what you select and when you pause. Time of day and the music shape it too.</p>
+    <span class="small" id="loadNote"></span>
+  </header>
+
+  <section class="beat" data-v="0.35" data-a="0.22" data-x="-0.3" data-y="0.25"><article class="card">
+    <span class="era">Dial-up, 1991–2000</span>
+    <h2>Chapter one</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+
+  <section class="beat" data-v="0.25" data-a="0.5" data-x="0.3" data-y="-0.15"><article class="card">
+    <span class="era">Broadband, 2001–2007</span>
+    <h2>Chapter two</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+
+  <section class="beat" data-v="0.85" data-a="0.85" data-x="0.1" data-y="0.2"><article class="card">
+    <span class="era">Apps, 2007–2013</span>
+    <h2>Chapter three</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+
+  <section class="beat" data-v="0.7" data-a="0.1" data-x="0" data-y="0"><article class="card">
+    <span class="era">Components, 2013–2022</span>
+    <h2>Chapter four</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+
+  <section class="beat" data-v="-0.4" data-a="0.45" data-x="-0.35" data-y="-0.25"><article class="card">
+    <span class="era">Agents, 2022–now</span>
+    <h2>Chapter five</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+
+  <section class="beat" data-v="0.15" data-a="0.95" data-x="0.35" data-y="0.15"><article class="card">
+    <span class="era">Agents, 2022–now</span>
+    <h2>Chapter six</h2>
+    <p>Placeholder copy. The chapter's words, in Kevin's voice, go here; the data attributes on the section are its mood.</p>
+    <details><summary>Read more</summary><p>Placeholder. The longer story goes here, in Kevin's words.</p></details>
+  </article></section>
+</main>
+
+<button class="tune-btn" id="tuneBtn" type="button" aria-expanded="false" aria-controls="tune">Live numbers</button>
+<div class="tune" id="tune" hidden>
+  <h3>Reader signals</h3>
+  <div class="nums" id="sigs"></div>
+  <h3>What the field is doing</h3>
+  <div class="nums" id="nums"></div>
+  <h3>Time of day</h3>
+  <label><input type="checkbox" id="clock" checked> Follow the clock</label>
+  <div class="tod"><input type="range" id="tod" min="0" max="24" step="0.05" aria-label="Time of day"><output id="todO"></output></div>
+  <h3>Music</h3>
+  <label><input type="checkbox" id="inst" checked> Simulated instrument</label>
+</div>
+
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const sstep = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hsl(h, s, l) {
+  h = ((h % 360) + 360) % 360 / 360; s = clamp(s, 0, 1); l = clamp(l, 0, 1);
+  const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return [f(h + 1 / 3), f(h), f(h - 1 / 3)];
+}
+const mixc = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
+
+/* ---------- world ---------- */
+const CAM_D = 5, FOV = 0.72, OVERSCAN = 1.25;
+let W = 8, H = 4.5, cssW = 1, cssH = 1, dpr = 1;
+function sizeWorld() {
+  cssW = Math.max(1, innerWidth); cssH = Math.max(1, innerHeight); dpr = Math.min(1.75, devicePixelRatio || 1);
+  H = 2 * CAM_D * Math.tan(FOV / 2) * OVERSCAN; W = H * cssW / cssH;
+}
+sizeWorld();
+
+/* ---------- this load's shatter ---------- */
+const SEED = 1 + Math.floor(Math.random() * 99990);
+const rnd = mulberry32(SEED);
+const PATTERN = ['impact', 'glass', 'splinter'][Math.floor(rnd() * 3)];
+const LOAD_POINT = [(rnd() - .5) * 0.7, (rnd() - .5) * 0.7];
+const POOL = Math.round(clamp(W * H * 14, 260, 820));
+$('loadNote').textContent = `This load: ${PATTERN} pattern, ${POOL} shards, seed ${SEED}. Reload for a different shatter.`;
+
+/* ---------- source art (placeholder rectangle) ---------- */
+const TEXW = 2048, TEXH = 1152;
+const tex = document.createElement('canvas'); tex.width = TEXW; tex.height = TEXH;
+(function drawSource() {
+  const c = tex.getContext('2d');
+  const g = c.createLinearGradient(0, 0, TEXW, TEXH);
+  g.addColorStop(0, '#f2f2f2'); g.addColorStop(.42, '#8c8c8c'); g.addColorStop(.5, '#3a3a3a'); g.addColorStop(.58, '#9a9a9a'); g.addColorStop(1, '#e8e8e8');
+  c.fillStyle = g; c.fillRect(0, 0, TEXW, TEXH);
+  const r = mulberry32(11);
+  c.globalAlpha = .07; c.fillStyle = '#000'; for (let y = 0; y < TEXH; y += 2) if (r() < .45) c.fillRect(0, y, TEXW, 1);
+  c.globalAlpha = .05; c.fillStyle = '#fff'; for (let i = 0; i < 9; i++) c.fillRect(r() * TEXW, 0, 2 + r() * 40, TEXH);
+})();
+
+/* ---------- Voronoi fracture of the art ---------- */
+function genSites(n, imp) {
+  const [ix, iy] = imp, pts = [], maxR = Math.hypot(W, H) * .75;
+  const inRect = (x, y) => Math.abs(x) < W / 2 && Math.abs(y) < H / 2;
+  if (PATTERN === 'glass') for (let i = 0; i < n; i++) pts.push([(rnd() - .5) * W, (rnd() - .5) * H]);
+  else if (PATTERN === 'splinter') {
+    const rays = Math.max(9, Math.round(n / 10)); let guard = 0;
+    while (pts.length < n && guard++ < 80) for (let k = 0; k < rays && pts.length < n; k++) {
+      const a0 = k / rays * Math.PI * 2 + (rnd() - .5) * .5 + guard * .37; let r = .04 + rnd() * .08;
+      while (r < maxR && pts.length < n) { const a = a0 + (rnd() - .5) * .08, x = ix + Math.cos(a) * r, y = iy + Math.sin(a) * r; if (inRect(x, y)) pts.push([x, y]); r = r * (1.2 + rnd() * .4) + .03; }
+    }
+  } else {
+    let guard = 0;
+    while (pts.length < n && guard++ < n * 20) {
+      let x, y;
+      if (rnd() < .22) { x = (rnd() - .5) * W; y = (rnd() - .5) * H; }
+      else { const r = maxR * Math.pow(rnd(), 1.9), a = rnd() * Math.PI * 2; x = ix + Math.cos(a) * r; y = iy + Math.sin(a) * r; }
+      if (inRect(x, y)) pts.push([x, y]);
+    }
+  }
+  return pts;
+}
+function clip(poly, s, q) {
+  const nx = q[0] - s[0], ny = q[1] - s[1], mx = (s[0] + q[0]) / 2, my = (s[1] + q[1]) / 2, out = [];
+  for (let k = 0; k < poly.length; k++) {
+    const a = poly[k], b = poly[(k + 1) % poly.length];
+    const fa = (a[0] - mx) * nx + (a[1] - my) * ny, fb = (b[0] - mx) * nx + (b[1] - my) * ny;
+    if (fa <= 0) out.push(a);
+    if ((fa <= 0) !== (fb <= 0)) { const t = fa / (fa - fb); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+  }
+  return out;
+}
+const shards = [], staticData = [];
+(function fracture() {
+  const imp = [LOAD_POINT[0] * W, LOAD_POINT[1] * H], pts = genSites(POOL, imp);
+  const rect = [[-W / 2, -H / 2], [W / 2, -H / 2], [W / 2, H / 2], [-W / 2, H / 2]];
+  const idx = pts.map((_, j) => j);
+  for (let i = 0; i < pts.length; i++) {
+    const s = pts[i];
+    const order = idx.filter(j => j !== i).sort((a, b) => ((pts[a][0] - s[0]) ** 2 + (pts[a][1] - s[1]) ** 2) - ((pts[b][0] - s[0]) ** 2 + (pts[b][1] - s[1]) ** 2));
+    const reach = p => p.reduce((m, v) => Math.max(m, (v[0] - s[0]) ** 2 + (v[1] - s[1]) ** 2), 0);
+    let poly = rect, R2 = reach(poly);
+    for (const j of order) { const q = pts[j]; if ((q[0] - s[0]) ** 2 + (q[1] - s[1]) ** 2 > 4 * R2) break; poly = clip(poly, s, q); if (poly.length < 3) break; R2 = reach(poly); }
+    if (poly.length < 3) continue;
+    let A = 0, cx = 0, cy = 0;
+    for (let k = 0; k < poly.length; k++) { const a = poly[k], b = poly[(k + 1) % poly.length], cr = a[0] * b[1] - b[0] * a[1]; A += cr; cx += (a[0] + b[0]) * cr; cy += (a[1] + b[1]) * cr; }
+    A *= .5; if (Math.abs(A) < 1e-7) continue; cx /= 6 * A; cy /= 6 * A;
+    const r = [rnd(), rnd(), rnd(), rnd()];
+    let ax = rnd() * 2 - 1, ay = rnd() * 2 - 1, az = (rnd() * 2 - 1) * .35; const al = Math.hypot(ax, ay, az) || 1;
+    const start = staticData.length / 12;
+    const push = (x, y, e) => staticData.push(x - cx, y - cy, (x + W / 2) / W, (y + H / 2) / H, r[0], r[1], r[2], r[3], ax / al, ay / al, az / al, e);
+    for (let k = 0; k < poly.length; k++) { const a = poly[k], b = poly[(k + 1) % poly.length]; push(cx, cy, 1); push(a[0], a[1], 0); push(b[0], b[1], 0); }
+    shards.push({
+      start, n: poly.length * 3, r, x: 0, y: 0, z: 0, angle: 0, scale: 1, alpha: 1, alive: true,
+      k: 0.55 + r[0] * 0.9, zf: (0.2 + r[1] * 1.1) * (r[3] < .72 ? 1 : -1), spin: (0.3 + r[2] * 1.4) * (r[0] < .5 ? -1 : 1), depth: 0
+    });
+  }
+})();
+const VERTS = staticData.length / 12;
+
+/* ================= Reader signals: ambient interactions become data =================
+   None of these touch the field. They are measured from how the page is being read. */
+const beats = [...document.querySelectorAll('[data-v]')];
+const sig = {
+  scrollSpeed: 0,   // how fast the reader is moving, 0..1.6
+  linger: 0,        // how long attention has rested on the current section, 0..1
+  opened: 0,        // impulse from opening content, decays over seconds
+  select: 0,        // how much text is selected, 0..1
+  pause: 0,         // how long since any reader activity, 0..1
+  tension: 0        // builds with activity, releases in stillness: the score's arc
+};
+const dwell = new Map(beats.map(b => [b, 0]));
+let lastActivity = performance.now(), openPoint = null, scrollPrev = scrollY, scrollDelta = 0, selectRaw = 0;
+const touch = () => { lastActivity = performance.now(); };
+addEventListener('scroll', () => { scrollDelta += scrollY - scrollPrev; scrollPrev = scrollY; touch(); }, { passive: true });
+['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'].forEach(t => addEventListener(t, touch, { passive: true }));
+document.addEventListener('selectionchange', () => {
+  const s = getSelection(); const txt = s ? String(s) : '';
+  selectRaw = txt.trim() ? clamp(txt.length / 140, 0.15, 1) : 0; touch();
+});
+document.querySelectorAll('.card details').forEach(d => d.addEventListener('toggle', () => {
+  touch();
+  const r = d.closest('.card').getBoundingClientRect();
+  // the shatter point drifts toward the content that was opened
+  const halfH = CAM_D * Math.tan(FOV / 2), halfW = halfH * cssW / cssH;
+  openPoint = [((r.left + r.width / 2) / cssW * 2 - 1) * halfW, (1 - (r.top + r.height / 2) / cssH * 2) * halfH];
+  sig.opened = Math.min(1.6, sig.opened + (d.open ? 1 : 0.35));
+}));
+
+function readerMood() {
+  let wsum = 0, v = 0, a = 0, x = 0, y = 0, lin = 0;
+  const mid = innerHeight / 2;
+  for (const b of beats) {
+    const r = b.getBoundingClientRect();
+    const d = (r.top + r.height / 2 - mid) / innerHeight;
+    let w = Math.exp(-(d * d) / 0.12);
+    if (b.querySelector('details[open]')) w *= 2.5;   // open content weighs more
+    wsum += w; v += w * +b.dataset.v; a += w * +b.dataset.a;
+    x += w * (b.dataset.x != null ? +b.dataset.x : 0); y += w * (b.dataset.y != null ? +b.dataset.y : 0);
+    lin += w * (1 - Math.exp(-dwell.get(b) / 14));
+  }
+  if (wsum < 1e-4) return { v: 0.3, a: 0.2, x: 0, y: 0, lin: 0 };
+  return { v: v / wsum, a: a / wsum, x: x / wsum, y: y / wsum, lin: lin / wsum };
+}
+function updateSignals(dt, now) {
+  const speed = dt > 0 ? Math.abs(scrollDelta) / dt : 0;
+  sig.scrollSpeed = lerp(sig.scrollSpeed, clamp(speed / 1400, 0, 1.6), Math.min(1, dt * 4));
+  // linger accrues on the section nearest the middle while the reader is still enough to be reading
+  const mid = innerHeight / 2;
+  for (const b of beats) {
+    const r = b.getBoundingClientRect();
+    const centered = Math.abs(r.top + r.height / 2 - mid) < innerHeight * 0.28;
+    const t = dwell.get(b);
+    dwell.set(b, centered && sig.scrollSpeed < 0.15 && !document.hidden ? t + dt : Math.max(0, t - dt * 0.6));
+  }
+  sig.opened *= Math.exp(-dt / 7);
+  sig.select = lerp(sig.select, selectRaw, Math.min(1, dt * 1.5));
+  sig.pause = sstep(4, 16, (now - lastActivity) / 1000);
+  sig.tension = clamp(sig.tension + (sig.scrollSpeed * 0.35 + sig.opened * 0.12) * dt - (0.03 + 0.1 * sig.pause) * dt, 0, 1);
+}
+
+/* ---------- time of day ---------- */
+const input = { tod: null, music: { on: true, x: 0, y: 0, energy: 0 } };
+const TOD = [[0, [0.016, 0.02, 0.045], 228], [5.5, [0.03, 0.025, 0.055], 265], [7.5, [0.07, 0.04, 0.06], 330], [12, [0.06, 0.07, 0.085], 205], [17.5, [0.075, 0.045, 0.03], 28], [20, [0.04, 0.025, 0.05], 285], [24, [0.016, 0.02, 0.045], 228]];
+function todAt(h) {
+  for (let i = 0; i < TOD.length - 1; i++) {
+    const [h0, b0, u0] = TOD[i], [h1, b1, u1] = TOD[i + 1];
+    if (h >= h0 && h <= h1) { const t = sstep(0, 1, (h - h0) / (h1 - h0)); const du = ((u1 - u0 + 540) % 360) - 180; return { bg: mixc(b0, b1, t), hue: u0 + du * t }; }
+  }
+  return { bg: TOD[0][1], hue: TOD[0][2] };
+}
+const hourNow = () => input.tod ?? (new Date().getHours() + new Date().getMinutes() / 60);
+function keyLight(h) {
+  // sun travels east to west through the day; at night a cool, high, frontal moon
+  const day = sstep(5.5, 7.5, h) * (1 - sstep(18.5, 20.5, h));
+  const az = (h - 6) / 12 * Math.PI, el = Math.max(0, Math.sin(az));
+  const sun = [-Math.cos(az) * 0.85, 0.25 + 0.6 * el, 0.6];
+  const moon = [0.25, 0.8, 0.55];
+  const L = mixc(moon, sun, day), n = Math.hypot(...L);
+  return L.map(x => x / n);
+}
+
+/* ---------- targets: every number recomputed every frame ---------- */
+function targets(T) {
+  const m = readerMood();
+  const s = sig;
+  // the reader's behavior bends the emotional point: activity tenses it, stillness calms it
+  const v = clamp(m.v, -1, 1);
+  const a = clamp(m.a + 0.25 * s.tension + 0.15 * Math.min(1, s.opened) - 0.25 * s.pause, 0, 1);
+  const pos = Math.max(0, v), neg = Math.max(0, -v);
+  const scrollFrac = clamp(scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight), 0, 1);
+  let energy = 0, mx = 0, my = 0;
+  if (input.music.on) {
+    input.music.x = 0.4 * Math.sin(T * 0.071); input.music.y = 0.3 * Math.sin(T * 0.113 + 1.3);
+    input.music.energy = 0.5 + 0.5 * Math.sin(T * 0.19) * Math.sin(T * 0.053 + 2);
+  }
+  energy = input.music.energy; mx = input.music.x; my = input.music.y;
+  let px = lerp(LOAD_POINT[0], m.x, sstep(0.02, 0.2, scrollFrac)) * W + mx * 0.25 * W;
+  let py = lerp(LOAD_POINT[1], m.y, sstep(0.02, 0.2, scrollFrac)) * H + my * 0.25 * H;
+  if (openPoint) { const o = Math.min(1, s.opened) * 0.6; px = lerp(px, openPoint[0], o); py = lerp(py, openPoint[1], o); }
+
+  // stillness: lingering, selecting and pausing all slow time down
+  const slow = (1 - 0.35 * s.linger) * (1 - 0.6 * s.select) * (1 - 0.5 * s.pause);
+  const hue = v >= 0 ? 26 + 10 * a : 218 - 14 * a, sat = 0.1 + 0.55 * Math.abs(v) + 0.18 * a;
+  const h = hourNow(), tod = todAt(h), tint = hsl(tod.hue, 0.45, 0.6);
+  const colB = mixc(hsl(hue + 16, sat * 0.85, 0.16 + 0.05 * a), mixc(tint, [0, 0, 0], .7), 0.25);
+  const t = {
+    valence: v, arousal: a, energy,
+    expand: ((0.012 + 0.07 * a) * (1 + 0.35 * energy) + 0.16 * s.scrollSpeed + 0.05 * s.opened + 0.03 * s.tension) * slow,
+    spinRate: (0.04 + 0.45 * a * a + 0.9 * s.scrollSpeed + 0.2 * s.opened) * slow,
+    depth: 0.3 + 1.3 * a + 0.4 * scrollFrac,
+    swirl: (0.02 + 0.22 * neg + 0.05 * a) * slow,
+    sink: 0.04 * neg,
+    countFrac: 0.42 + 0.58 * a,
+    pointX: px, pointY: py,
+    gap: 0.01 + 0.06 * a,
+    rim: 0.3 + 0.5 * a + 0.35 * s.select,
+    opacity: 0.4 + 0.5 * a,
+    opVar: 0.25 + 0.6 * (1 - a),
+    // camera: a slow motivated push-in when the reader lingers or selects, easing back out in a pause
+    dolly: CAM_D - 0.9 * s.linger - 0.45 * s.select + 0.35 * s.pause - 0.25 * scrollFrac,
+    pitch: (scrollFrac - 0.5) * 0.08 + 0.02 * s.tension,
+    yaw: 0.03 * v,
+    camX: px * 0.1, camY: py * 0.1,
+    // lens: rack focus toward near shards while lingering or selecting, deep focus when relaxed
+    focusOff: -1.4 * s.linger - 1.9 * s.select + 0.6 * s.pause,
+    dof: 0.06 + 0.16 * (1 - a) + 0.2 * s.linger + 0.3 * s.select,
+    // light and grade
+    light: keyLight(h),
+    keyI: 0.65 + 0.35 * a + 0.4 * Math.min(1, s.opened),
+    spec: 0.6 + 0.5 * s.tension + 0.6 * Math.min(1, s.opened),
+    exposure: 0.88 + 0.22 * a - 0.18 * s.pause + 0.08 * Math.min(1, s.opened),
+    vignette: 0.45 + 0.35 * s.linger + 0.25 * s.pause + 0.2 * s.select,
+    colA: mixc(hsl(hue, sat, 0.68), tint, 0.18),
+    colB,
+    crack: hsl(hue - 6, Math.min(1, sat + 0.35), 0.62 + 0.12 * a),
+    bg: mixc(tod.bg, colB, 0.12)
+  };
+  if (reduced) { t.expand *= 0.15; t.spinRate = 0; t.swirl = 0; t.dolly = CAM_D; t.camX = 0; t.camY = 0; t.pitch = 0; }
+  return t;
+}
+
+/* ---------- springs ---------- */
+const SMOOTH = { expand: 1.6, spinRate: 1.6, pointX: 3.2, pointY: 3.2, countFrac: 3, colA: 4, colB: 4, crack: 4, bg: 4,
+  dolly: 5, pitch: 5, yaw: 6, camX: 6, camY: 6, focusOff: 2.6, dof: 2.6, light: 6, keyI: 2.4, spec: 2.4, exposure: 3, vignette: 3.5 };
+const cur = {};
+function damp(s, target, dt, T) {
+  const w = 2 / T, x = w * dt, e = 1 / (1 + x + 0.48 * x * x + 0.235 * x * x * x);
+  const ch = s.x - target, tmp = (s.v + w * ch) * dt;
+  s.v = (s.v - w * tmp) * e; s.x = target + (ch + tmp) * e;
+}
+function stepSprings(t, dt, snap) {
+  for (const k in t) {
+    const T = SMOOTH[k] || 2.4;
+    if (Array.isArray(t[k])) {
+      if (!cur[k]) cur[k] = t[k].map(x => ({ x, v: 0 }));
+      cur[k].forEach((s, i) => snap ? (s.x = t[k][i]) : damp(s, t[k][i], dt, T));
+    } else {
+      if (!cur[k]) cur[k] = { x: t[k], v: 0 };
+      snap ? (cur[k].x = t[k]) : damp(cur[k], t[k], dt, T);
+    }
+  }
+}
+const val = k => cur[k].x, col = k => cur[k].map(s => s.x);
+
+/* ---------- camera ---------- */
+function persp(fy, a, n, f) { const t = 1 / Math.tan(fy / 2); return [t / a, 0, 0, 0, 0, t, 0, 0, 0, 0, (f + n) / (n - f), -1, 0, 0, 2 * f * n / (n - f), 0]; }
+function lookAt(e, c, u) {
+  let z = [e[0] - c[0], e[1] - c[1], e[2] - c[2]]; let l = Math.hypot(...z); z = z.map(v => v / l);
+  let x = [u[1] * z[2] - u[2] * z[1], u[2] * z[0] - u[0] * z[2], u[0] * z[1] - u[1] * z[0]]; l = Math.hypot(...x); x = x.map(v => v / l);
+  const y = [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]];
+  const d = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -d(x, e), -d(y, e), -d(z, e), 1];
+}
+function mul(a, b) { const o = new Array(16); for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + r] * b[c * 4 + k]; o[c * 4 + r] = s; } return o; }
+let PV, eye = [0, 0, CAM_D], fwd = [0, 0, -1];
+function computeCamera() {
+  const d = val('dolly'), p = val('pitch'), yaw = val('yaw'), tx = val('camX'), ty = val('camY');
+  eye = [tx + d * Math.sin(yaw) * Math.cos(p), ty + d * Math.sin(p), d * Math.cos(yaw) * Math.cos(p)];
+  const f = [tx - eye[0], ty - eye[1], -eye[2]], fl = Math.hypot(...f); fwd = f.map(v => v / fl);
+  PV = mul(persp(FOV, cssW / cssH, 0.05, 80), lookAt(eye, [tx, ty, 0], [0, 1, 0]));
+}
+function ndc(x, y, z) {
+  const cw = PV[3] * x + PV[7] * y + PV[11] * z + PV[15];
+  return [(PV[0] * x + PV[4] * y + PV[8] * z + PV[12]) / cw, (PV[1] * x + PV[5] * y + PV[9] * z + PV[13]) / cw, cw];
+}
+
+/* ---------- simulation: velocities change, positions never jump ---------- */
+const srnd = mulberry32(SEED ^ 0x5f3759df);
+function respawn(s) {
+  const a = srnd() * Math.PI * 2, r = 0.05 + srnd() * 0.45;
+  s.x = val('pointX') + Math.cos(a) * r; s.y = val('pointY') + Math.sin(a) * r * 0.8;
+  s.z = (srnd() - .5) * 0.3; s.scale = 0.02; s.alpha = 0; s.alive = true;
+}
+function simulate(dt, parallaxDy) {
+  const ex = val('expand'), sp = val('spinRate'), dp = val('depth'), sw = val('swirl'), sk = val('sink');
+  const px = val('pointX'), py = val('pointY');
+  const active = Math.round(val('countFrac') * shards.length);
+  for (let i = 0; i < shards.length; i++) {
+    const s = shards[i], want = i < active;
+    if (!s.alive) { if (want) respawn(s); else continue; }
+    const dx = s.x - px, dy = s.y - py, rate = ex * s.k;
+    s.x += (dx * rate - dy * sw * s.k * 0.35) * dt;
+    s.y += (dy * rate + dx * sw * s.k * 0.35 - sk) * dt + parallaxDy * (1 + s.z * 0.35);
+    s.z += rate * s.zf * dp * 1.6 * dt;
+    s.angle += s.spin * sp * dt;
+    s.scale += (1 - s.scale) * Math.min(1, dt * 0.45);
+    s.alpha += ((want ? 1 : 0) - s.alpha) * Math.min(1, dt * 0.5);
+    const p = ndc(s.x, s.y, s.z);
+    const gone = p[2] < 0.6 || Math.abs(p[0]) > 1.35 || Math.abs(p[1]) > 1.35 || s.z < -9;
+    if (gone || (!want && s.alpha < 0.004)) { if (want) respawn(s); else s.alive = false; }
+  }
+}
+
+/* ---------- WebGL ---------- */
+const canvas = $('field');
+const gl = canvas.getContext('webgl', { antialias: true, alpha: false, premultipliedAlpha: false });
+const deriv = gl && gl.getExtension('OES_standard_derivatives');
+const uint32 = gl && gl.getExtension('OES_element_index_uint');
+const VS = `
+precision highp float;
+attribute vec2 aLocal; attribute vec2 aUV; attribute vec4 aRand; attribute vec4 aAxis;
+attribute vec3 aPos; attribute vec3 aDyn;
+uniform mat4 uPV; uniform float uGap;
+varying vec2 vUV; varying vec3 vN; varying vec3 vPos; varying float vEdge; varying vec4 vRand; varying float vAlpha;
+vec3 rot(vec3 v, vec3 k, float a){ float c = cos(a), s = sin(a); return v*c + cross(k, v)*s + k*dot(k, v)*(1.0 - c); }
+void main(){
+  vec3 k = normalize(aAxis.xyz);
+  vec3 p = rot(vec3(aLocal*(1.0 - uGap)*aDyn.y, 0.0), k, aDyn.x);
+  vN = rot(vec3(0.0, 0.0, 1.0), k, aDyn.x);
+  vPos = aPos + p; vUV = aUV; vEdge = aAxis.w; vRand = aRand; vAlpha = aDyn.z;
+  gl_Position = uPV * vec4(vPos, 1.0);
+}`;
+const FS = (deriv ? '#extension GL_OES_standard_derivatives : enable\n#define HAS_D\n' : '') + `
+precision highp float;
+uniform sampler2D uTex; uniform vec3 uCam, uColA, uColB, uCrack, uBg, uLight;
+uniform float uRim, uOpacity, uOpVar, uDof, uFocal, uKeyI, uSpec, uExposure;
+varying vec2 vUV; varying vec3 vN; varying vec3 vPos; varying float vEdge; varying vec4 vRand; varying float vAlpha;
+void main(){
+  float l = texture2D(uTex, vUV).r;
+  vec3 base = mix(uColB, uColA, clamp(l*0.9 + (vRand.x - 0.5)*0.4, 0.0, 1.0));
+  vec3 n = normalize(vN); bool back = !gl_FrontFacing; if (back) n = -n;
+  vec3 L = normalize(uLight), V = normalize(uCam - vPos);
+  float diff = max(dot(n, L), 0.0);
+  float spec = pow(max(dot(n, normalize(L + V)), 0.0), 64.0);
+  float fres = pow(1.0 - abs(dot(n, V)), 3.0);
+  vec3 col = base*(0.22 + 0.85*diff*uKeyI) + vec3(spec*uSpec) + uColA*fres*0.35;
+  if (back) col = mix(col*0.45, uColB, 0.35);
+#ifdef HAS_D
+  float rim = 1.0 - smoothstep(0.0, 1.8, vEdge / max(fwidth(vEdge), 1e-5));
+#else
+  float rim = 1.0 - smoothstep(0.0, 0.05, vEdge);
+#endif
+  col = mix(col, uCrack*1.1, rim*uRim);
+  float off = clamp(abs(length(uCam - vPos) - uFocal) * uDof, 0.0, 1.0);
+  col = mix(col, uBg, off*0.6);
+  col *= uExposure;
+  float alpha = uOpacity * mix(1.0, 0.3 + 0.7*vRand.y, uOpVar);
+  alpha = mix(alpha, 1.0, fres*0.5);
+  alpha = max(alpha, rim*uRim*0.85);
+  alpha *= (1.0 - off*0.65) * vAlpha;
+  gl_FragColor = vec4(col, alpha);
+}`;
+const BG_VS = `attribute vec2 p; varying vec2 v; void main(){ v = p; gl_Position = vec4(p, 0.999, 1.0); }`;
+const BG_FS = `precision mediump float; varying vec2 v; uniform vec3 uBg; uniform float uVig;
+void main(){ float vig = 1.0 - smoothstep(0.1, 1.7 - uVig*0.6, length(v*vec2(1.0, 0.85))); gl_FragColor = vec4(mix(uBg*(0.6 - uVig*0.35), uBg*1.35 + 0.012, vig), 1.0); }`;
+// a separate pass darkens the frame edges over the shards too, like a lens
+const VIG_FS = `precision mediump float; varying vec2 v; uniform float uVig;
+void main(){ float d = length(v*vec2(1.0, 0.8)); gl_FragColor = vec4(0.0, 0.0, 0.0, smoothstep(0.55, 1.5, d) * uVig * 0.75); }`;
+let prog, bgProg, vigProg, sBuf, dBuf, iBuf, bgBuf, glTex, U = {}, A = {}, BU = {}, VU = {};
+const dynData = new Float32Array(VERTS * 6);
+const idxData = (VERTS > 65535 && uint32) ? new Uint32Array(VERTS) : new Uint16Array(VERTS);
+let idxCount = 0;
+function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+function link(vs, fs) { const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p); if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+function initGL() {
+  prog = link(VS, FS); bgProg = link(BG_VS, BG_FS); vigProg = link(BG_VS, VIG_FS);
+  ['uPV', 'uGap', 'uTex', 'uCam', 'uColA', 'uColB', 'uCrack', 'uBg', 'uLight', 'uRim', 'uOpacity', 'uOpVar', 'uDof', 'uFocal', 'uKeyI', 'uSpec', 'uExposure'].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  ['aLocal', 'aUV', 'aRand', 'aAxis', 'aPos', 'aDyn'].forEach(n => A[n] = gl.getAttribLocation(prog, n));
+  BU.p = gl.getAttribLocation(bgProg, 'p'); BU.uBg = gl.getUniformLocation(bgProg, 'uBg'); BU.uVig = gl.getUniformLocation(bgProg, 'uVig');
+  VU.p = gl.getAttribLocation(vigProg, 'p'); VU.uVig = gl.getUniformLocation(vigProg, 'uVig');
+  sBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(staticData), gl.STATIC_DRAW);
+  dBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBuf); gl.bufferData(gl.ARRAY_BUFFER, dynData.byteLength, gl.DYNAMIC_DRAW);
+  iBuf = gl.createBuffer();
+  bgBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, bgBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  glTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, glTex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex);
+  [[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]].forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
+}
+function writeDynamic() {
+  let i = 0;
+  for (const s of shards) {
+    s.depth = (s.x - eye[0]) * fwd[0] + (s.y - eye[1]) * fwd[1] + (s.z - eye[2]) * fwd[2];
+    for (let k = 0; k < s.n; k++) {
+      const o = (s.start + k) * 6;
+      dynData[o] = s.x; dynData[o + 1] = s.y; dynData[o + 2] = s.z;
+      dynData[o + 3] = s.angle; dynData[o + 4] = s.scale; dynData[o + 5] = s.alive ? s.alpha : 0;
+    }
+  }
+  const order = shards.filter(s => s.alive && s.alpha > 0.003).sort((a, b) => b.depth - a.depth);
+  for (const s of order) for (let k = 0; k < s.n; k++) idxData[i++] = s.start + k;
+  idxCount = i;
+}
+function fullscreen(progLoc) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, bgBuf);
+  gl.enableVertexAttribArray(progLoc); gl.vertexAttribPointer(progLoc, 2, gl.FLOAT, false, 0, 0);
+  gl.drawArrays(gl.TRIANGLES, 0, 3); gl.disableVertexAttribArray(progLoc);
+}
+function render() {
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  const bg = col('bg'), vig = val('vignette');
+  gl.clearColor(bg[0], bg[1], bg[2], 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+  gl.useProgram(bgProg); gl.uniform3fv(BU.uBg, bg); gl.uniform1f(BU.uVig, vig); fullscreen(BU.p);
+
+  gl.useProgram(prog);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  gl.bindBuffer(gl.ARRAY_BUFFER, sBuf);
+  [['aLocal', 2, 0], ['aUV', 2, 2], ['aRand', 4, 4], ['aAxis', 4, 8]].forEach(([n, sz, off]) => { gl.enableVertexAttribArray(A[n]); gl.vertexAttribPointer(A[n], sz, gl.FLOAT, false, 48, off * 4); });
+  gl.bindBuffer(gl.ARRAY_BUFFER, dBuf); gl.bufferSubData(gl.ARRAY_BUFFER, 0, dynData);
+  [['aPos', 3, 0], ['aDyn', 3, 3]].forEach(([n, sz, off]) => { gl.enableVertexAttribArray(A[n]); gl.vertexAttribPointer(A[n], sz, gl.FLOAT, false, 24, off * 4); });
+  gl.uniformMatrix4fv(U.uPV, false, new Float32Array(PV));
+  ['gap', 'rim', 'opacity', 'opVar', 'dof', 'keyI', 'spec', 'exposure'].forEach(k => gl.uniform1f(U['u' + (k === 'opVar' ? 'OpVar' : k === 'keyI' ? 'KeyI' : k[0].toUpperCase() + k.slice(1))], val(k)));
+  gl.uniform1f(U.uFocal, val('dolly') + val('focusOff'));
+  gl.uniform3fv(U.uCam, eye); gl.uniform3fv(U.uLight, col('light'));
+  gl.uniform3fv(U.uColA, col('colA')); gl.uniform3fv(U.uColB, col('colB')); gl.uniform3fv(U.uCrack, col('crack')); gl.uniform3fv(U.uBg, bg);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, glTex); gl.uniform1i(U.uTex, 0);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuf); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxData.subarray(0, idxCount), gl.DYNAMIC_DRAW);
+  gl.drawElements(gl.TRIANGLES, idxCount, idxData instanceof Uint32Array ? gl.UNSIGNED_INT : gl.UNSIGNED_SHORT, 0);
+  Object.values(A).forEach(l => gl.disableVertexAttribArray(l));
+
+  gl.useProgram(vigProg); gl.uniform1f(VU.uVig, vig); fullscreen(VU.p);
+}
+function resize() { sizeWorld(); canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr); }
+
+/* ---------- frame ---------- */
+let last = performance.now(), T0 = last;
+const listeners = new Set();
+function snapshot() {
+  const o = { signals: { ...sig } };
+  for (const k in cur) o[k] = Array.isArray(cur[k]) ? cur[k].map(s => +s.x.toFixed(3)) : +cur[k].x.toFixed(3);
+  return o;
+}
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const T = (now - T0) / 1000;
+  updateSignals(dt, now);
+  const delta = scrollDelta; scrollDelta = 0;
+  stepSprings(targets(T), dt, false);
+  computeCamera();
+  const visH = 2 * CAM_D * Math.tan(FOV / 2);
+  simulate(dt, reduced ? 0 : (delta / cssH) * visH * 0.28);
+  if (gl && prog) { writeDynamic(); render(); }
+  if (!tune.hidden) drawNums();
+  if (listeners.size) { const snap = snapshot(); listeners.forEach(fn => { try { fn(snap); } catch (e) { console.error(e); } }); }
+  requestAnimationFrame(frame);
+}
+
+/* ---------- live numbers drawer ---------- */
+const tune = $('tune'), tuneBtn = $('tuneBtn');
+tuneBtn.addEventListener('click', () => { tune.hidden = !tune.hidden; tuneBtn.setAttribute('aria-expanded', String(!tune.hidden)); });
+const SIGS = [['scrollSpeed', 'scroll', 1.6], ['linger', 'linger', 1], ['opened', 'opened', 1.6], ['select', 'selecting', 1], ['pause', 'pause', 1], ['tension', 'tension', 1]];
+const NUMS = [
+  ['valence', -1, 1, v => v.toFixed(2)], ['arousal', 0, 1, v => v.toFixed(2)],
+  ['expand', 0, 0.35, v => v.toFixed(3)], ['spinRate', 0, 1.5, v => v.toFixed(2)], ['depth', 0, 2, v => v.toFixed(2)],
+  ['countFrac', 0, 1, v => Math.round(v * shards.length) + ''], ['opacity', 0, 1, v => v.toFixed(2)],
+  ['dolly', 3.5, 5.5, v => v.toFixed(2)], ['focusOff', -3, 1, v => v.toFixed(2)], ['keyI', 0, 1.5, v => v.toFixed(2)], ['exposure', 0.5, 1.3, v => v.toFixed(2)],
+  ['pointX', -4, 4, v => v.toFixed(2)], ['pointY', -2.5, 2.5, v => v.toFixed(2)], ['energy', 0, 1, v => v.toFixed(2)]
+];
+const LABEL = { valence: 'valence', arousal: 'arousal', expand: 'speed', spinRate: 'spin', depth: 'depth', countFrac: 'shards', opacity: 'opacity', dolly: 'camera', focusOff: 'focus', keyI: 'key light', exposure: 'exposure', pointX: 'point x', pointY: 'point y', energy: 'music' };
+$('sigs').innerHTML = SIGS.map(([k, l]) => `<span>${l}</span><span class="track"><span class="fill" id="sf-${k}"></span></span><span class="v" id="sv-${k}"></span>`).join('');
+$('nums').innerHTML = NUMS.map(([k]) => `<span>${LABEL[k]}</span><span class="track"><span class="fill" id="f-${k}"></span></span><span class="v" id="v-${k}"></span>`).join('');
+const todEl = $('tod'), todO = $('todO'), fmtH = h => `${String(Math.floor(h) % 24).padStart(2, '0')}:${String(Math.floor((h % 1) * 60)).padStart(2, '0')}`;
+$('clock').addEventListener('change', e => { input.tod = e.target.checked ? null : +todEl.value; });
+todEl.addEventListener('input', () => { $('clock').checked = false; input.tod = +todEl.value; });
+$('inst').addEventListener('change', e => { input.music.on = e.target.checked; });
+function drawNums() {
+  for (const [k, , hi] of SIGS) { $('sf-' + k).style.width = clamp(sig[k] / hi, 0, 1) * 100 + '%'; $('sv-' + k).textContent = sig[k].toFixed(2); }
+  for (const [k, lo, hi, fmt] of NUMS) { $('f-' + k).style.width = clamp((val(k) - lo) / (hi - lo), 0, 1) * 100 + '%'; $('v-' + k).textContent = fmt(val(k)); }
+  const h = hourNow(); if (input.tod == null) todEl.value = h; todO.textContent = fmtH(h);
+}
+
+/* ---------- hooks for the real site: the music feedback loop ---------- */
+window.doooomgaze = {
+  setTimeOfDay(h) { input.tod = h == null ? null : ((h % 24) + 24) % 24; },
+  setMusic(x, y, energy) { input.music.on = false; Object.assign(input.music, { x, y, energy }); },
+  get numbers() { return snapshot(); },
+  subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
+  seed: SEED, pattern: PATTERN
+};
+
+/* ---------- boot ---------- */
+resize(); addEventListener('resize', resize);
+updateSignals(0, performance.now());
+stepSprings(targets(0), 0, true);
+computeCamera();
+if (!gl) $('nogl').hidden = false;
+else { try { initGL(); } catch (err) { console.error(err); $('nogl').hidden = false; $('nogl').textContent = 'Shader compile failed: ' + err.message; } }
+// pre-shattered: the art is never seen whole
+{
+  const r = mulberry32(SEED ^ 0x9e3779b9), aspect = cssW / cssH;
+  for (const s of shards) {
+    s.z = -4.5 + r() * 6;
+    const halfH = (CAM_D - s.z) * Math.tan(FOV / 2) * 1.1, halfW = halfH * aspect;
+    s.x = (r() * 2 - 1) * halfW; s.y = (r() * 2 - 1) * halfH;
+    s.angle = r() * Math.PI * 2;
+  }
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

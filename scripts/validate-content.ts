@@ -1,0 +1,67 @@
+// Validates every file under content/ against lib/content/schema.ts.
+// Runs in CI and before a build; exits non-zero on the first bad file.
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
+import matter from "gray-matter";
+import { ChapterMeta, Design, Milestone, Phase, PHASE_KEYS } from "../lib/content/schema";
+
+const root = path.join(process.cwd(), "content");
+let problems = 0;
+const fail = (file: string, msg: string) => {
+  problems++;
+  console.error(`✗ ${file}: ${msg}`);
+};
+
+async function json(file: string) {
+  return JSON.parse(await readFile(path.join(root, file), "utf8")) as unknown[];
+}
+
+async function main() {
+  const phases = (await json("spine/phases.json")).map((x) => Phase.parse(x));
+  if (phases.map((p) => p.key).join() !== PHASE_KEYS.join()) fail("spine/phases.json", `phases must be ${PHASE_KEYS.join(", ")} in order`);
+  for (let i = 1; i < phases.length; i++) {
+    if (phases[i].start <= phases[i - 1].end) fail("spine/phases.json", `${phases[i].key} starts before ${phases[i - 1].key} ends`);
+  }
+
+  const milestones = (await json("spine/milestones.json")).map((x) => Milestone.parse(x));
+  const keys = new Set<string>();
+  for (const m of milestones) {
+    if (keys.has(m.key)) fail("spine/milestones.json", `duplicate key ${m.key}`);
+    keys.add(m.key);
+    const p = phases.find((p) => p.key === m.phase)!;
+    if (m.date < p.start || m.date > p.end) fail("spine/milestones.json", `${m.key} (${m.date}) is outside ${p.key} (${p.start}–${p.end})`);
+    if (m.sources.length === 0) fail("spine/milestones.json", `${m.key} has no source`);
+  }
+
+  const designs = (await json("spine/designs.json")).map((x) => Design.parse(x));
+  for (const d of designs) if (d.snapshot.captured < d.start) fail("spine/designs.json", `${d.key} captured before it started`);
+
+  const storyDir = path.join(root, "story");
+  const files = (await readdir(storyDir, { recursive: true, withFileTypes: true }))
+    .filter((e) => e.isFile() && e.name.endsWith(".mdx") && !e.name.startsWith("_"))
+    .map((e) => path.relative(root, path.join(e.parentPath ?? e.path, e.name)));
+  for (const file of files) {
+    try {
+      const { data } = matter(await readFile(path.join(root, file), "utf8"));
+      const meta = ChapterMeta.parse(data);
+      const dir = file.split(path.sep)[1];
+      if (dir !== meta.phase) fail(file, `folder "${dir}" and phase "${meta.phase}" disagree`);
+      const p = phases.find((p) => p.key === meta.phase)!;
+      if (meta.start < p.start || meta.start > p.end) fail(file, `start ${meta.start} is outside ${p.key}`);
+      if (meta.status !== "stub" && meta.sources.length === 0) fail(file, "a chapter with words needs sources");
+    } catch (e) {
+      fail(file, e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  console.log(`${phases.length} phases, ${milestones.length} milestones, ${designs.length} designs, ${files.length} chapters checked`);
+  if (problems) {
+    console.error(`${problems} problem(s)`);
+    process.exit(1);
+  }
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
