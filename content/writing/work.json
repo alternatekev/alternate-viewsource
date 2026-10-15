@@ -1,0 +1,376 @@
+[
+  {
+    "key": "work-automattic",
+    "title": "WordPress.com",
+    "date": "2012-01-11",
+    "end": "2016-03-01",
+    "kind": "work",
+    "org": "Automattic",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/automattic"
+    },
+    "html": "<p>I worked at <strong>Automattic</strong> for six years, and two of them were spent on <strong>Calypso, an API- and JavaScript-powered UI for WordPress</strong>. Calypso runs the WordPress desktop app, the WordPress.com UI, influences the UX of the WordPress mobile app and is built using Node.js + React.</p>\n\n<figure><img src=\"/writing/automattic/wp1.webp\" alt=\"\" /></figure>\n\n<p>WordPress.com is the largest installation of WordPress in the world with 131 million unique monthly users in the US. We were seeking to modernize our users’ experience by taking WordPress, which clearly still exists in its unchanged form and is in active development, abstract the core technology to an API, and build new experiences on top.</p>\n\n<figure><img src=\"/writing/automattic/wp2.webp\" alt=\"\" /></figure>\n\n<p>We had historically eschewed email, working together through the internally-developed P2 WordPress theme and IRC. Prior to Calypso, we usually launched code pretty quickly through Subversion to the main production codebase, and teams often iterated in silos, attending to their own needs first and foremost. Calypso changed all of that, moving a large portion of the design and development discussion to Slack and Github, adding beneficial layers of peer-based code and design review on top of each Pull Request. The end result was a more cohesive product, for us in the code and for our users in the experience. Designers started working more closely together on specific issues across teams, developers and designers collaborated in quicker iterations to get to better solutions, and the standards we used to build the app progressed along with evolving React and ES6 best practices.</p>\n\n<figure><img src=\"/writing/automattic/wp3.webp\" alt=\"\" /></figure>\n\n<p>Despite this increased flow of communication and priority-dovetailing, there were still inconsistencies within Calypso’s design. In September 2014, I organized a workshop for four designers to:</p>\n<ul>\n  <li>Look at the UX we’d achieved at breakneck speed over the past year and a half</li>\n  <li>Find UI inconsistencies and gotchas</li>\n  <li>Provide recommendations on how to bring the app into a more pure Atomic Design model</li>\n</ul>\n\n<figure><img src=\"/writing/automattic/Component-Map.webp\" alt=\"\" /></figure>\n\n<p>Since we were already using React, this made for a perfect time to adopt a more standards-driven UI design process, placing the idea of functional components at the heart of the design language. We reviewed every page, outlined the parts of it that differed from the UX of other parts of the app, and made general recommendations for how to bring the application more in-line with itself.</p>\n\n<p>The result of these workshops were 6 lengthy internal blog posts outlining the changes that we felt should be made, and created much discussion. Some recommendations were implemented by other teams and some of them were decided against by the wider group of contributors.</p>\n\n<p>There was a third group of recommendations which were generally agreed upon by everyone, but were not going to be worked on by anyone, so I took it upon myself to get them finished. I took specific problems that the team had seen crop up over and over again and created Pull Requests in Github to address them. I re-engineered the interfaces in question to use core Calypso React components, got my designs and code reviewed by my peers, and launched them into production. This work is evident on WordPress.com in the following ways:</p>\n<ul>\n  <li>Stats modules got simplified, including a cleaner way of clicking through into detailed information</li>\n  <li>A cleaner Site Settings section</li>\n  <li>Sharing Settings and Connected Applications use the same components to do the same interactions</li>\n  <li>Standardized patterns covering Connect/Disconnect, Remove/Delete and Disable actions</li>\n  <li>I created and edited core Calypso components as-needed to express improvements needed for implementation across the entire app</li>\n</ul>"
+  },
+  {
+    "key": "work-bank-of-america",
+    "title": "Bank of America",
+    "date": "2005-09-11",
+    "end": "2006-11-03",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/bank-of-america"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-barclays-ishares",
+    "title": "Barclays iShares",
+    "date": "2009-01-11",
+    "end": "2009-11-26",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/barclays-ishares"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-blackrock",
+    "title": "BlackRock",
+    "date": "2007-03-11",
+    "end": "2009-11-01",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/blackrock"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-breckenridge",
+    "title": "Breckenridge",
+    "date": "2003-08-11",
+    "end": "2004-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/breckenridge"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-ca-computer-associates",
+    "title": "Project Catchfly",
+    "date": "2016-01-07",
+    "end": "2017-05-01",
+    "kind": "work",
+    "org": "CA / Computer Associates",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/ca-computer-associates"
+    },
+    "html": "<p>Rally Software was a company providing Jira-like Agile tools, which got purchased by CA in 2015. As part of a broader initiative to modernize CA's software offerings, Project Catchfly was spun up as a startup within the large corporation.</p>\n\n<p>Within the first two days on Project Catchfly, I had outlined the problem the team was trying to solve – something they had tried to use Lean Startup methodology to define – and had provided the first real mockup of their app they'd ever seen.</p>\n\n<p>We quickly iterated through approaches to find the right solution. We held design sprint sessions, big-room planning sessons, and worked with a team in North Carolina building the mobile version of the app.</p>\n\n<p>I spent a lot of time taking Material UI (a Material Design component library implemented in React), and customizing it for our needs. This was also my first introduction to TypeScript.</p>\n\n<p>When the business needed me to step out of the codebase and into Sketch in order to iterate even faster on projections 1.5 years into the future, I re-built our component system as graphical assets in Sketch.</p>\n\n<p>When Project Catchfly was cancelled 9 months afer I started, I quickly pivoted to providing prototyping for the Agile Central (Rally) design team. Within a week, I had a custom component library rendering a Kanban board, that the designers were taking screenshots of to send to their developers as the final design.</p>"
+  },
+  {
+    "key": "work-commonwealth-of-pennsylvania",
+    "title": "Commonwealth of Pennsylvania",
+    "date": "2009-01-12",
+    "end": "2009-11-18",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/commonwealth-of-pennsylvania"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-community-funded",
+    "title": "Beleaf Design System",
+    "date": "2017-02-08",
+    "end": "2020-03-01",
+    "kind": "work",
+    "org": "Community Funded",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/community-funded"
+    },
+    "html": "<p><strong>Community Funded</strong> came to me with one need: the first version of their product that got them to where they were was built on old technology, and was now limiting their growth potential. Could I help steer them toward the right choices to make for version 2?</p>\n\n<p>And could I <strong>help them build it?</strong></p>\n\n<figure><img src=\"/writing/community-funded/card.webp\" alt=\"Community Funded\" /></figure>\n\n<p>After meeting with their founders, and finding that I could have a strong passion for their business, I enthusiastically agreed to help. V1 was heavily based on WordPress, something I have a unique amount of experience building and building for; React + Next.js were my suggestions for the front-end technologies, and three years later, we launched to live clients in the first quarter of 2020. I have worked hand-in-hand with the CTO, Chief Creative Officer, and VP of Product to craft not just a cohesive visual design system, but the codebase and UX patterns necessary to pull it off, in a real product, right now.</p>\n\n<p>We used an iterative, design sprint-based approach that included customers, clients, success managers, board members, and executives. This all-inclusive approach led to the product improving by leaps and bounds in short amounts of time, with ideas we knew were already vetted with users.</p>\n\n<p>I began my work with CF by asking questions, and iterating on Next.js-based prototypes complete with animation, beautfiul custom components, and an extensible architecture that worked as a bridge between quick prototyping and prodution-ready code.</p>\n\n<p>Using a modified Agile methodology, with an ad-hoc mixture of scrum, dailies, plannings sessions and spikes, we delivered a beautiful experience to delighted users, who often found that the extensive training needed to onboard for the first version of the prdouct, was now simply unnecesary.</p>"
+  },
+  {
+    "key": "work-discount-com",
+    "title": "Discount.com",
+    "date": "2003-12-11",
+    "end": "2004-11-05",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/discount-com"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-dynavox",
+    "title": "Dynavox",
+    "date": "2009-01-08",
+    "end": "2009-11-12",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/dynavox"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-echostar",
+    "title": "Echostar",
+    "date": "2004-10-11",
+    "end": "2004-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/echostar"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-einsteins-bagels",
+    "title": "Einstein’s Bagels",
+    "date": "2003-09-11",
+    "end": "2003-11-15",
+    "kind": "work",
+    "org": "Creation Chamber",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/einsteins-bagels"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-executive-wealth-management",
+    "title": "Executive Wealth Management",
+    "date": "2001-04-11",
+    "end": "2002-11-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/executive-wealth-management"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-friday-health-plans",
+    "title": "Friday Health Plans",
+    "date": "2020-01-07",
+    "end": "2020-09-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/friday-health-plans"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-great-west-healthcare",
+    "title": "Great-West Healthcare",
+    "date": "2005-04-11",
+    "end": "2005-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/great-west-healthcare"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-marriage-mirror",
+    "title": "Marriage Mirror",
+    "date": "2020-01-07",
+    "end": "2020-11-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/marriage-mirror"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-merrill-lynch",
+    "title": "Merrill Lynch",
+    "date": "2005-11-11",
+    "end": "2009-11-05",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/merrill-lynch"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-office-of-the-director-of-national-intelligence",
+    "title": "Office of the Director of National Intelligence",
+    "date": "2010-01-01",
+    "end": "2010-11-17",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/office-of-the-director-of-national-intelligence"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-ping-identity",
+    "title": "Ping Identity",
+    "date": "2001-02-11",
+    "end": "2001-11-04",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/ping-identity"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-polldaddy",
+    "title": "Polldaddy",
+    "date": "2010-01-11",
+    "end": "2012-11-01",
+    "kind": "work",
+    "org": "Automattic",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/polldaddy"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-rl",
+    "title": "Rule Gallery",
+    "date": "2020-04-01",
+    "approximate": true,
+    "kind": "work",
+    "org": "Rule Gallery",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/rl"
+    },
+    "html": "<p>Rule is one of Denver's premier art galleries, representing some of the most talked-about names in both Denver and Marfa, Texas.</p>\n\n<p>Leveraging a sleek, minimalist feel, this website was a joy to work on, letting white space breathe, and giving the artwork space to speak for itself.</p>\n\n<p>This site uses Advanced Custom Fields for custom post types, Timber for templating, and a statically-built React app for browsing art.</p>\n\n<p>Due to COVID-19 restrictions, the gallery cannot be open to the public. We quickly put together a WooCommerce site to get cash flowing to the artsists in need again.</p>\n\n<p><a href=\"https://shop.rulegallery.com\">View the Shop</a></p>"
+  },
+  {
+    "key": "work-state-of-wisonsin",
+    "title": "State of Wisconsin",
+    "date": "2009-01-11",
+    "end": "2009-11-20",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/state-of-wisonsin"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-the-new-york-times",
+    "title": "The New York Times",
+    "date": "2006-04-11",
+    "end": "2008-11-08",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/the-new-york-times"
+    },
+    "html": "<p>In the fall of 2006, I was part of a small team at Wall Street on Demand that pitched The New York Times on a replacement for their MarketWatch-powered (meaning competitor-powered) financial markets research portal. We continued to meet with the client periodically for about a year before work started in earnest.</p>\n\n<figure><img src=\"/writing/the-new-york-times/card.webp\" alt=\"The New York Times\" /></figure>\n\n<p>While our pitch work had been valuable in demonstrating our abilities from a cold start, we needed to start all over again once things were officially underway. This included meetings on-site with news editors, graphics editors, and web designers. We learned the ins-and-outs of their archaic publishing system (since replaced with WordPress) so that we could better understand how their web content producers’ work flowed throughout the day and night.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt2.webp\" alt=\"\" /></figure>\n\n<p>We learned the intricacies of their standards for web design, content design, and print-based financial visualization, and weaved them together into a new set of rules. Since few of these disciplines had been integrated by the Times themselves, we had to work with them to forge a hybrid model of displaying financial information on the web that felt at home within their sprawling, ever-changing site.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt3.webp\" alt=\"\" /></figure>\n\n<p>As our main work would take over a complete CNAME subdomain of their site, our developers needed to build a new platform on our end that perfectly mimicked the look and feel of the actual nytimes.com. I worked hand-in-hand with the development team to build both HTML and Flash-based tools (hey it was 2008) for users to investigate market data. We also worked closely with the client’s developers to create ways in which our content could show up within the main news stories.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt4.webp\" alt=\"\" /></figure>\n\n<p>In 2006, when we first pitched the client, I had been with the company a year, and was still a relatively new member of the design team, taking much direction from the Creative Director. By late 2007, when we started work from scratch, I was an Associate Creative Director myself, and oversaw 60-70% of the design and front-end engineering work, managing a range of 2-3 designers at a time. Our Creative Director oversaw the broad scope of work but many day-to-day management tasks were handled by me.</p>"
+  },
+  {
+    "key": "work-aeo",
+    "title": "An Earthen Ocean",
+    "date": "2012-01-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/aeo"
+    },
+    "html": "<p>Written and recorded in 2012, <strong>An Earthen Ocean</strong> was my first foray into self-produced (live) music on my laptop. Drawing heavily from post-rock influences, I'm still very proud of this album's ability to be abstract yet full of form.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/an-earthen-ocean\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-dec",
+    "title": "December",
+    "date": "2014-12-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/dec"
+    },
+    "html": "<p>Written and recorded in 2014, <strong>December</strong> was inspired by a trio of consecutive Decembers.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/december\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-mc",
+    "title": "Morocco",
+    "date": "2014-01-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/mc"
+    },
+    "html": "<p>Written and recorded in 2014, <strong>Morocco</strong> was inspired by a trip to Morocco in 2012.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/morocco\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-states",
+    "title": "States",
+    "date": "2016-03-11",
+    "end": "2016-11-09",
+    "kind": "album",
+    "org": "For the Earth Was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/states"
+    },
+    "html": "<p>Written and recorded in 2016, <strong>States</strong> was a meditation on loneliness, meaningless meaning found elsewhere, and a feeling of impending doom.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/states\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-skinwalker",
+    "title": "Skinwalker",
+    "date": "2016-03-11",
+    "end": "2021-11-12",
+    "kind": "album",
+    "org": "FULL BLEED",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/skinwalker"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-untitled",
+    "title": "Untitled",
+    "date": "2021-10-11",
+    "end": "2021-11-17",
+    "kind": "album",
+    "org": "For the Earth Was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/untitled"
+    },
+    "html": ""
+  }
+]

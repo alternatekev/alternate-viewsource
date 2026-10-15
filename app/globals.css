@@ -81,7 +81,8 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .far-years, .near-year { font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
 .near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
 .near p, .piece-body li { text-wrap: pretty; }
-.near-mark, .near-site { margin: 0 0 .8rem; }
+.near-mark, .near-site, .near-work { margin: 0 0 .8rem; }
+.piece-org { display: block; color: var(--quiet); font-size: .85em; }
 .near-source, .near-source a, .piece-source { color: var(--quiet); font-size: .85em; }
 .near-source > * + *::before { content: " · "; }
 .piece { margin: 3rem 0 0; }
