@@ -11,6 +11,8 @@ This repository is public on purpose. It is part of the evidence the site presen
 | `app/` | The site: a Next.js app that prerenders to static HTML. The home page is the glance tier, the spine as a list a phone can scan; chapter pages render the story. |
 | `content/` | Everything the site says, as files: the spine (`phases`, `milestones`, `designs`), the chapters in MDX, objects, voice timings. Validated by `lib/content/schema.ts`. See `content/README.md`. |
 | `lib/content/` | The content model, the loader (files in development, the repo at a ref in production) and the MDX renderer. |
+| `tokens/` | The token system: color, motion, shatter and sound, validated at build. See `docs/tokens.md`. |
+| `lib/air/` | The air: `field.ts` is doooomgaze, loaded after idle on devices that qualify. |
 | `lib/mood.ts` | The mood bus: the one shared state the content writes and the air reads. |
 | `prototypes/` | Dated snapshots of the working sketches: Doooom Shatter GL, doooomgaze (the ambient field) and dooombient (the instrument). |
 | `docs/` | The working plan, the air primitive, the dock model. |
@@ -42,4 +44,4 @@ The first paint is the glance tier: the HTML and its inlined stylesheet, no clie
 
 ## Status
 
-Scaffold. Five phases, fourteen sourced milestones and fifteen documented designs are in; the two first chapters are labeled stubs. Known gaps: a strict CSP (needs nonces, which would make pages dynamic); unknown chapter URLs render the not-found view under a 200 because the prerendered shell is sent first; the air primitive is not yet ported from `prototypes/`.
+Scaffold. Five phases, fourteen sourced milestones and fifteen documented designs are in; the two first chapters are labeled stubs. Known gaps: a strict CSP (needs nonces, which would make pages dynamic); unknown chapter URLs render the not-found view under a 200 because the prerendered shell is sent first; the field is ported (on tokens, about 14 KB gzipped, loaded after idle, off on phones for now); the instrument is not yet.

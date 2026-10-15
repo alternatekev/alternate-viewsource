@@ -16,7 +16,15 @@ export default async function Home() {
       </p>
       <ol className="spine">
         {phases.map((p) => (
-          <li key={p.key} id={p.key} style={{ borderLeft: `3px solid var(--${p.key})`, paddingLeft: "1rem" }}>
+          <li
+            key={p.key}
+            id={p.key}
+            style={{ borderLeft: `3px solid var(--${p.key})`, paddingLeft: "1rem" }}
+            data-valence={p.mood.valence}
+            data-arousal={p.mood.arousal}
+            data-x={p.mood.x}
+            data-y={p.mood.y}
+          >
             <div className="phase-head">
               <h2>{p.name}</h2>
               <span className="years">

@@ -1,40 +1,34 @@
 /* The glance tier's whole stylesheet. Inlined by Next at build; stays small on purpose.
    Type is a system stack until Kevin picks the face; the phase accents are placeholders
    sampled from the archive (#6699CC from 2001, #FE1300 from 2005) and are his call. */
+/* Colors come from tokens/color.ts, inlined as custom properties in <head>. One dark world,
+   as every prototype assumes; a light tier is Kevin's call. */
 :root {
-  color-scheme: light dark;
-  --paper: #f6f4ef;
-  --ink: #15161a;
-  --quiet: #5c6068;
-  --rule: #d9d6cf;
-  --accent: #0d5f6a;
-  --dialup: #6699cc;
-  --broadband: #fe1300;
-  --apps: #e8a317;
-  --components: #2a9d8f;
-  --agents: #7c4dff;
+  color-scheme: dark;
   --measure: 62ch;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0b0c0f;
-    --ink: #e8e6e0;
-    --quiet: #9a9ea6;
-    --rule: #26282e;
-    --accent: #7ad3e0;
-  }
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+html { background: var(--paper); }
 body {
   margin: 0;
-  background: var(--paper);
   color: var(--ink);
   font: 17px/1.55 ui-serif, Georgia, "Times New Roman", serif;
   font-feature-settings: "kern", "liga", "onum";
 }
 a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: .15em; }
-main { max-width: var(--measure); margin: 0 auto; padding: clamp(24px, 6vh, 64px) 16px 20vh; }
+main { position: relative; max-width: var(--measure); margin: 0 auto; padding: clamp(24px, 6vh, 64px) 16px 20vh; }
+/* the reading column stays calm: a scrim between the field and the words, soft at its edges,
+   dense enough that text keeps its contrast over anything the field does (checked at build) */
+main::before {
+  content: ""; position: absolute; inset: 0 -48px; z-index: -1; pointer-events: none;
+  background: var(--scrim);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+}
+/* the field: fixed behind everything, never takes a pointer, fades in once it is running */
+.air { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0; transition-property: opacity; transition-timing-function: ease-in-out; }
+.air[data-on] { opacity: 1; }
 h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
 h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 .5rem; }
 h2 { font-size: clamp(20px, 3.2vw, 26px); margin: 2.2rem 0 .6rem; }

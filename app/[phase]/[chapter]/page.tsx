@@ -29,7 +29,7 @@ export default async function ChapterPage({ params }: Props) {
   const body = await renderChapterBody(c.body);
   return (
     <main>
-      <article>
+      <article data-valence={c.mood.valence} data-arousal={c.mood.arousal} data-x={c.mood.x} data-y={c.mood.y}>
         <header>
           <p className="kicker">
             <Link href={`/#${p.key}`}>{p.name}</Link> · {c.start.slice(0, 4)}
