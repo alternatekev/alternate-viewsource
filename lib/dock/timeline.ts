@@ -6,7 +6,26 @@
 import { newestFirst, onTime, timePlace } from "@/lib/time";
 import { dock } from "@/tokens/dock";
 
-export function timelineBlocks() {
+/** a phase name that types itself out while the block is hovered or focused, and erases after */
+function typedName(el: HTMLElement, full: string) {
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let shown = 0, want = 0, timer = 0;
+  const tick = () => {
+    if (shown === want) { timer = 0; if (!want) delete el.dataset.typing; return; }
+    shown += shown < want ? 1 : -1;
+    el.textContent = full.slice(0, shown);
+    timer = window.setTimeout(tick, shown < want ? dock.typing.charMs : dock.typing.eraseMs);
+  };
+  const to = (n: number) => {
+    want = n;
+    if (n) el.dataset.typing = "";
+    if (reduced) { shown = n; el.textContent = full.slice(0, n); if (!n) delete el.dataset.typing; return; }
+    if (!timer) tick();
+  };
+  return { show: () => to(full.length), hide: () => to(0), destroy: () => clearTimeout(timer) };
+}
+
+export function timelineBlocks(onPress?: () => void) {
   const beats = [...document.querySelectorAll<HTMLElement>(".beat[data-key]")];
   const year = (d?: string) => (d ? new Date(d).getUTCFullYear() + new Date(d).getUTCMonth() / 12 : 0); // dates are UTC days
   const spans = beats.map((b) => Math.max(1, year(b.dataset.end) - year(b.dataset.start)));
@@ -14,14 +33,22 @@ export function timelineBlocks() {
 
   const el = document.createElement("div");
   el.className = "dock-timeline";
+  const typers: ReturnType<typeof typedName>[] = [];
   const blocks = beats.map((b, i) => {
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "dock-block";
     btn.style.flexGrow = String(spans[i]);
-    const name = document.createElement("span"); name.textContent = (b.dataset.name ?? "").toLowerCase();
-    const from = document.createElement("span"); from.className = "dock-block-year"; from.textContent = String(Math.floor(year(b.dataset.start)));
-    btn.append(from, name);
-    btn.addEventListener("click", () => scrollToY(b.offsetTop));
+    const label = (b.dataset.name ?? "").toLowerCase(), from = String(Math.floor(year(b.dataset.start)));
+    btn.setAttribute("aria-label", `${label}, from ${from}`);
+    // the name is hidden until the block is hovered or focused, then types out like the logotype
+    const name = document.createElement("span"); name.className = "dock-block-name"; name.setAttribute("aria-hidden", "true");
+    const yr = document.createElement("span"); yr.className = "dock-block-year"; yr.setAttribute("aria-hidden", "true"); yr.textContent = from;
+    btn.append(yr, name);
+    const typer = typedName(name, label);
+    typers.push(typer);
+    btn.addEventListener("pointerenter", typer.show); btn.addEventListener("focus", typer.show);
+    btn.addEventListener("pointerleave", typer.hide); btn.addEventListener("blur", typer.hide);
+    btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); });
     el.append(btn);
     return btn;
   });
@@ -58,5 +85,5 @@ export function timelineBlocks() {
   }
   const off = onTime(sync);
   sync();
-  return { el, destroy() { off(); stopTrip(); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); } };
+  return { el, destroy() { off(); stopTrip(); typers.forEach((t) => t.destroy()); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); } };
 }
