@@ -102,6 +102,13 @@ export const schemes: Record<"compass" | "archive" | "hueWheel" | "warmCool", St
 };
 export const schemeByEdge = { top: "compass", right: "archive", bottom: "hueWheel", left: "warmCool" } as const;
 export type DockEdge = keyof typeof schemeByEdge;
+/** where the nav sits along its edge, as the eye sees it */
+export type DockSpot = "left" | "center" | "right";
+/**
+ * The nav docks only top or bottom now (Oct 15), so the side schemes would go unused: the corners
+ * take them. Centered, the edge's own scheme; in a left corner, Warm/cool; in a right corner, Archive.
+ */
+export const schemeEdgeFor = (edge: DockEdge, spot: DockSpot): DockEdge => (spot === "center" ? edge : spot);
 // the knobs for toning it down: how much the scheme outweighs the hour's light
 export const matrix = { schemeIntoHour: 0.75 };
 
