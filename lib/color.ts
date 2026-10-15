@@ -52,3 +52,10 @@ export function mix(a: Oklch, b: Oklch, t: number): Oklch {
   const dh = ((hb - ha + 540) % 360) - 180;
   return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, (ha + dh * t + 360) % 360];
 }
+
+/** Blend two OKLCH colors through OKLab: the middle desaturates instead of sweeping through other hues. */
+export function mixLab(a: Oklch, b: Oklch, t: number): Oklch {
+  const A = oklchToOklab(a), B = oklchToOklab(b);
+  const L = A[0] + (B[0] - A[0]) * t, x = A[1] + (B[1] - A[1]) * t, y = A[2] + (B[2] - A[2]) * t;
+  return [L, Math.hypot(x, y), ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360];
+}

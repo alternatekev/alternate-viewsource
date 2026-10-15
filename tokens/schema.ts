@@ -18,6 +18,8 @@ export const ColorTokens = z.object({
     // the calm behind the reading column, so text holds its contrast over anything the field does
     scrimAlpha: z.number().min(0).max(1),
   }),
+  // what shows outside the window mask's shards
+  maskOutside: Oklch,
   phases: z.object({ dialup: Oklch, broadband: Oklch, apps: Oklch, components: Oklch, agents: Oklch }),
   field: z.object({
     // the hour sets the light: background and a tint, blended between stops; 0 and 24 must match
@@ -99,6 +101,27 @@ export const ShatterTokens = z.object({
 });
 // authored shape (defaults optional); the build parses it against the schema
 export type ShatterTokens = z.input<typeof ShatterTokens>;
+
+// ---------- dock ----------
+export const DockTokens = z.object({
+  thickness: z.number().positive(),
+  // touch targets need 44 px at least
+  thicknessCoarse: z.number().min(44),
+  inset: z.number().min(0),
+  gap: z.number().min(0),
+  reach: z.number().positive(),
+  stub: z.number().positive(),
+  navMaxLength: z.number().positive(),
+  keyStep: z.number().positive().max(0.5),
+  dragStartPx: z.number().min(1),
+  followSec: z.number().positive().max(0.5),
+  grip: z.object({ hit: z.number().min(24), lines: z.tuple([z.number().positive(), z.number().positive()]), lineSpacing: z.number().min(2), lineWidth: z.number().positive() }),
+  look: z.object({
+    lineAlpha: z.number().min(0).max(1), gripAlpha: z.number().min(0).max(1), ghostAlpha: z.number().min(0).max(1),
+    liftedOpacity: z.number().min(0).max(1), ghostFadeMs: z.number().min(0), borderWidth: z.number().positive(),
+  }),
+});
+export type DockTokens = z.input<typeof DockTokens>;
 
 // ---------- sound ----------
 const Pedals = z.object({

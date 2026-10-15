@@ -9,8 +9,9 @@
 // tuned. What is left in code is mechanism: geometry, the simulation, the GL plumbing.
 
 import { toLinear, type Rgb } from "@/lib/color";
-import { fieldPalette, motion, shatter } from "@/tokens";
+import { color, fieldPalette, motion, shatter } from "@/tokens";
 import type { Linear, Signal } from "@/tokens/schema";
+import type { DockEdge } from "@/tokens/color";
 
 type Vec3 = [number, number, number];
 type Shard = {
@@ -309,7 +310,10 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     let py = lerp(loadPoint[1], m.y, sstep(0.02, 0.2, scrollFrac)) * H + my * 0.25 * H;
     if (openPoint) { const o = openedCapped * 0.6; px = lerp(px, openPoint[0], o); py = lerp(py, openPoint[1], o); }
 
-    const h = hourNow(), pal = fieldPalette(h, v, a);
+    // the color matrix: the nav's edge picks the scheme, the timeline picks the color inside it.
+    // Until the timeline scrubs, scrolling down through the phases stands in for the year.
+    const edge = (document.querySelector<HTMLElement>('.dock[data-dock="nav"]')?.dataset.edge ?? "top") as DockEdge;
+    const h = hourNow(), pal = fieldPalette(h, v, a, { edge, year: scrollFrac });
     const t = {
       expand: e(D.expand), spinRate: e(D.spin), depth: e(D.depth), swirl: e(D.swirl), sink: e(D.sink), countFrac: clamp(e(D.count), 0, 1),
       pointX: px, pointY: py, gap: e(D.gap), rim: e(D.rim), opacity: e(D.opacity), opVar: e(D.opacityVariance),
@@ -460,7 +464,8 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.disable(g.DEPTH_TEST); g.disable(g.BLEND);
     if (windowMask) {
       // the windows: the second shatter writes 1 into the stencil, nothing into color
-      g.clearColor(0, 0, 0, 1); g.clearStencil(0); g.clear(g.COLOR_BUFFER_BIT | g.STENCIL_BUFFER_BIT);
+      const outside = toLinear(color.maskOutside);
+      g.clearColor(outside[0], outside[1], outside[2], 1); g.clearStencil(0); g.clear(g.COLOR_BUFFER_BIT | g.STENCIL_BUFFER_BIT);
       g.enable(g.STENCIL_TEST); g.stencilFunc(g.ALWAYS, 1, 0xff); g.stencilOp(g.KEEP, g.KEEP, g.REPLACE);
       g.colorMask(false, false, false, false);
       drawShards(msBuf, mdBuf, mDynData, miBuf, mIdxData, mIdxCount, bg);

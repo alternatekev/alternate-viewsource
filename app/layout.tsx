@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 import { cssVariables } from "@/tokens";
 import Air from "./air";
+import Docks from "./docks";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body>
         <Air />
         {children}
+        <Docks />
       </body>
     </html>
   );

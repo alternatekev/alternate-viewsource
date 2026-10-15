@@ -1,6 +1,6 @@
 # Tokens
 
-Everything that colors, moves, shatters or sounds reads from `tokens/`, so the field, the instrument, the docks and the text cannot drift apart. Four families, each built the same way:
+Everything that colors, moves, shatters or sounds reads from `tokens/`, so the field, the instrument, the docks and the text cannot drift apart. Five families, each built the same way:
 
 | Layer | What it is |
 | --- | --- |
@@ -14,6 +14,9 @@ Everything that colors, moves, shatters or sounds reads from `tokens/`, so the f
 | Motion | `tokens/motion.ts` | the field's springs and signals, the docks, cross-fades, reduced motion |
 | Shatter | `tokens/shatter.ts` | the field: fracture, camera, and every moving quantity as `base + Σ coefficient × signal` |
 | Sound | `tokens/sound.ts` | dooombient: tempo, modes, voicings, the three boards' ratios, each phase's pedals and Fathom mode |
+| Dock | `tokens/dock.ts` | the docks: geometry, the drag threshold and follow, the wireframe look (line, grip and ghost alphas over ink), all emitted as CSS custom properties |
+
+**The color matrix.** The nav's edge picks one of four schemes (top Compass, right Archive, bottom Hue wheel, left Warm/cool); the position on the timeline picks the color inside it, 1998 to now. Each scheme is a strip of OKLCH `bg` + `tint` stops in `tokens/color.ts`. The hour's light sits underneath and the scheme outweighs it by `matrix.schemeIntoHour`, the knob for toning it down. Until the timeline scrubs, scrolling stands in for the year.
 
 **Authoring.** Colors are written in OKLCH, which blends evenly to the eye, so a halfway mix between two moods or two hours looks halfway. The build converts them to whatever each reader needs. Token files are plain typed objects, so nothing ships a validator to the browser.
 

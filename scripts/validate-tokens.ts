@@ -1,17 +1,24 @@
 // Parses every token family against tokens/schema.ts and runs the cross-checks a schema can't:
 // text contrast over the worst the field can do, the time-of-day loop, level ceilings, board ratios.
 import { contrast, luminance, type Oklch } from "../lib/color";
-import { color, fieldPalette, motion, shatter, sound } from "../tokens";
-import { ColorTokens, MotionTokens, ShatterTokens, SoundTokens } from "../tokens/schema";
+import { color, dock, fieldPalette, motion, shatter, sound } from "../tokens";
+import { schemes } from "../tokens/color";
+import { ColorTokens, DockTokens, MotionTokens, Oklch as OklchSchema, ShatterTokens, SoundTokens } from "../tokens/schema";
 
 let problems = 0;
 const fail = (msg: string) => { problems++; console.error(`✗ tokens: ${msg}`); };
 
 for (const [name, schema, value] of [
-  ["color", ColorTokens, color], ["motion", MotionTokens, motion], ["shatter", ShatterTokens, shatter], ["sound", SoundTokens, sound],
+  ["color", ColorTokens, color], ["motion", MotionTokens, motion], ["shatter", ShatterTokens, shatter], ["sound", SoundTokens, sound], ["dock", DockTokens, dock],
 ] as const) {
   const r = (schema as { safeParse: (v: unknown) => { success: boolean; error?: { message: string } } }).safeParse(value);
   if (!r.success) fail(`${name}: ${r.error?.message}`);
+}
+
+// Every scheme stop is a valid OKLCH color, and every scheme has at least two stops.
+for (const [name, stops] of Object.entries(schemes)) {
+  if (stops.length < 2) fail(`scheme ${name} needs at least two stops`);
+  for (const st of stops) for (const c of [st.bg, st.tint]) if (!OklchSchema.safeParse(c).success) fail(`scheme ${name}: ${JSON.stringify(c)} is not OKLCH`);
 }
 
 // The time of day is a loop.
@@ -28,8 +35,9 @@ const paperY = luminance(u.paper as Oklch);
 const throughScrim = (fieldY: number) => u.scrimAlpha * paperY + (1 - u.scrimAlpha) * fieldY;
 const worstBright = throughScrim(1);
 let darkest = 1, brightestBg = 0;
-for (let h = 0; h < 24; h += 0.25) for (let v = -1; v <= 1; v += 0.25) for (let a = 0; a <= 1; a += 0.25) {
-  const y = luminance(fieldPalette(h, v, a).bg); darkest = Math.min(darkest, y); brightestBg = Math.max(brightestBg, y);
+for (const edge of ["top", "right", "bottom", "left"] as const) for (let year = 0; year <= 1; year += 0.1)
+for (let h = 0; h < 24; h += 1) for (let v = -1; v <= 1; v += 0.5) for (let a = 0; a <= 1; a += 0.5) {
+  const y = luminance(fieldPalette(h, v, a, { edge, year }).bg); darkest = Math.min(darkest, y); brightestBg = Math.max(brightestBg, y);
 }
 for (const [name, c, min] of [["ink", u.ink, 4.5], ["quiet", u.quiet, 4.5], ["accent", u.accent, 4.5]] as const) {
   const y = luminance(c as Oklch);
@@ -62,5 +70,5 @@ const w = Object.values(sound.modeWeights).reduce((s, x) => s + x, 0);
 if (Math.abs(w - 1) > 1e-6) fail(`sound.modeWeights sum to ${w}, not 1`);
 for (const m of Object.keys(sound.modeWeights)) if (!(m in sound.modes)) fail(`sound.modeWeights names unknown mode ${m}`);
 
-console.log(`tokens: color, motion, shatter and sound checked`);
+console.log(`tokens: color, motion, shatter, sound and dock checked`);
 if (problems) { console.error(`${problems} token problem(s)`); process.exit(1); }
