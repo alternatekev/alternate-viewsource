@@ -92,3 +92,15 @@ export const ChapterMeta = z.object({
 export type ChapterMeta = z.infer<typeof ChapterMeta>;
 
 export type Chapter = ChapterMeta & { slug: string; body: string; path: string };
+
+// Writing I published before this site, brought in whole (cleared by me piece by piece), with the
+// place it first appeared as its source. html is cleaned: no scripts, no embeds, images local.
+export const Writing = z.object({
+  key: z.string().regex(/^[a-z0-9-]+$/),
+  title: z.string().min(1),
+  date: isoDate,
+  kind: z.enum(["essay", "music"]),
+  source: z.object({ label: z.string().min(1), url: z.string().url() }),
+  html: z.string(),
+});
+export type Writing = z.infer<typeof Writing>;
