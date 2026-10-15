@@ -26,6 +26,7 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 - Sound is off until the visitor asks.
 - WebGL-first with an accessible alternative for everything; the docks and the air are DOM, Pointer Events, WebGL and Web Audio, not React. React is the shell. TypeScript throughout; small modules, so rendering stays fast.
 - It must not look like an AI designed it. Light touch: the content and the voice carry the site; the ambience supports them.
+- Leave it alone by default. Selecting, clicking, pressing, hovering or focusing content or controls never makes them animate or change in a way Kevin didn't ask for. Nothing moves, reseats, recenters, restyles or animates unless that change is the action itself or he asked for it. The one exception is the ambient layer, the field and the instrument: it is the only thing that responds to how the page is read, and it may do so in unpredictable ways. Keeping things still never needs explaining; changing them does.
 - Kevin art-directs every step. Propose and sketch; do not add features he did not ask for. When a request is ambiguous, ask one question instead of guessing in code.
 - Next.js here is newer than most training data. Read `node_modules/next/dist/docs/` before using an API you are not sure of; `AGENTS.md` says the same.
 
