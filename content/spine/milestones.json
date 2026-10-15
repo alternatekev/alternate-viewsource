@@ -16,7 +16,7 @@
   { "key": "nyt", "date": "2008-01-01", "approximate": true, "phase": "apps", "label": "NYTimes.com Markets launches, with its Chart Builder",
     "sources": [{ "label": "Case study, alternate.org (2016 capture)", "url": "https://web.archive.org/web/20161025073739/http://alternate.org:80/project/nyt-markets/" }] },
   { "key": "personal-data", "date": "2008-08-01", "approximate": true, "phase": "apps", "label": "a personal-data app goes to beta; a thousand users in four months",
-    "sources": [{ "label": "Kevin's account", "note": "archive captures held privately for now" }] },
+    "sources": [{ "label": "My account", "note": "archive captures held privately for now" }] },
   { "key": "automattic", "date": "2010-02-01", "approximate": true, "phase": "apps", "label": "Joins Automattic",
     "sources": [{ "label": "alternate.org, July 2010 capture", "url": "https://web.archive.org/web/20100713200107/http://www.alternate.org:80/" }] },
   { "key": "calypso", "date": "2014-09-01", "approximate": true, "phase": "components", "label": "Calypso, WordPress.com in React, before React 1.0",
@@ -24,7 +24,7 @@
   { "key": "catchfly", "date": "2016-06-01", "approximate": true, "phase": "components", "label": "Catchfly, a design system at CA Technologies",
     "sources": [{ "label": "About, alternate.org (April 2020 capture)", "url": "https://web.archive.org/web/20200418052841/https://alternate.org/about/" }] },
   { "key": "magnetic", "date": "2020-01-01", "approximate": true, "phase": "components", "label": "Magnetic, the design system at Cisco Meraki",
-    "sources": [{ "label": "Kevin's account", "note": "to be sourced before it ships" }] },
+    "sources": [{ "label": "My account", "note": "to be sourced before it ships" }] },
   { "key": "agentic", "date": "2026-03-01", "approximate": true, "phase": "agents", "label": "Three teams turn to agentic development",
-    "sources": [{ "label": "Kevin's account", "note": "to be sourced before it ships" }] }
+    "sources": [{ "label": "My account", "note": "to be sourced before it ships" }] }
 ]

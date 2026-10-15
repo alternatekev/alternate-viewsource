@@ -57,7 +57,7 @@
   },
   {
     "key": "components",
-    "name": "Components",
+    "name": "Design systems",
     "start": "2013-05-29",
     "end": "2022-11-29",
     "web": "React, npm and Node everywhere, design systems as a job, Next.js and Vercel, TypeScript.",

@@ -3,7 +3,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import { ChapterMeta, Design, Milestone, Phase, PHASE_KEYS } from "../lib/content/schema";
+import { ChapterMeta, Design, Milestone, Phase, PHASE_KEYS, Writing } from "../lib/content/schema";
 
 const root = path.join(process.cwd(), "content");
 let problems = 0;
@@ -36,6 +36,15 @@ async function main() {
   const designs = (await json("spine/designs.json")).map((x) => Design.parse(x));
   for (const d of designs) if (d.snapshot.captured < d.start) fail("spine/designs.json", `${d.key} captured before it started`);
 
+  const writing = (await json("writing/posts.json")).map((x) => Writing.parse(x));
+  const wkeys = new Set<string>();
+  for (const w of writing) {
+    if (wkeys.has(w.key)) fail("writing/posts.json", `duplicate key ${w.key}`);
+    wkeys.add(w.key);
+    if (/<script|<iframe|on[a-z]+=/i.test(w.html)) fail("writing/posts.json", `${w.key} carries script, an embed or an event handler`);
+    for (const m of w.html.matchAll(/src="([^"]+)"/g)) if (!m[1].startsWith("/writing/")) fail("writing/posts.json", `${w.key} loads ${m[1]} from elsewhere`);
+  }
+
   const storyDir = path.join(root, "story");
   const files = (await readdir(storyDir, { recursive: true, withFileTypes: true }))
     .filter((e) => e.isFile() && e.name.endsWith(".mdx") && !e.name.startsWith("_"))
@@ -54,7 +63,7 @@ async function main() {
     }
   }
 
-  console.log(`${phases.length} phases, ${milestones.length} milestones, ${designs.length} designs, ${files.length} chapters checked`);
+  console.log(`${phases.length} phases, ${milestones.length} milestones, ${designs.length} designs, ${writing.length} pieces of writing, ${files.length} chapters checked`);
   if (problems) {
     console.error(`${problems} problem(s)`);
     process.exit(1);
