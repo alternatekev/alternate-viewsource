@@ -13,6 +13,8 @@ export const color = {
     accent: [0.86, 0.09, 205],
     scrimAlpha: 0.94,
   },
+  // outside the window mask's shards: black, as first seen and liked (Oct 14)
+  maskOutside: [0, 0, 0],
   // placeholders: dial-up and broadband are sampled from the 2001 and 2005 sites (#6699CC, #FE1300);
   // the other three are invented and wait for Kevin
   phases: {
@@ -68,15 +70,62 @@ export function timeOfDay(hour: number) {
  * here comes from the clock and from the chapter in view.
  *   valence -1..1: warm when bright, cool when dark · arousal 0..1: more chroma, more light
  */
-export function fieldPalette(hour: number, valence: number, arousal: number) {
+// The color matrix (Kevin, Oct 14, 23:16): the dock edge picks the scheme; the position on the timeline
+// picks the color inside it. Each scheme is a strip of four bg + tint stops, 1998 at stop 1, now at stop 4.
+// First sketch from the color chat; "we will likely tone it down after seeing in action."
+type Stop = { bg: Oklch; tint: Oklch };
+export const schemes: Record<"compass" | "archive" | "hueWheel" | "warmCool", Stop[]> = {
+  compass: [
+    { bg: [0.14, 0.012, 258], tint: [0.68, 0.08, 240] },
+    { bg: [0.155, 0.018, 40], tint: [0.7, 0.1, 55] },
+    { bg: [0.115, 0.016, 290], tint: [0.6, 0.13, 300] },
+    { bg: [0.145, 0.018, 335], tint: [0.64, 0.13, 345] },
+  ],
+  archive: [
+    { bg: [0.135, 0.016, 252], tint: [0.66, 0.09, 252] },
+    { bg: [0.14, 0.02, 29], tint: [0.63, 0.18, 29] },
+    { bg: [0.14, 0.016, 75], tint: [0.74, 0.13, 75] },
+    { bg: [0.13, 0.016, 235], tint: [0.63, 0.13, 235] },
+  ],
+  hueWheel: [
+    { bg: [0.135, 0.02, 0], tint: [0.66, 0.1, 0] },
+    { bg: [0.135, 0.02, 90], tint: [0.66, 0.1, 90] },
+    { bg: [0.135, 0.02, 180], tint: [0.66, 0.1, 180] },
+    { bg: [0.135, 0.02, 270], tint: [0.66, 0.1, 270] },
+  ],
+  warmCool: [
+    { bg: [0.135, 0.014, 250], tint: [0.66, 0.09, 250] },
+    { bg: [0.138, 0.014, 156], tint: [0.68, 0.07, 156] },
+    { bg: [0.14, 0.016, 62], tint: [0.72, 0.1, 62] },
+    { bg: [0.138, 0.014, 156], tint: [0.68, 0.07, 156] },
+  ],
+};
+export const schemeByEdge = { top: "compass", right: "archive", bottom: "hueWheel", left: "warmCool" } as const;
+export type DockEdge = keyof typeof schemeByEdge;
+// the knobs for toning it down: how much the scheme outweighs the hour's light
+export const matrix = { schemeIntoHour: 0.75 };
+
+/** A scheme's bg and tint at a point on the timeline, 0 = 1998, 1 = now. */
+export function schemeAt(edge: DockEdge, year: number): Stop {
+  const stops = schemes[schemeByEdge[edge]];
+  const f = Math.min(1, Math.max(0, year)) * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(f)), t = f - i;
+  return { bg: mix(stops[i].bg, stops[i + 1].bg, t), tint: mix(stops[i].tint, stops[i + 1].tint, t) };
+}
+
+/**
+ * The field's palette. The hour sets the light, the dock edge and the timeline pick the scheme's color
+ * on top of it, and the chapter's mood sets how much color and light the shards carry.
+ */
+export function fieldPalette(hour: number, valence: number, arousal: number, place: { edge: DockEdge; year: number } = { edge: "top", year: 0 }) {
   const m = color.field.mood;
-  const tod = timeOfDay(hour);
-  const hue = valence >= 0 ? m.warmHue : m.coolHue;
-  const c = m.chroma.base + m.chroma.valence * Math.abs(valence) + m.chroma.arousal * arousal;
-  const light: Oklch = mix([m.shardLight, c, hue], tod.tint, m.tintIntoLight);
-  const darkTint: Oklch = [tod.tint[0] * 0.3, tod.tint[1] * 0.3, tod.tint[2]];
+  const tod = timeOfDay(hour), sch = schemeAt(place.edge, place.year), w = matrix.schemeIntoHour;
+  const bgBase = mix(tod.bg, sch.bg, w), tint = mix(tod.tint, sch.tint, w);
+  const hue = tint[2];
+  const c = (m.chroma.base + m.chroma.valence * Math.abs(valence) + m.chroma.arousal * arousal) * (tint[1] / 0.1);
+  const light: Oklch = mix([m.shardLight, c, hue], tint, m.tintIntoLight);
+  const darkTint: Oklch = [tint[0] * 0.3, tint[1] * 0.3, tint[2]];
   const dark: Oklch = mix([m.shardDark + 0.05 * arousal, c * 0.8, hue + 16], darkTint, m.tintIntoDark);
   const crack: Oklch = [m.crackLight + 0.08 * arousal, Math.min(0.37, c + m.crackChroma), hue - 6];
-  const bg: Oklch = mix(tod.bg, dark, m.moodIntoBg);
+  const bg: Oklch = mix(bgBase, dark, m.moodIntoBg);
   return { bg, light, dark, crack };
 }
