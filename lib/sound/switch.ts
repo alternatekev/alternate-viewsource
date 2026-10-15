@@ -4,6 +4,7 @@
 // when sound first starts.
 
 import { onReset } from "@/lib/ambience";
+import { toggle } from "@/lib/dock/toggle";
 import type { Instrument } from "./instrument";
 
 const WORKLET = "/sound/pedals.js";
@@ -11,15 +12,10 @@ const WORKLET = "/sound/pedals.js";
 type Field = { setMusic(x: number, y: number, energy: number): void };
 
 export function soundSwitch() {
-  const button = document.createElement("button");
-  button.type = "button"; button.className = "dock-option";
   let wanted = true, ac: AudioContext | null = null, inst: Instrument | null = null, failed = false;
-  const label = () => {
-    button.setAttribute("aria-pressed", String(wanted && !failed));
-    button.textContent = failed ? "sound unavailable here" : wanted ? "sound on" : "sound off";
-    button.disabled = failed;
-  };
-  label();
+  const sw = toggle({ name: "sound", on: true, onChange: (on) => { wanted = on; if (on) start(); inst?.setOn(on); } });
+  const button = sw.el;
+  const fail = () => { failed = true; sw.unavailable("unavailable here"); };
 
   // iOS routes Web Audio through the ringer switch; a playback session moves it to the media channel
   function unlockIOS() {
@@ -36,16 +32,10 @@ export function soundSwitch() {
       import("./instrument")
         .then(({ createInstrument }) => createInstrument(ctx, WORKLET))
         .then((i) => { inst = i; i.setOn(wanted); })
-        .catch(() => { failed = true; label(); });
+        .catch(fail);
     }
     void ac.resume();
   }
-
-  button.addEventListener("click", () => {
-    wanted = !wanted; label();
-    if (wanted) start();
-    inst?.setOn(wanted);
-  });
 
   const offReset = onReset(() => inst?.reset());
 

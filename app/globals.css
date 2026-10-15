@@ -7,6 +7,8 @@
   color-scheme: dark;
   --measure: 62ch;
   --face-pixel: "argent-pixel-cf", ui-sans-serif, system-ui, sans-serif;
+  --face-display: "le-monde-livre-classic-byol", ui-serif, Georgia, serif;
+  --face-text: "le-monde-livre-classic-byol", ui-serif, Georgia, serif;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -34,7 +36,8 @@ h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.1
 h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 .5rem; }
 h2 { font-size: clamp(20px, 3.2vw, 26px); margin: 2.2rem 0 .6rem; }
 h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; }
-p { margin: 0 0 1rem; }
+p { margin: 0 0 1rem; text-wrap: pretty; } /* no orphans, anywhere */
+li, figcaption, blockquote { text-wrap: pretty; }
 small, .quiet { color: var(--quiet); }
 .kicker { font: 500 13px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); margin: 0 0 .4rem; }
 .lede { font-size: 1.15em; max-width: 46ch; }
@@ -65,10 +68,59 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
-/* field only, for now: five empty beats, one per phase, a viewport tall each */
-.beat { height: 100vh; height: 100dvh; }
+/* the surface: five beats, one per phase, a viewport tall each. Without JavaScript it is a plain
+   document; with it (html[data-surface]) each beat is a space you dive into (lib/surface.ts) */
+.beat { position: relative; min-height: 100vh; min-height: 100dvh; padding: 15vh 8vw; }
+.beat .dive { all: unset; cursor: pointer; display: block; }
+.beat .dive:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 6px; }
+/* the subhead: the same serif as the header, a size down, in the quieter ink */
+.subhead { margin: 2rem 0 0; max-width: 36ch; text-wrap: balance; font: 400 clamp(22px, 3vw, 40px)/1.25 var(--face-text); color: var(--quiet); }
+.welcome-source { margin: 1.5rem 0 0; font: 13px/1 var(--face-pixel); }
+.welcome-source a { color: var(--quiet); }
+.far h2 { margin: 0; font: 400 clamp(56px, 11vw, 160px)/0.9 var(--face-display); letter-spacing: -.01em; }
+.far-years, .near-year { font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
+.near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
+.near p, .piece-body li { text-wrap: pretty; }
+.near-mark, .near-site, .near-work { margin: 0 0 .8rem; }
+.piece-org { display: block; color: var(--quiet); font-size: .85em; }
+.near-source, .near-source a, .piece-source { color: var(--quiet); font-size: .85em; }
+.near-source > * + *::before { content: " · "; }
+.piece { margin: 3rem 0 0; }
+.piece h3 { margin: .3rem 0 1rem; font: 400 1.6rem/1.15 var(--face-display); letter-spacing: 0; }
+.piece-body img { display: block; max-width: 100%; height: auto; margin: 1rem 0; }
+.piece-body figure { margin: 1rem 0; }
+.piece-body figcaption { color: var(--quiet); font-size: .85em; }
+.piece-body blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 1px solid var(--rule); color: var(--quiet); }
+
+html[data-surface] .beat { height: 100vh; height: 100dvh; padding: 0; overflow: hidden; }
+/* a beat is unseen until it scrolls into view after begin; then each part sets in as a box (no typing) */
+html[data-surface] .space:not([data-arrived]) { visibility: hidden; }
+html[data-surface] .space { position: absolute; left: 8vw; top: 22vh; transform-origin: 0 0; }
+html[data-surface] .far { position: relative; }
+/* near sits beside the far title, set small: a wide field of columns, the era's notes first, then each
+   piece of writing whole; you dive into a piece to read it */
+html[data-surface] .near { position: absolute; left: 100%; top: 0; max-width: none; width: max-content; margin: 0 0 0 4rem;
+  display: grid; grid-auto-flow: column; grid-auto-columns: 34rem; gap: 4rem; align-items: start;
+  transform: scale(var(--zoom-near)); transform-origin: 0 0; }
+html[data-surface] .piece { margin: 0; }
+/* only the current level takes presses; deeper words are there, just too small to aim at yet */
+html[data-surface] .beat .near, html[data-surface] .beat .near * { pointer-events: none; }
+html[data-surface] .beat[data-depth="1"] .near [data-dive], html[data-surface] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
+html[data-surface] .beat[data-depth="2"] .piece a { pointer-events: auto; }
+.surface-back { position: absolute; left: 8vw; top: 12vh; margin: 0; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); background: none; border: 0; cursor: pointer; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
+/* type in, type out (lib/type.ts): a box sets in left to right in steps at typing speed and
+   withdraws the same way at erasing speed; its words type and erase on their own */
+@keyframes set-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes set-out { from { clip-path: inset(0); } to { clip-path: inset(0 100% 0 0); } }
+[data-set="in"] { animation: set-in calc(var(--type-char) * var(--type-steps) * var(--type-pace, 1)) steps(var(--type-steps), jump-start) backwards; }
+[data-set="out"] { animation: set-out calc(var(--type-erase) * var(--type-steps) * var(--type-pace, 1)) steps(var(--type-steps), jump-end) forwards; pointer-events: none; }
+/* the letters a word hasn't typed yet: there, holding its shape, unseen (lib/type.ts) */
+::highlight(untyped) { color: transparent; }
+.type-ghost { visibility: hidden; }
+/* colors change at typing speed: the current timeline block, a switch turning off, a hovered link */
+.dock-block, .dock-option, .dock-links a, .dock-ambience { transition: color calc(var(--type-char) * var(--type-steps)) steps(var(--type-steps)); }
 /* docks: wireframe for now. Every value comes from tokens/dock.ts as a custom property. */
 .dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; }
 .dock[data-edge="right"], .dock[data-edge="left"] { flex-direction: column; }
@@ -84,6 +136,8 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
   background-size: var(--dock-grip-h) var(--dock-grip-w); }
 .dock[data-lifted] .dock-grip { cursor: grabbing; }
 .dock-grip:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-home { all: unset; flex: none; display: flex; align-self: stretch; align-items: center; cursor: pointer; }
+.dock-home:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
 .dock-type { flex: none; display: grid; padding-inline-end: 16px; white-space: nowrap; color: var(--quiet); user-select: none; }
 .dock-type > * { grid-area: 1 / 1; justify-self: start; }
 .dock-type-sizer { visibility: hidden; }
@@ -111,11 +165,18 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .dock-block-year { font-variant-numeric: tabular-nums; }
 .dock-block-name[data-typing]::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
 .dock-block:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
-.dock-marker { position: absolute; inset-block: 0; inline-size: 1px; background: var(--dock-focus); pointer-events: none; }
+.dock-marker { position: absolute; inset-block: 8px; inline-size: 1px; background: var(--ink); mix-blend-mode: difference; pointer-events: none; }
+/* the label under the open highlight reads black: difference blending turns the light text dark */
 /* the visualizer: two strips of canvas beside the nav */
 .dock-visualizer { position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none; }
 /* begin: the only thing on the page until it is pressed */
-.begin { position: fixed; left: 50%; top: 50%; z-index: 20; transform: translate(-50%, -50%); margin: 0; padding: 12px 20px;
+/* before begin: the logotype typing, begin under it, centered */
+.intro { position: fixed; left: 50%; top: 50%; z-index: 20; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: stretch; gap: 16px; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+.intro .dock-type { padding: 0; justify-items: center; }
+.intro .dock-type > * { justify-self: center; }
+/* begin is as wide as the logo and sits over it, so the logo can fall behind it */
+.intro .begin { position: relative; z-index: 1; background: var(--paper); }
+.begin { margin: 0; padding: 12px 20px;
   font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: var(--dock-border) solid var(--dock-line); cursor: pointer; }
 .begin:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
 .dock-ghost { position: fixed; left: 0; top: 0; z-index: 9; box-sizing: border-box; border: var(--dock-border) dashed var(--dock-ghost); pointer-events: none; opacity: 0; transition: opacity var(--dock-ghost-fade); }

@@ -102,13 +102,47 @@ void main(){
 }`;
 const BG_VS = `attribute vec2 p; varying vec2 v; void main(){ v = p; gl_Position = vec4(p, 0.999, 1.0); }`;
 const BG_FS = `precision mediump float; varying vec2 v; uniform vec3 uBg; uniform float uVig;
+uniform sampler2D uGlow; uniform float uGlowAmt, uGlowLod;
 ${ENCODE}
-void main(){ float vig = 1.0 - smoothstep(0.1, 1.7 - uVig*0.6, length(v*vec2(1.0, 0.85))); gl_FragColor = vec4(encode(mix(uBg*(0.6 - uVig*0.35), uBg*1.35 + 0.001, vig)), 1.0); }`;
+void main(){
+  float vig = 1.0 - smoothstep(0.1, 1.7 - uVig*0.6, length(v*vec2(1.0, 0.85)));
+  // the shards' own light, spilled softly into the dark around them
+  vec3 glow = texture2D(uGlow, v*0.5 + 0.5, uGlowLod).rgb * uGlowAmt;
+  gl_FragColor = vec4(encode(mix(uBg*(0.6 - uVig*0.35), uBg*1.35 + 0.001, vig)) + glow, 1.0);
+}`;
+// the portrait at Hello, seen only through the windows: placed in screen pixels, its edges melting
+// into the dark, its strength rising as Hello comes into view
+const PORTRAIT_FS = `precision mediump float; uniform sampler2D uImg; uniform vec4 uRect; uniform float uAmt, uSoft, uKeep, uShift, uCatch;
+uniform vec3 uLight, uDark;
+varying vec2 vUV; varying vec3 vN; varying vec3 vPos; varying float vEdge; varying vec4 vRand; varying float vAlpha;
+float lum(vec3 c){ return dot(c, vec3(0.299, 0.587, 0.114)); }
+void main(){
+  // fractured: behind the glass, each window shard shows the picture shifted and scaled its own way,
+  // so it never lines up into a face looking out, only pieces of one
+  vec2 uv = (gl_FragCoord.xy - uRect.xy) / uRect.zw;
+  vec2 c0 = vec2(0.5);
+  uv = c0 + (uv - c0) * (1.0 + (vRand.y - 0.5) * 0.35 * uShift) + (vRand.zw - 0.5) * 0.22 * uShift;
+  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) discard;
+  vec2 e = min(uv, 1.0 - uv);
+  float edge = smoothstep(0.0, 0.25, e.x) * smoothstep(0.0, 0.2, e.y);
+  vec2 r = vec2(uSoft) / uRect.zw;
+  float l = lum(texture2D(uImg, uv).rgb);
+  float halo = (lum(texture2D(uImg, uv + vec2(r.x, 0.0)).rgb) + lum(texture2D(uImg, uv - vec2(r.x, 0.0)).rgb)
+    + lum(texture2D(uImg, uv + vec2(0.0, r.y)).rgb) + lum(texture2D(uImg, uv - vec2(0.0, r.y)).rgb)) / 4.0;
+  float t = smoothstep(0.06, 0.9, mix(halo, l, 0.4));
+  vec3 c = mix(mix(uDark, uLight, t), texture2D(uImg, uv).rgb, uKeep);
+  // and only some shards catch it at all, each at its own strength
+  float catchy = step(1.0 - uCatch, vRand.x) * (0.6 + 0.4 * vRand.y);
+  gl_FragColor = vec4(c, uAmt * edge * catchy * (0.1 + 0.9 * t) * vAlpha);
+}`;
+// the same spill, laid over the dark outside the windows (added, so it only ever lightens)
+const GLOW_FS = `precision mediump float; varying vec2 v; uniform sampler2D uGlow; uniform float uGlowAmt, uGlowLod;
+void main(){ gl_FragColor = vec4(texture2D(uGlow, v*0.5 + 0.5, uGlowLod).rgb * uGlowAmt, 1.0); }`;
 // The docks as fractured panes: inside a dock's box, the finished frame is seen through a small
 // Voronoi shatter fixed to the bar (along/across, so it survives turning a corner). Each piece
 // shifts what is behind it in its own direction, by its own amount.
 const PANE_FS = `precision highp float;
-uniform sampler2D uScene; uniform vec2 uRes; uniform vec4 uRect; uniform float uHoriz, uCell, uShiftMin, uShiftMax, uSeed;
+uniform sampler2D uScene; uniform vec2 uRes; uniform vec4 uRect; uniform float uHoriz, uCell, uShiftMin, uShiftMax, uSeed, uLift, uGain, uFloor;
 vec2 hash2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))) + uSeed; return fract(sin(p)*43758.5453); }
 void main(){
   vec2 px = gl_FragCoord.xy - uRect.xy;
@@ -122,7 +156,9 @@ void main(){
   vec2 h = hash2(id + 17.0);
   vec2 off = vec2(cos(h.x*6.2831853), sin(h.x*6.2831853)) * mix(uShiftMin, uShiftMax, h.y);
   if (uHoriz < 0.5) off = off.yx;
-  gl_FragColor = texture2D(uScene, clamp((gl_FragCoord.xy + off)/uRes, 0.0, 1.0));
+  vec4 c = texture2D(uScene, clamp((gl_FragCoord.xy + off)/uRes, 0.0, 1.0));
+  // a hovered dock brightens what it refracts
+  gl_FragColor = vec4(min(c.rgb * (1.0 + uLift * uGain) + uLift * uFloor, 1.0), 1.0);
 }`;
 const VIG_FS = `precision mediump float; varying vec2 v; uniform float uVig;
 void main(){ float d = length(v*vec2(1.0, 0.8)); gl_FragColor = vec4(0.0, 0.0, 0.0, smoothstep(0.55, 1.5, d) * uVig * 0.75); }`;
@@ -446,10 +482,68 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   const U: Record<string, WebGLUniformLocation | null> = {}, A: Record<string, number> = {};
   ["uPV", "uGap", "uTex", "uCam", "uColA", "uColB", "uCrack", "uBg", "uLight", "uRim", "uOpacity", "uOpVar", "uDof", "uFocal", "uKeyI", "uSpec", "uExposure"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
   ["aLocal", "aUV", "aRand", "aAxis", "aPos", "aDyn"].forEach((n) => (A[n] = gl.getAttribLocation(prog, n)));
-  const BU = { p: gl.getAttribLocation(bgProg, "p"), uBg: gl.getUniformLocation(bgProg, "uBg"), uVig: gl.getUniformLocation(bgProg, "uVig") };
+  const BU = { p: gl.getAttribLocation(bgProg, "p"), uBg: gl.getUniformLocation(bgProg, "uBg"), uVig: gl.getUniformLocation(bgProg, "uVig"),
+    uGlow: gl.getUniformLocation(bgProg, "uGlow"), uGlowAmt: gl.getUniformLocation(bgProg, "uGlowAmt"), uGlowLod: gl.getUniformLocation(bgProg, "uGlowLod") };
+  // the glow: the shards drawn small into their own texture each frame, then read back heavily blurred
+  // (a high mip level) as light in the background around them
+  const glowProg = link(BG_VS, GLOW_FS);
+  const GU = { p: gl.getAttribLocation(glowProg, "p"), uGlow: gl.getUniformLocation(glowProg, "uGlow"), uGlowAmt: gl.getUniformLocation(glowProg, "uGlowAmt"), uGlowLod: gl.getUniformLocation(glowProg, "uGlowLod") };
+  const GLOW = 256, glowTex = gl.createTexture(), glowFb = gl.createFramebuffer();
+  gl.bindTexture(gl.TEXTURE_2D, glowTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, GLOW, GLOW, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+  ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, glowFb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, glowTex, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  const glow = shatter.glow;
+  // the portrait: loaded once, drawn inside the windows while Hello is in view
+  const P = shatter.portrait, portraitProg = link(VS, PORTRAIT_FS);
+  const PRU = Object.fromEntries(["uImg", "uRect", "uAmt", "uSoft", "uKeep", "uShift", "uCatch", "uLight", "uDark", "uPV", "uGap"].map((n) => [n, gl.getUniformLocation(portraitProg, n)]));
+  const PRA = Object.fromEntries(["aLocal", "aUV", "aRand", "aAxis", "aPos", "aDyn"].map((n) => [n, gl.getAttribLocation(portraitProg, n)]));
+  const portraitTex = gl.createTexture(); let portraitAspect = 0, helloness = 0;
+  if (P.amount > 0) {
+    const img = new Image(); img.decoding = "async"; img.src = P.src;
+    img.onload = () => {
+      gl.bindTexture(gl.TEXTURE_2D, portraitTex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
+      portraitAspect = img.naturalWidth / img.naturalHeight;
+    };
+  }
+  // drawn on the window shards' own geometry (they are the glass it sits behind), before the main
+  // shards, so it is part of the background they pass in front of
+  function drawPortrait() {
+    if (!portraitAspect || helloness < 0.002 || !windowMask || !mIdxCount) return;
+    const g = gl!, W = canvas.width, H = canvas.height;
+    const h = H * P.height, w = h * portraitAspect, x = W * (1 - P.right) - w, y = (H - h) / 2;
+    g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
+    g.useProgram(portraitProg);
+    g.bindBuffer(g.ARRAY_BUFFER, msBuf);
+    ([["aLocal", 2, 0], ["aUV", 2, 2], ["aRand", 4, 4], ["aAxis", 4, 8]] as const).forEach(([n, sz, off]) => { if (PRA[n] < 0) return; g.enableVertexAttribArray(PRA[n]); g.vertexAttribPointer(PRA[n], sz, g.FLOAT, false, 48, off * 4); });
+    g.bindBuffer(g.ARRAY_BUFFER, mdBuf);
+    ([["aPos", 3, 0], ["aDyn", 3, 3]] as const).forEach(([n, sz, off]) => { if (PRA[n] < 0) return; g.enableVertexAttribArray(PRA[n]); g.vertexAttribPointer(PRA[n], sz, g.FLOAT, false, 24, off * 4); });
+    g.uniformMatrix4fv(PRU.uPV, false, new Float32Array(PV)); g.uniform1f(PRU.uGap, val("gap"));
+    g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, portraitTex);
+    g.uniform1i(PRU.uImg, 0); g.uniform4f(PRU.uRect, x, y, w, h); g.uniform1f(PRU.uAmt, P.amount * helloness);
+    g.uniform1f(PRU.uSoft, P.soft * dpr); g.uniform1f(PRU.uKeep, P.keep); g.uniform1f(PRU.uShift, P.fracture); g.uniform1f(PRU.uCatch, P.catch);
+    const L = col("colA"), Dk = col("colB");
+    g.uniform3f(PRU.uLight, Math.min(1, L[0] * 1.4), Math.min(1, L[1] * 1.4), Math.min(1, L[2] * 1.4));
+    g.uniform3f(PRU.uDark, Dk[0] * 0.5, Dk[1] * 0.5, Dk[2] * 0.5);
+    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, miBuf); // the window pass already sent these this frame
+    g.drawElements(g.TRIANGLES, mIdxCount, mIdxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
+    Object.values(PRA).forEach((l) => { if (l >= 0) g.disableVertexAttribArray(l); });
+  }
+  // how much Hello is in view: 1 when it fills the screen, 0 a screen away, eased
+  function updateHello(dt: number) {
+    const el = document.querySelector<HTMLElement>(".beat.welcome");
+    let want = 0;
+    if (el) { const r = el.getBoundingClientRect(); want = Math.max(0, 1 - Math.abs(r.top) / Math.max(1, innerHeight)); }
+    helloness += (want - helloness) * (1 - Math.exp(-dt / P.easeSec));
+  }
   const VU = { p: gl.getAttribLocation(vigProg, "p"), uVig: gl.getUniformLocation(vigProg, "uVig") };
   const pane = dock.refraction, paneProg = link(BG_VS, PANE_FS);
-  const PU = Object.fromEntries(["uScene", "uRes", "uRect", "uHoriz", "uCell", "uShiftMin", "uShiftMax", "uSeed"].map((n) => [n, gl.getUniformLocation(paneProg, n)]));
+  const PU = Object.fromEntries(["uScene", "uRes", "uRect", "uHoriz", "uCell", "uShiftMin", "uShiftMax", "uSeed", "uLift", "uGain", "uFloor"].map((n) => [n, gl.getUniformLocation(paneProg, n)]));
   const PA = gl.getAttribLocation(paneProg, "p");
   const sceneTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, sceneTex);
   ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
@@ -493,11 +587,21 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     gl!.enableVertexAttribArray(loc); gl!.vertexAttribPointer(loc, 2, gl!.FLOAT, false, 0, 0);
     gl!.drawArrays(gl!.TRIANGLES, 0, 3); gl!.disableVertexAttribArray(loc);
   }
+  const sent = new Set<WebGLBuffer>(); // shard sets already sent to the GPU this frame
   function render() {
     const g = gl!;
-    g.viewport(0, 0, canvas.width, canvas.height);
+    sent.clear();
     const bg = col("bg"), vig = val("vignette");
     g.disable(g.DEPTH_TEST); g.disable(g.BLEND);
+    if (glow.amount > 0) {
+      g.bindFramebuffer(g.FRAMEBUFFER, glowFb); g.viewport(0, 0, GLOW, GLOW);
+      g.clearColor(0, 0, 0, 1); g.clear(g.COLOR_BUFFER_BIT);
+      drawShards(sBuf, dBuf, dynData, iBuf, idxData, idxCount, bg);
+      g.bindFramebuffer(g.FRAMEBUFFER, null);
+      g.bindTexture(g.TEXTURE_2D, glowTex); g.generateMipmap(g.TEXTURE_2D);
+      g.disable(g.BLEND);
+    }
+    g.viewport(0, 0, canvas.width, canvas.height);
     if (windowMask) {
       // the windows: the second shatter writes 1 into the stencil, nothing into color
       const outside = toLinear(color.maskOutside);
@@ -506,20 +610,36 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       g.colorMask(false, false, false, false);
       drawShards(msBuf, mdBuf, mDynData, miBuf, mIdxData, mIdxCount, bg);
       g.colorMask(true, true, true, true);
+      // the dark outside the windows still catches the shards' light
+      if (glow.amount > 0) {
+        g.disable(g.STENCIL_TEST); g.enable(g.BLEND); g.blendFunc(g.ONE, g.ONE);
+        g.useProgram(glowProg); g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, glowTex);
+        g.uniform1i(GU.uGlow, 0); g.uniform1f(GU.uGlowAmt, glow.amount); g.uniform1f(GU.uGlowLod, glow.blur); fullscreen(GU.p);
+        g.enable(g.STENCIL_TEST);
+      }
       // everything after this draws only inside the windows
       g.stencilFunc(g.EQUAL, 1, 0xff); g.stencilOp(g.KEEP, g.KEEP, g.KEEP);
       g.disable(g.BLEND);
     }
-    g.useProgram(bgProg); g.uniform3fv(BU.uBg, bg); g.uniform1f(BU.uVig, vig); fullscreen(BU.p);
+    g.useProgram(bgProg); g.uniform3fv(BU.uBg, bg); g.uniform1f(BU.uVig, vig);
+    g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, glowTex);
+    g.uniform1i(BU.uGlow, 0); g.uniform1f(BU.uGlowAmt, glow.amount); g.uniform1f(BU.uGlowLod, glow.blur);
+    fullscreen(BU.p);
+    drawPortrait();
     drawShards(sBuf, dBuf, dynData, iBuf, idxData, idxCount, bg);
     g.disable(g.STENCIL_TEST);
 
     g.useProgram(vigProg); g.uniform1f(VU.uVig, vig); fullscreen(VU.p);
     if (pane.on) panes();
   }
+  // how lit each dock's pane is: eases toward 1 while the pointer is over the dock, back to 0 after
+  const lift = new Map<string, number>();
+  let paneLast = performance.now();
   function panes() {
     const g = gl!, docks = document.querySelectorAll<HTMLElement>(".dock");
     if (!docks.length) return;
+    const tnow = performance.now(), pdt = Math.min(0.1, (tnow - paneLast) / 1000); paneLast = tnow;
+    const ease = reduced ? 1 : 1 - Math.exp(-pdt / pane.hoverSec);
     const pad = Math.ceil(pane.shift[1] * dpr) + 2, cw = canvas.width, ch = canvas.height;
     g.disable(g.BLEND); g.enable(g.SCISSOR_TEST);
     g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, sceneTex);
@@ -530,16 +650,20 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       const w = Math.min(cw - x, Math.ceil(r.width * dpr)), h = Math.min(ch - y, Math.ceil(r.height * dpr));
       const cx = Math.max(0, x - pad), cy = Math.max(0, y - pad);
       if (w > 0 && h > 0) g.copyTexSubImage2D(g.TEXTURE_2D, 0, cx, cy, cx, cy, Math.min(cw - cx, w + 2 * pad), Math.min(ch - cy, h + 2 * pad));
-      return { x, y, w, h, horiz: r.width >= r.height, id: el.dataset.dock ?? "" };
+      const id = el.dataset.dock ?? "", was = lift.get(id) ?? 0;
+      lift.set(id, was + ((el.hasAttribute("data-hover") ? 1 : 0) - was) * ease);
+      return { x, y, w, h, horiz: r.width >= r.height, id };
     });
     g.useProgram(paneProg);
     g.uniform1i(PU.uScene, 0); g.uniform2f(PU.uRes, cw, ch);
+    g.uniform1f(PU.uGain, pane.hoverGain); g.uniform1f(PU.uFloor, pane.hoverFloor);
     g.uniform1f(PU.uCell, pane.cell * dpr); g.uniform1f(PU.uShiftMin, pane.shift[0] * dpr); g.uniform1f(PU.uShiftMax, pane.shift[1] * dpr);
     for (const b of boxes) {
       if (b.w <= 0 || b.h <= 0) continue;
       g.scissor(b.x, b.y, b.w, b.h);
       g.uniform4f(PU.uRect, b.x, b.y, b.w, b.h); g.uniform1f(PU.uHoriz, b.horiz ? 1 : 0);
       g.uniform1f(PU.uSeed, (seed % 997) + [...b.id].reduce((a, c) => a + c.charCodeAt(0), 0));
+      g.uniform1f(PU.uLift, lift.get(b.id) ?? 0);
       fullscreen(PA);
     }
     g.disable(g.SCISSOR_TEST);
@@ -550,7 +674,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
     g.bindBuffer(g.ARRAY_BUFFER, sBuf);
     ([["aLocal", 2, 0], ["aUV", 2, 2], ["aRand", 4, 4], ["aAxis", 4, 8]] as const).forEach(([n, sz, off]) => { g.enableVertexAttribArray(A[n]); g.vertexAttribPointer(A[n], sz, g.FLOAT, false, 48, off * 4); });
-    g.bindBuffer(g.ARRAY_BUFFER, dBuf); g.bufferSubData(g.ARRAY_BUFFER, 0, dynData);
+    // each set of shards goes to the GPU once a frame; the passes after the first reuse it
+    const fresh = !sent.has(dBuf!); sent.add(dBuf!);
+    g.bindBuffer(g.ARRAY_BUFFER, dBuf); if (fresh) g.bufferSubData(g.ARRAY_BUFFER, 0, dynData);
     ([["aPos", 3, 0], ["aDyn", 3, 3]] as const).forEach(([n, sz, off]) => { g.enableVertexAttribArray(A[n]); g.vertexAttribPointer(A[n], sz, g.FLOAT, false, 24, off * 4); });
     g.uniformMatrix4fv(U.uPV, false, new Float32Array(PV));
     g.uniform1f(U.uGap, val("gap")); g.uniform1f(U.uRim, val("rim")); g.uniform1f(U.uOpacity, val("opacity")); g.uniform1f(U.uOpVar, val("opVar"));
@@ -559,7 +685,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.uniform3fv(U.uCam, eye); g.uniform3fv(U.uLight, col("light"));
     g.uniform3fv(U.uColA, col("colA")); g.uniform3fv(U.uColB, col("colB")); g.uniform3fv(U.uCrack, col("crack")); g.uniform3fv(U.uBg, bg);
     g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, glTex); g.uniform1i(U.uTex, 0);
-    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, iBuf); g.bufferData(g.ELEMENT_ARRAY_BUFFER, idxData.subarray(0, idxCount), g.DYNAMIC_DRAW);
+    g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, iBuf); if (fresh) g.bufferData(g.ELEMENT_ARRAY_BUFFER, idxData.subarray(0, idxCount), g.DYNAMIC_DRAW);
     g.drawElements(g.TRIANGLES, idxCount, idxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
     Object.values(A).forEach((l) => g.disableVertexAttribArray(l));
   }
@@ -591,6 +717,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     const parallax = (reduced ? R.parallax : 1) * (delta / cssH) * camH * 0.28;
     simulate(shards, srnd, dt, parallax);
     if (windowMask) simulate(maskShards, msrnd, dt, parallax);
+    updateHello(dt);
     writeDynamic(); render();
     if (listeners.size) { const snap = snapshot(); listeners.forEach((fn) => { try { fn(snap); } catch (err) { console.error(err); } }); }
     raf = requestAnimationFrame(frame);

@@ -1,7 +1,7 @@
 import matter from "gray-matter";
 import { cacheLife, cacheTag } from "next/cache";
 import { contentSource } from "./source";
-import { Chapter, ChapterMeta, Design, Milestone, Phase, PHASE_KEYS, type PhaseKey } from "./schema";
+import { Chapter, ChapterMeta, Design, Milestone, Phase, PHASE_KEYS, Writing, type PhaseKey } from "./schema";
 
 // Readers. In production every reader is cached under the "content" tag and lives until
 // /api/revalidate is hit; in development they read the files on every request so an edit
@@ -23,6 +23,10 @@ async function readMilestones() {
 async function readDesigns() {
   const rows = await readJson("spine/designs.json", (x) => Design.parse(x));
   return rows.sort((a, b) => a.start.localeCompare(b.start));
+}
+async function readWriting() {
+  const rows = [...await readJson("writing/posts.json", (x) => Writing.parse(x)), ...await readJson("writing/work.json", (x) => Writing.parse(x))];
+  return rows.sort((a, b) => a.date.localeCompare(b.date));
 }
 async function readChapters(): Promise<Chapter[]> {
   const src = contentSource();
@@ -58,6 +62,12 @@ async function cachedDesigns() {
   cacheLife("max");
   return readDesigns();
 }
+async function cachedWriting() {
+  "use cache";
+  cacheTag("content");
+  cacheLife("max");
+  return readWriting();
+}
 async function cachedChapters() {
   "use cache";
   cacheTag("content");
@@ -71,6 +81,7 @@ export const getPhases = cachedPhases;
 export const getMilestones = cachedMilestones;
 export const getDesigns = cachedDesigns;
 export const getChapters = cachedChapters;
+export const getWriting = cachedWriting;
 
 export async function getChapter(phase: string, slug: string): Promise<Chapter | undefined> {
   if (!(PHASE_KEYS as readonly string[]).includes(phase)) return undefined;

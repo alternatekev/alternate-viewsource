@@ -13,7 +13,8 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 
 ## Content
 
-- Every claim is sourced or labeled as Kevin's account. A chapter with words needs `sources`; a milestone always does.
+- Every claim is sourced or labeled as Kevin's own account (shown on the site as "My account").
+- The site speaks as Kevin, in the first person. Never refer to him in the third person in anything a visitor sees. A chapter with words needs `sources`; a milestone always does.
 - Chapters are in Kevin's words. Draft from existing material he wrote; do not invent his voice or his opinions. New material comes from his dictation.
 - `status` is honest: `stub` until there are words, `draft` until he has read or heard them, `told` after.
 - `npm run validate` must pass. It runs before every build.
@@ -26,6 +27,10 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 - Sound is on by default and starts with begin, the press that starts the page (browsers allow no sound before a click, tap or key press). The switch in the ambience popover turns it off.
 - WebGL-first with an accessible alternative for everything; the docks and the air are DOM, Pointer Events, WebGL and Web Audio, not React. React is the shell. TypeScript throughout; small modules, so rendering stays fast.
 - It must not look like an AI designed it. Light touch: the content and the voice carry the site; the ambience supports them.
+- Nothing changes at once, at any depth. A swap, a pop, a cut or a jump is a bug. The one exception Kevin has made is the dock landing where it is dropped.
+- One transition, used over and over: type in, type out (`lib/type.ts`, timed by `tokens/dock.ts` typing). Words type and erase like the logotype; boxes set in and withdraw in the same steps. Reuse it; never invent a second transition. The ambient layer (field, music) is the only thing with its own motion.
+- No orphans. Headings and short lines balance (`text-wrap: balance`); paragraphs and list items wrap pretty (`text-wrap: pretty`).
+- Build in components and patterns. When two things share a look or a behavior, they share the code.
 - Leave it alone by default. Selecting, clicking, pressing, hovering or focusing content or controls never makes them animate or change in a way Kevin didn't ask for. Nothing moves, reseats, recenters, restyles or animates unless that change is the action itself or he asked for it. The one exception is the ambient layer, the field and the instrument: it is the only thing that responds to how the page is read, and it may do so in unpredictable ways. Keeping things still never needs explaining; changing them does.
 - Kevin art-directs every step. Propose and sketch; do not add features he did not ask for. When a request is ambiguous, ask one question instead of guessing in code.
 - Next.js here is newer than most training data. Read `node_modules/next/dist/docs/` before using an API you are not sure of; `AGENTS.md` says the same.

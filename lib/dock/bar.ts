@@ -51,6 +51,9 @@ export function createBar(opts: { id: string; label: string }): Bar {
   content.className = "dock-content";
   el.append(content);
   document.body.append(el);
+  // the field reads this to brighten the pane under a hovered bar
+  const enter = () => el.setAttribute("data-hover", ""), leave = () => el.removeAttribute("data-hover");
+  el.addEventListener("pointerenter", enter); el.addEventListener("pointerleave", leave);
 
   let edge: Edge = "top";
   return {

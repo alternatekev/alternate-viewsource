@@ -9,9 +9,11 @@ export const dock = {
   gap: 16, // minimum gap between two bars on one edge
   reach: 120, // distance from an edge at which the ghost appears
   stub: 150, // length of the lifted bar
-  navStart: { edge: "top", t: 0.5 }, // where the nav sits on page load: centered on the top (the timeline then spans the bottom); the visitor can move it
+  navStart: { edge: "bottom", t: 1 }, // where the nav sits on page load: the bottom left corner (on the bottom, t runs right to left), with the timeline across the top; the visitor can move it
   navMaxLength: 560, // placeholder until the nav and effects controls have content
   navEdges: ["top", "bottom"], // the nav docks only here, so its words stay upright (Kevin, Oct 15)
+  visualizerReach: 0.12, // how far the waveform swings from its center line, as a share of the bar's thickness: subtle (Kevin, Oct 15)
+  helloSpan: 2, // Hello's block on the timeline is as wide as this many years
   timelineScrollMs: 1600, // a timeline press scrolls the page there over this long, eased; never a jump
   stops: [0, 0.5, 1], // the nav locks to these spots along an edge: its corners and its center
   keyStep: 0.05, // arrow keys move 5% of the edge (unused while the nav locks to stops)
@@ -20,9 +22,11 @@ export const dock = {
   grip: { hit: 40, lines: [9, 12], lineSpacing: 4, lineWidth: 1 },
   // Exploration, Oct 14: each bar is a fractured pane. The field under it is seen through its own
   // small Voronoi shatter, every piece shifting what is behind it by a different amount. First sketch.
-  refraction: { on: true, cell: 24, shift: [3, 10] }, // px: piece size, and the range of each piece's shift
-  // The typing cursor at the head of the nav. Types each name, holds, erases, and after the last one
-  // pauses before starting over. Stops at the visitor's first interaction; moving the nav steps it on.
-  typing: { charMs: 60, eraseMs: 25, holdMs: 3200, gapMs: 900, pauseMs: 8000, blinkMs: 1060 },
+  refraction: { on: true, cell: 24, shift: [3, 10], hoverGain: 1.2, hoverFloor: 0.03, hoverSec: 0.35 }, // hovered, a pane brightens what it refracts (gain × and floor +), easing over hoverSec
+  // px: piece size, and the range of each piece's shift
+  // Type in, type out: the one transition (lib/type.ts). Words type at charMs and erase at eraseMs;
+  // boxes set in and withdraw in revealSteps steps at the same speeds. The logotype also holds each
+  // name for holdMs, waits gapMs between, and pauses pauseMs after the last before starting over.
+  typing: { charMs: 60, eraseMs: 25, holdMs: 3200, gapMs: 900, pauseMs: 8000, blinkMs: 1060, revealSteps: 16, popoverPace: 0.35, longChars: 24 }, // longChars: text longer than this types several letters a step, finishing in about the time this many take // the popover answers a press, so it runs at about a third of the time
   look: { lineAlpha: 0.45, gripAlpha: 0.5, ghostAlpha: 0.35, liftedOpacity: 0.5, ghostFadeMs: 120, borderWidth: 1 },
 } satisfies DockTokens;
