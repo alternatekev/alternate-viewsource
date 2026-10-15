@@ -23,7 +23,7 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 - The glance tier comes first on every device: the HTML and its stylesheet carry the whole story. Nothing needs JavaScript to read a word.
 - Budgets: first round trip under 14 KB compressed, no WebGL before first paint, the read tier under 50 KB of JavaScript, the field and the instrument after idle.
 - Motion follows `.claude/skills/ambient-field-motion/SKILL.md`: atmosphere, not interface; slow, deliberate, data-informed; nothing jumps; nothing in the field is clickable; `prefers-reduced-motion` keeps mood changes and drops drift.
-- Sound is off until the visitor asks.
+- Sound is on by default and starts with begin, the press that starts the page (browsers allow no sound before a click, tap or key press). The switch in the ambience popover turns it off.
 - WebGL-first with an accessible alternative for everything; the docks and the air are DOM, Pointer Events, WebGL and Web Audio, not React. React is the shell. TypeScript throughout; small modules, so rendering stays fast.
 - It must not look like an AI designed it. Light touch: the content and the voice carry the site; the ambience supports them.
 - Leave it alone by default. Selecting, clicking, pressing, hovering or focusing content or controls never makes them animate or change in a way Kevin didn't ask for. Nothing moves, reseats, recenters, restyles or animates unless that change is the action itself or he asked for it. The one exception is the ambient layer, the field and the instrument: it is the only thing that responds to how the page is read, and it may do so in unpredictable ways. Keeping things still never needs explaining; changing them does.

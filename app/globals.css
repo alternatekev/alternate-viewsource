@@ -6,6 +6,7 @@
 :root {
   color-scheme: dark;
   --measure: 62ch;
+  --face-pixel: "argent-pixel-cf", ui-sans-serif, system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -71,6 +72,9 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 /* docks: wireframe for now. Every value comes from tokens/dock.ts as a custom property. */
 .dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; }
 .dock[data-edge="right"], .dock[data-edge="left"] { flex-direction: column; }
+.dock-content { flex: 1; min-width: 0; min-height: 0; display: flex; align-items: center; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+/* on a side edge the contents run along the bar */
+.dock[data-edge="right"] .dock-content, .dock[data-edge="left"] .dock-content { writing-mode: vertical-rl; }
 .dock[data-lifted] { opacity: var(--dock-lifted); }
 .dock-grip { flex: none; width: var(--dock-grip-hit); height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: grab; touch-action: none;
   background-image: repeating-linear-gradient(90deg, var(--dock-grip) 0 var(--dock-grip-line), transparent var(--dock-grip-line) var(--dock-grip-step));
@@ -80,5 +84,38 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
   background-size: var(--dock-grip-h) var(--dock-grip-w); }
 .dock[data-lifted] .dock-grip { cursor: grabbing; }
 .dock-grip:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-type { flex: none; display: grid; padding-inline-end: 16px; white-space: nowrap; color: var(--quiet); user-select: none; }
+.dock-type > * { grid-area: 1 / 1; justify-self: start; }
+.dock-type-sizer { visibility: hidden; }
+.dock-type-text[data-italic] { font-style: italic; }
+.dock-type-text::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
+.dock-type[data-still] .dock-type-text::after, .dock-type-sizer::after { animation: none; }
+@keyframes dock-caret { 50% { opacity: 0; } }
+/* the nav: the pages centered between the cursor and ambience, which sits at the far end */
+.dock-links { display: flex; gap: 16px; margin: 0 auto; margin-inline: auto; padding: 0; list-style: none; }
+.dock-links a, .dock-ambience { color: var(--quiet); text-decoration: none; }
+.dock-links a[aria-current="page"] { color: var(--ink); }
+.dock-ambience { margin: 0; padding: 0 12px; height: 100%; font: inherit; letter-spacing: inherit; background: none; border: 0; cursor: pointer; }
+.dock-links a:focus-visible, .dock-ambience:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+.dock-popover { margin: 0; inset: auto; position: fixed; min-inline-size: 240px; padding: 16px; color: var(--ink); background: transparent; border: var(--dock-border) solid var(--dock-line); }
+.dock-option { display: block; margin: 0 0 12px; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: 0; cursor: pointer; text-align: start; }
+.dock-option:last-child { margin-bottom: 0; }
+.dock-option[aria-pressed="false"], .dock-option:disabled { color: var(--quiet); }
+.dock-option:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* the timeline: a block per phase, sized by its years, and a marker where the reader is */
+.dock-timeline { position: relative; flex: 1; display: flex; align-self: stretch; }
+.dock-block { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 10px; overflow: hidden; white-space: nowrap;
+  font: inherit; letter-spacing: inherit; color: var(--quiet); background: none; border: 0; border-inline-start: var(--dock-border) solid var(--dock-line); cursor: pointer; text-align: start; }
+.dock-block:first-child { border-inline-start: 0; }
+.dock-block[aria-current] { color: var(--ink); }
+.dock-block-year { font-variant-numeric: tabular-nums; }
+.dock-block:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-marker { position: absolute; inset-block: 0; inline-size: 1px; background: var(--dock-focus); pointer-events: none; }
+/* the visualizer: two strips of canvas beside the nav */
+.dock-visualizer { position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none; }
+/* begin: the only thing on the page until it is pressed */
+.begin { position: fixed; left: 50%; top: 50%; z-index: 20; transform: translate(-50%, -50%); margin: 0; padding: 12px 20px;
+  font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: var(--dock-border) solid var(--dock-line); cursor: pointer; }
+.begin:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
 .dock-ghost { position: fixed; left: 0; top: 0; z-index: 9; box-sizing: border-box; border: var(--dock-border) dashed var(--dock-ghost); pointer-events: none; opacity: 0; transition: opacity var(--dock-ghost-fade); }
 .dock-ghost[data-on="1"] { opacity: 1; }
