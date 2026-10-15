@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
+import { cssVariables } from "@/tokens";
+import Air from "./air";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +13,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <style>{cssVariables()}</style>
+      </head>
+      <body>
+        <Air />
+        {children}
+      </body>
     </html>
   );
 }

@@ -20,6 +20,16 @@ export const Source = z.object({
 });
 export type Source = z.infer<typeof Source>;
 
+// Where the chapter sits in the mood space the field and the instrument read.
+// valence: -1 (dark) .. 1 (bright); arousal: 0 (still) .. 1 (charged); x, y: a point in the frame, -0.5 .. 0.5.
+export const Mood = z.object({
+  valence: z.number().min(-1).max(1),
+  arousal: z.number().min(0).max(1),
+  x: z.number().min(-0.5).max(0.5).default(0),
+  y: z.number().min(-0.5).max(0.5).default(0),
+});
+export type Mood = z.infer<typeof Mood>;
+
 export const Phase = z.object({
   key: z.enum(PHASE_KEYS),
   name: z.string(),
@@ -29,6 +39,8 @@ export const Phase = z.object({
   web: z.string(),
   // The event that opens the phase, when there is one hinge rather than a slow edge.
   opens: z.object({ event: z.string(), date: isoDate, source: Source.optional() }).nullable(),
+  // the phase's point in the mood space, read by the field while the phase is in view
+  mood: Mood,
 });
 export type Phase = z.infer<typeof Phase>;
 
@@ -55,15 +67,6 @@ export const Design = z.object({
 });
 export type Design = z.infer<typeof Design>;
 
-// Where the chapter sits in the mood space the field and the instrument read.
-// valence: -1 (dark) .. 1 (bright); arousal: 0 (still) .. 1 (charged); x, y: a point in the frame, -0.5 .. 0.5.
-export const Mood = z.object({
-  valence: z.number().min(-1).max(1),
-  arousal: z.number().min(0).max(1),
-  x: z.number().min(-0.5).max(0.5).default(0),
-  y: z.number().min(-0.5).max(0.5).default(0),
-});
-export type Mood = z.infer<typeof Mood>;
 
 export const ChapterMeta = z.object({
   title: z.string().min(1),
