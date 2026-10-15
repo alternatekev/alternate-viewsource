@@ -7,8 +7,6 @@ import { Chapter, ChapterMeta, Design, Milestone, Phase, PHASE_KEYS, type PhaseK
 // /api/revalidate is hit; in development they read the files on every request so an edit
 // shows on the next reload.
 
-const dev = process.env.NODE_ENV === "development";
-
 async function readJson<T>(file: string, parse: (x: unknown) => T): Promise<T[]> {
   const text = await contentSource().read(file);
   const raw = JSON.parse(text) as unknown[];
@@ -67,10 +65,12 @@ async function cachedChapters() {
   return readChapters();
 }
 
-export const getPhases = dev ? readPhases : cachedPhases;
-export const getMilestones = dev ? readMilestones : cachedMilestones;
-export const getDesigns = dev ? readDesigns : cachedDesigns;
-export const getChapters = dev ? readChapters : cachedChapters;
+// Cached in development too: Cache Components refuses uncached reads outside Suspense.
+// The dev server drops the cache when these files change.
+export const getPhases = cachedPhases;
+export const getMilestones = cachedMilestones;
+export const getDesigns = cachedDesigns;
+export const getChapters = cachedChapters;
 
 export async function getChapter(phase: string, slug: string): Promise<Chapter | undefined> {
   if (!(PHASE_KEYS as readonly string[]).includes(phase)) return undefined;

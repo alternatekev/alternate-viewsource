@@ -107,7 +107,7 @@ void main(){ float d = length(v*vec2(1.0, 0.8)); gl_FragColor = vec4(0.0, 0.0, 0
  * data-arousal (and optionally data-x, data-y), which the content's mood frontmatter writes.
  */
 export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; simulateMusic?: boolean } = {}): FieldHandle | null {
-  const gl = canvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false });
+  const gl = canvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false, stencil: true });
   if (!gl) return null;
   const deriv = !!gl.getExtension("OES_standard_derivatives");
   const uint32 = !!gl.getExtension("OES_element_index_uint");
@@ -147,7 +147,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
   // ---------- Voronoi fracture ----------
   type P = [number, number];
-  function genSites(n: number, [ix, iy]: P) {
+  function genSites(rnd: () => number, n: number, [ix, iy]: P) {
     const pts: P[] = [], maxR = Math.hypot(W, H) * 0.75;
     const inRect = (x: number, y: number) => Math.abs(x) < W / 2 && Math.abs(y) < H / 2;
     if (pattern === "glass") for (let i = 0; i < n; i++) pts.push([(rnd() - 0.5) * W, (rnd() - 0.5) * H]);
@@ -178,9 +178,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     }
     return out;
   }
-  const shards: Shard[] = [], staticData: number[] = [];
-  {
-    const pts = genSites(pool, [loadPoint[0] * W, loadPoint[1] * H]);
+  function fracture(rnd: () => number, n: number, imp: P) {
+    const shards: Shard[] = [], staticData: number[] = [];
+    const pts = genSites(rnd, n, imp);
     const rect: P[] = [[-W / 2, -H / 2], [W / 2, -H / 2], [W / 2, H / 2], [-W / 2, H / 2]];
     const idx = pts.map((_, j) => j);
     for (let i = 0; i < pts.length; i++) {
@@ -202,7 +202,16 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       shards.push({ start, n: poly.length * 3, x: 0, y: 0, z: 0, angle: 0, scale: 1, alpha: 1, alive: true,
         k: 0.55 + r[0] * 0.9, zf: (0.2 + r[1] * 1.1) * (r[3] < 0.72 ? 1 : -1), spin: (0.3 + r[2] * 1.4) * (r[0] < 0.5 ? -1 : 1), depth: 0 });
     }
+    return { shards, staticData };
   }
+  const main = fracture(rnd, pool, [loadPoint[0] * W, loadPoint[1] * H]);
+  const shards = main.shards, staticData = main.staticData;
+  // Exploration, Oct 14: a second shatter, same rules, its own seed. Its shards are windows:
+  // the main field shows only through them; everywhere else is dark.
+  const windowMask = shatter.windowMask ?? false;
+  const maskRnd = mulberry32(seed ^ 0x2545f491);
+  const maskSet = fracture(maskRnd, pool, [(maskRnd() - 0.5) * 0.7 * W, (maskRnd() - 0.5) * 0.7 * H]);
+  const maskShards = maskSet.shards, maskStatic = maskSet.staticData;
   const VERTS = staticData.length / 12;
 
   // ---------- reader signals: how the page is read, as data ----------
@@ -369,19 +378,19 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   };
 
   // ---------- simulation: rates change, positions never jump ----------
-  const srnd = mulberry32(seed ^ 0x5f3759df);
-  function respawn(s: Shard) {
+  const srnd = mulberry32(seed ^ 0x5f3759df), msrnd = mulberry32(seed ^ 0x6c8e9cf5);
+  function respawn(s: Shard, srnd: () => number) {
     const a = srnd() * Math.PI * 2, r = 0.05 + srnd() * 0.45;
     s.x = val("pointX") + Math.cos(a) * r; s.y = val("pointY") + Math.sin(a) * r * 0.8;
     s.z = (srnd() - 0.5) * 0.3; s.scale = 0.02; s.alpha = 0; s.alive = true;
   }
-  function simulate(dt: number, parallaxDy: number) {
+  function simulate(shards: Shard[], srnd: () => number, dt: number, parallaxDy: number) {
     const ex = val("expand"), sp = val("spinRate"), dp = val("depth"), sw = val("swirl"), sk = val("sink");
     const px = val("pointX"), py = val("pointY");
     const active = Math.round(val("countFrac") * shards.length);
     for (let i = 0; i < shards.length; i++) {
       const s = shards[i], want = i < active;
-      if (!s.alive) { if (want) respawn(s); else continue; }
+      if (!s.alive) { if (want) respawn(s, srnd); else continue; }
       const dx = s.x - px, dy = s.y - py, rate = ex * s.k;
       s.x += (dx * rate - dy * sw * s.k * 0.35) * dt;
       s.y += (dy * rate + dx * sw * s.k * 0.35 - sk) * dt + parallaxDy * (1 + s.z * 0.35);
@@ -391,7 +400,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       s.alpha += ((want ? 1 : 0) - s.alpha) * Math.min(1, dt * 0.5);
       const p = ndc(s.x, s.y, s.z);
       const gone = p[2] < 0.6 || Math.abs(p[0]) > 1.35 || Math.abs(p[1]) > 1.35 || s.z < -9;
-      if (gone || (!want && s.alpha < 0.004)) { if (want) respawn(s); else s.alive = false; }
+      if (gone || (!want && s.alpha < 0.004)) { if (want) respawn(s, srnd); else s.alive = false; }
     }
   }
 
@@ -415,8 +424,16 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
   const idxData = VERTS > 65535 && uint32 ? new Uint32Array(VERTS) : new Uint16Array(VERTS);
   let idxCount = 0;
+  const MVERTS = maskStatic.length / 12;
+  const msBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, msBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(maskStatic), gl.STATIC_DRAW);
+  const mDynData = new Float32Array(MVERTS * 6);
+  const mdBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, mdBuf); gl.bufferData(gl.ARRAY_BUFFER, mDynData.byteLength, gl.DYNAMIC_DRAW);
+  const miBuf = gl.createBuffer();
+  const mIdxData = MVERTS > 65535 && uint32 ? new Uint32Array(MVERTS) : new Uint16Array(MVERTS);
+  let mIdxCount = 0;
 
-  function writeDynamic() {
+  function writeDynamic() { idxCount = writeSet(shards, dynData, idxData); if (windowMask) mIdxCount = writeSet(maskShards, mDynData, mIdxData); }
+  function writeSet(shards: Shard[], dynData: Float32Array, idxData: Uint16Array | Uint32Array) {
     let i = 0;
     for (const s of shards) {
       s.depth = (s.x - eye[0]) * fwd[0] + (s.y - eye[1]) * fwd[1] + (s.z - eye[2]) * fwd[2];
@@ -429,7 +446,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     // back to front, so overlapping glass blends correctly
     const order = shards.filter((s) => s.alive && s.alpha > 0.003).sort((a, b) => b.depth - a.depth);
     for (const s of order) for (let k = 0; k < s.n; k++) idxData[i++] = s.start + k;
-    idxCount = i;
+    return i;
   }
   function fullscreen(loc: number) {
     gl!.bindBuffer(gl!.ARRAY_BUFFER, bgBuf);
@@ -441,8 +458,25 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.viewport(0, 0, canvas.width, canvas.height);
     const bg = col("bg"), vig = val("vignette");
     g.disable(g.DEPTH_TEST); g.disable(g.BLEND);
+    if (windowMask) {
+      // the windows: the second shatter writes 1 into the stencil, nothing into color
+      g.clearColor(0, 0, 0, 1); g.clearStencil(0); g.clear(g.COLOR_BUFFER_BIT | g.STENCIL_BUFFER_BIT);
+      g.enable(g.STENCIL_TEST); g.stencilFunc(g.ALWAYS, 1, 0xff); g.stencilOp(g.KEEP, g.KEEP, g.REPLACE);
+      g.colorMask(false, false, false, false);
+      drawShards(msBuf, mdBuf, mDynData, miBuf, mIdxData, mIdxCount, bg);
+      g.colorMask(true, true, true, true);
+      // everything after this draws only inside the windows
+      g.stencilFunc(g.EQUAL, 1, 0xff); g.stencilOp(g.KEEP, g.KEEP, g.KEEP);
+      g.disable(g.BLEND);
+    }
     g.useProgram(bgProg); g.uniform3fv(BU.uBg, bg); g.uniform1f(BU.uVig, vig); fullscreen(BU.p);
+    drawShards(sBuf, dBuf, dynData, iBuf, idxData, idxCount, bg);
+    g.disable(g.STENCIL_TEST);
 
+    g.useProgram(vigProg); g.uniform1f(VU.uVig, vig); fullscreen(VU.p);
+  }
+  function drawShards(sBuf: WebGLBuffer | null, dBuf: WebGLBuffer | null, dynData: Float32Array, iBuf: WebGLBuffer | null, idxData: Uint16Array | Uint32Array, idxCount: number, bg: Rgb) {
+    const g = gl!;
     g.useProgram(prog);
     g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
     g.bindBuffer(g.ARRAY_BUFFER, sBuf);
@@ -459,8 +493,6 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, iBuf); g.bufferData(g.ELEMENT_ARRAY_BUFFER, idxData.subarray(0, idxCount), g.DYNAMIC_DRAW);
     g.drawElements(g.TRIANGLES, idxCount, idxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
     Object.values(A).forEach((l) => g.disableVertexAttribArray(l));
-
-    g.useProgram(vigProg); g.uniform1f(VU.uVig, vig); fullscreen(VU.p);
   }
   function resize() { sizeWorld(); canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr); }
 
@@ -482,7 +514,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     const t = targets((now - T0) / 1000);
     stepSprings(t, dt, false);
     computeCamera();
-    simulate(dt, (reduced ? R.parallax : 1) * (delta / cssH) * camH * 0.28);
+    const parallax = (reduced ? R.parallax : 1) * (delta / cssH) * camH * 0.28;
+    simulate(shards, srnd, dt, parallax);
+    if (windowMask) simulate(maskShards, msrnd, dt, parallax);
     writeDynamic(); render();
     if (listeners.size) { const snap = snapshot(); listeners.forEach((fn) => { try { fn(snap); } catch (err) { console.error(err); } }); }
     raf = requestAnimationFrame(frame);
@@ -499,7 +533,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   {
     // pre-shattered: the art is never seen whole; every shard starts somewhere in the visible volume
     const r = mulberry32(seed ^ 0x9e3779b9), aspect = cssW / cssH, [zNear, zFar] = shatter.preShatterDepth;
-    for (const s of shards) {
+    for (const s of [...shards, ...maskShards]) {
       s.z = zNear + r() * (zFar - zNear);
       const halfH = (cam.distance - s.z) * Math.tan(cam.fov / 2) * 1.1, halfW = halfH * aspect;
       s.x = (r() * 2 - 1) * halfW; s.y = (r() * 2 - 1) * halfH; s.angle = r() * Math.PI * 2;

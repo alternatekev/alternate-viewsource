@@ -92,6 +92,8 @@ export const ShatterTokens = z.object({
     dolly: Linear, pitch: Linear, yaw: Linear, focusOffset: Linear, depthOfField: Linear,
     keyLight: Linear, specular: Linear, exposure: Linear, vignette: Linear,
   }),
+  // exploration: a second shatter whose shards are windows onto the main field
+  windowMask: z.boolean().default(false),
   // which tiers run the field; glance (phones, no GPU) is open
   tiers: z.array(z.enum(["glance", "read", "inhabit"])),
 });
