@@ -71,7 +71,6 @@ export default function Docks() {
         [
           { label: "timeline", href: "/" },
           { label: "work", href: "/work" },
-          { label: "influences", href: "/influences" },
           { label: "colophon", href: "/colophon" },
         ],
         location.pathname,
