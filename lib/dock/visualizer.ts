@@ -1,9 +1,9 @@
 // The music, drawn in the gaps on either side of the main nav, out to the window's edges. One
 // waveform runs the whole edge and passes behind the nav. With the sound off it settles to a flat,
-// still line. It hides while the nav is being dragged and reappears where the nav lands.
+// still line. It withdraws while the nav is being dragged and sets back in where the nav lands.
 
 import { dock as D } from "@/tokens/dock";
-import { sound as S } from "@/tokens/sound";
+import { setIn, setOut } from "@/lib/type";
 import { horizontal, vh, vw, type Bar } from "./bar";
 
 export function visualizer(nav: Bar, source: { readonly analyser: AnalyserNode | null; readonly on: boolean }) {
@@ -14,7 +14,7 @@ export function visualizer(nav: Bar, source: { readonly analyser: AnalyserNode |
     document.body.append(c);
     return c;
   });
-  let buf = new Float32Array(1024), amp = 0, raf = 0, lifted = false;
+  let buf = new Float32Array(1024), amp = 0, env = 0.01, raf = 0, lifted = false;
   const line = getComputedStyle(document.documentElement).getPropertyValue("--dock-line").trim() || "rgba(255,255,255,.45)";
 
   function layout() {
@@ -25,8 +25,11 @@ export function visualizer(nav: Bar, source: { readonly analyser: AnalyserNode |
       : [{ x: e === "left" ? i : vw() - i - t, y: i, w: t, h: b.top - g - i }, { x: e === "left" ? i : vw() - i - t, y: b.bottom + g, w: t, h: vh() - i - b.bottom - g }];
     const dpr = Math.min(2, devicePixelRatio || 1);
     pieces.forEach((c, k) => {
-      const r = rects[k], ok = r.w > 2 && r.h > 2 && !lifted;
+      const r = rects[k], ok = r.w > 2 && r.h > 2;
+      // while the nav is lifted the strips fade away where they are, and fade back where it lands
+      if (lifted) { void setOut(c); return; }
       c.style.display = ok ? "" : "none";
+      setIn(c);
       if (!ok) return;
       c.style.transform = `translate(${r.x}px, ${r.y}px)`; c.style.width = `${r.w}px`; c.style.height = `${r.h}px`;
       c.width = Math.round(r.w * dpr); c.height = Math.round(r.h * dpr);
@@ -40,7 +43,11 @@ export function visualizer(nav: Bar, source: { readonly analyser: AnalyserNode |
     if (a && source.on) a.getFloatTimeDomainData(buf); else buf.fill(0);
     // settles: the amplitude eases to nothing when the sound is off
     amp += ((source.on ? 1 : 0) - amp) * 0.05;
-    const H = horizontal(nav.edge), length = H ? vw() : vh(), gain = (amp / S.masterLevel) * (reduced ? 0.3 : 1);
+    // the music is very quiet, so the line follows its own level: a slow envelope on the peaks
+    // scales the wave to the same height whatever the volume, kept subtle by the token
+    let peak = 0; for (let i = 0; i < buf.length; i++) peak = Math.max(peak, Math.abs(buf[i]));
+    if (source.on) env += (Math.max(peak, 1e-4) - env) * (peak > env ? 0.2 : 0.01);
+    const H = horizontal(nav.edge), length = H ? vw() : vh(), gain = Math.min(400, amp / env) * (reduced ? 0.3 : 1);
     for (const c of pieces) {
       if (c.style.display === "none") continue;
       const ctx = c.getContext("2d")!, dpr = c.width / parseFloat(c.style.width || "1");
@@ -49,7 +56,7 @@ export function visualizer(nav: Bar, source: { readonly analyser: AnalyserNode |
       ctx.strokeStyle = line; ctx.lineWidth = dpr; ctx.beginPath();
       for (let p = 0; p <= along; p += 2) {
         const at = (from + p / dpr) / length, s = buf[Math.min(buf.length - 1, Math.floor(at * buf.length))];
-        const off = across / 2 + s * gain * across * 0.45;
+        const off = across / 2 + s * gain * across * D.visualizerReach;
         if (H) { if (p) ctx.lineTo(p, off); else ctx.moveTo(p, off); } else { if (p) ctx.lineTo(off, p); else ctx.moveTo(off, p); }
       }
       ctx.stroke();

@@ -1,53 +1,40 @@
-// The timeline's contents: one block per phase, in page order (newest first), sized by the years it covers, read from the page's
-// beats. A marker shows where in time the page is. Pressing a block scrolls the page to that phase,
+// The timeline's contents: one block per beat of the page, in page order. A phase's block is sized
+// by the years it covers and shows its span; Hello, at the end, gets a short block of its own
+// (dock.helloSpan) so the marker can say you are there, not in agents. A marker shows where the
+// reader is, read from the scroll position across all the beats. Pressing a block scrolls the page to that phase,
 // animated, never a jump; the field and the music follow the scroll, and a long trip surges them.
 // A wheel, touch or key during the trip hands control back to the visitor.
 
-import { newestFirst, onTime, timePlace } from "@/lib/time";
+import { retype } from "@/lib/type";
 import { dock } from "@/tokens/dock";
 
-/** a phase name that types itself out while the block is hovered or focused, and erases after */
-function typedName(el: HTMLElement, full: string) {
-  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let shown = 0, want = 0, timer = 0;
-  const tick = () => {
-    if (shown === want) { timer = 0; if (!want) delete el.dataset.typing; return; }
-    shown += shown < want ? 1 : -1;
-    el.textContent = full.slice(0, shown);
-    timer = window.setTimeout(tick, shown < want ? dock.typing.charMs : dock.typing.eraseMs);
-  };
-  const to = (n: number) => {
-    want = n;
-    if (n) el.dataset.typing = "";
-    if (reduced) { shown = n; el.textContent = full.slice(0, n); if (!n) delete el.dataset.typing; return; }
-    if (!timer) tick();
-  };
-  return { show: () => to(full.length), hide: () => to(0), destroy: () => clearTimeout(timer) };
-}
-
 export function timelineBlocks(onPress?: () => void) {
-  const beats = [...document.querySelectorAll<HTMLElement>(".beat[data-key]")];
+  const beats = [...document.querySelectorAll<HTMLElement>(".beat")];
   const year = (d?: string) => (d ? new Date(d).getUTCFullYear() + new Date(d).getUTCMonth() / 12 : 0); // dates are UTC days
-  const spans = beats.map((b) => Math.max(1, year(b.dataset.end) - year(b.dataset.start)));
+  const isPhase = (b: HTMLElement) => !!b.dataset.start;
+  const spans = beats.map((b) => (isPhase(b) ? Math.max(1, year(b.dataset.end) - year(b.dataset.start)) : dock.helloSpan));
   const total = spans.reduce((a, b) => a + b, 0);
 
   const el = document.createElement("div");
   el.className = "dock-timeline";
-  const typers: ReturnType<typeof typedName>[] = [];
   const blocks = beats.map((b, i) => {
     const btn = document.createElement("button");
     btn.type = "button"; btn.className = "dock-block";
     btn.style.flexGrow = String(spans[i]);
-    const label = (b.dataset.name ?? "").toLowerCase(), from = String(Math.floor(year(b.dataset.start)));
-    btn.setAttribute("aria-label", `${label}, from ${from}`);
+    // each phase's block shows its whole span, so its edges never read as another phase's start;
+    // Hello's shows its name
+    const label = (b.dataset.name ?? b.querySelector("h2")?.textContent ?? "").toLowerCase();
+    const span = isPhase(b) ? `${Math.floor(year(b.dataset.start))}–${Math.floor(year(b.dataset.end))}` : label;
+    btn.setAttribute("aria-label", `${label}, ${span}`);
     // the name is hidden until the block is hovered or focused, then types out like the logotype
     const name = document.createElement("span"); name.className = "dock-block-name"; name.setAttribute("aria-hidden", "true");
-    const yr = document.createElement("span"); yr.className = "dock-block-year"; yr.setAttribute("aria-hidden", "true"); yr.textContent = from;
+    const yr = document.createElement("span"); yr.className = "dock-block-year"; yr.setAttribute("aria-hidden", "true"); yr.textContent = span;
     btn.append(yr, name);
-    const typer = typedName(name, label);
-    typers.push(typer);
-    btn.addEventListener("pointerenter", typer.show); btn.addEventListener("focus", typer.show);
-    btn.addEventListener("pointerleave", typer.hide); btn.addEventListener("blur", typer.hide);
+    if (!isPhase(b)) { btn.setAttribute("aria-label", label); btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); }); el.append(btn); return btn; }
+    const show = () => { name.dataset.typing = ""; void retype(name, label); };
+    const hide = () => { void retype(name, "").then(() => { if (!name.textContent) delete name.dataset.typing; }); };
+    btn.addEventListener("pointerenter", show); btn.addEventListener("focus", show);
+    btn.addEventListener("pointerleave", hide); btn.addEventListener("blur", hide);
     btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); });
     el.append(btn);
     return btn;
@@ -75,15 +62,36 @@ export function timelineBlocks(onPress?: () => void) {
   marker.className = "dock-marker"; marker.setAttribute("aria-hidden", "true");
   el.append(marker);
 
-  // time as a fractional phase index, drawn across blocks sized by their years
+  // where the reader is: which beat the middle of the view is in and how far through it (a beat's
+  // middle is its exact place), drawn across the blocks
   function sync() {
-    const n = beats.length - 1, chrono = timePlace() * n, f = newestFirst() ? n - chrono : chrono;
+    const n = beats.length - 1, mid = scrollY + innerHeight / 2;
+    let k = beats.findIndex((b) => mid < b.offsetTop + b.offsetHeight);
+    if (k < 0) k = n;
+    const f = Math.max(0, Math.min(n, k + (mid - beats[k].offsetTop) / Math.max(1, beats[k].offsetHeight) - 0.5));
     const i = Math.min(n, Math.floor(f + 1e-6)), t = f - i;
+    // the marker is a single point travelling through time between phases, and opens into a
+    // highlight over the label of the phase you've arrived at (whose text then reads black)
     const before = spans.slice(0, i).reduce((a, c) => a + c, 0);
-    marker.style.insetInlineStart = `${((before + t * spans[i]) / total) * 100}%`;
+    const box = el.getBoundingClientRect(), horiz = box.width >= box.height, len = horiz ? box.width : box.height;
+    const point = ((before + t * spans[i]) / total) * len;
+    const near = Math.round(f), d = Math.abs(f - near);
+    const open = 1 - Math.min(1, Math.max(0, (d - 0.03) / 0.12)); // fully open within a few % of a phase, a point beyond ~15%
+    const eased = open * open * (3 - 2 * open);
+    const label = blocks[near].querySelector<HTMLElement>(".dock-block-year")!.getBoundingClientRect(), pad = 6;
+    const lStart = (horiz ? label.left - box.left : label.top - box.top) - pad, lLen = (horiz ? label.width : label.height) + pad * 2;
+    marker.style.insetInlineStart = `${point + (lStart - point) * eased}px`;
+    marker.style.inlineSize = `${1 + (lLen - 1) * eased}px`;
     blocks.forEach((x, k) => (k === i ? x.setAttribute("aria-current", "step") : x.removeAttribute("aria-current")));
   }
-  const off = onTime(sync);
+  addEventListener("scroll", sync, { passive: true });
+  addEventListener("resize", sync);
+  const off = () => { removeEventListener("scroll", sync); removeEventListener("resize", sync); };
   sync();
-  return { el, destroy() { off(); stopTrip(); typers.forEach((t) => t.destroy()); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); } };
+  return {
+    el,
+    /** an eased trip to a scroll position, the same one a block press makes */
+    travel: scrollToY,
+    destroy() { off(); stopTrip(); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); },
+  };
 }
