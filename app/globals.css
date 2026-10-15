@@ -63,3 +63,7 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* field only, for now: five empty beats, one per phase, a viewport tall each */
+.beat { height: 100vh; height: 100dvh; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
