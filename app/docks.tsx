@@ -60,7 +60,8 @@ export default function Docks() {
 
       const timelineBar = createBar({ id: "timeline", label: "Timeline" });
       const timeline = spanOpposite(timelineBar, { id: "nav", place: nav.place });
-      const blocks = timelineBlocks();
+      // a press on the timeline steps the logotype on, as moving the nav does
+      const blocks = timelineBlocks(() => cursor.step());
       timelineBar.content.append(blocks.el);
 
       const viz = visualizer(navBar, sound);

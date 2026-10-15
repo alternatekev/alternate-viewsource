@@ -109,6 +109,7 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .dock-block:first-child { border-inline-start: 0; }
 .dock-block[aria-current] { color: var(--ink); }
 .dock-block-year { font-variant-numeric: tabular-nums; }
+.dock-block-name[data-typing]::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
 .dock-block:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
 .dock-marker { position: absolute; inset-block: 0; inline-size: 1px; background: var(--dock-focus); pointer-events: none; }
 /* the visualizer: two strips of canvas beside the nav */
