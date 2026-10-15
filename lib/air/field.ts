@@ -12,7 +12,7 @@ import { toLinear, type Rgb } from "@/lib/color";
 import { timePlace } from "@/lib/time";
 import { color, dock, fieldPalette, motion, shatter } from "@/tokens";
 import type { Linear, Signal } from "@/tokens/schema";
-import type { DockEdge } from "@/tokens/color";
+import { schemeEdgeFor, type DockEdge } from "@/tokens/color";
 
 type Vec3 = [number, number, number];
 type Shard = {
@@ -337,7 +337,13 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
     // the color matrix: the nav's edge picks the scheme, the timeline picks the color inside it.
     // Until the timeline scrubs, scrolling down through the phases stands in for the year.
-    const edge = (document.querySelector<HTMLElement>('.dock[data-dock="nav"]')?.dataset.edge ?? "top") as DockEdge;
+    // the nav's edge picks the scheme when centered; its corners pick the side schemes
+    const navEl = document.querySelector<HTMLElement>('.dock[data-dock="nav"]');
+    const navEdge = (navEl?.dataset.edge ?? "top") as DockEdge;
+    const along = navEl?.dataset.p ? +navEl.dataset.p % 1 : 0.5; // t, clockwise: on the bottom it runs right to left
+    const leftward = navEdge === "bottom" || navEdge === "left" ? along > 0.75 : along < 0.25;
+    const rightward = navEdge === "bottom" || navEdge === "left" ? along < 0.25 : along > 0.75;
+    const edge = schemeEdgeFor(navEdge, leftward ? "left" : rightward ? "right" : "center");
     const h = hourNow(), pal = fieldPalette(h, v, a, { edge, year: scrollFrac });
     const t = {
       expand: e(D.expand), spinRate: e(D.spin), depth: e(D.depth), swirl: e(D.swirl), sink: e(D.sink), countFrac: clamp(e(D.count), 0, 1),
