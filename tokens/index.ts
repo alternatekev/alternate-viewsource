@@ -4,6 +4,7 @@
 import { toCss } from "@/lib/color";
 import { color } from "./color";
 import { dock } from "./dock";
+import { motion } from "./motion";
 
 export { color, fieldPalette, timeOfDay } from "./color";
 export { dock } from "./dock";
@@ -38,6 +39,11 @@ export function cssVariables(): string {
     "--dock-grip-step": px(G.lineSpacing),
     "--dock-grip-line": px(G.lineWidth),
     "--dock-caret-blink": `${dock.typing.blinkMs}ms`,
+    "--type-char": `${dock.typing.charMs}ms`,
+    "--type-erase": `${dock.typing.eraseMs}ms`,
+    "--type-steps": String(dock.typing.revealSteps),
+    "--zoom-near": String(motion.zoom.near),
+    "--zoom-close": String(motion.zoom.close),
   });
   return `:root{${Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(";")}}`;
 }

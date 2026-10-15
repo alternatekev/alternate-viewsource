@@ -35,5 +35,11 @@ export const shatter = {
     vignette: { base: 0.45, linger: 0.35, pause: 0.25, select: 0.2 },
   },
   windowMask: true,
+  // the background catches the shards' light: a soft spill in their own colors, ever so slight (Kevin, Oct 15)
+  glow: { amount: 0.22, blur: 4.5 },
+  // at Hello, my portrait sits in the background behind the window glass, fractured: each shard that
+  // catches it (catch: the share of shards that do) shows its own shifted, rescaled piece (fracture), soft (halo px), in the theme's colors
+  // with a trace of its own (keep); right of the welcome, height a share of the screen, fading with Hello
+  portrait: { src: "/hello/portrait.webp", amount: 0.75, height: 0.86, right: 0.06, easeSec: 0.8, soft: 6, keep: 0.08, fracture: 0.3, catch: 0.85 },
   tiers: ["read", "inhabit"],
 } satisfies ShatterTokens;
