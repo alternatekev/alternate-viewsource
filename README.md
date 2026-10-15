@@ -44,4 +44,4 @@ The first paint is the glance tier: the HTML and its inlined stylesheet, no clie
 
 ## Status
 
-Scaffold. Five phases, fourteen sourced milestones and fifteen documented designs are in; the two first chapters are labeled stubs. Known gaps: a strict CSP (needs nonces, which would make pages dynamic); unknown chapter URLs render the not-found view under a 200 because the prerendered shell is sent first; the field is ported (on tokens, about 14 KB gzipped, loaded after idle, off on phones for now); the instrument is not yet.
+The site is the field and nothing else: five empty beats, one per phase, carrying only their moods. Words render when Kevin has told them; the spine data and two stub chapters wait in `content/`. Known gaps: a strict CSP (needs nonces, which would make pages dynamic); unknown chapter URLs render the not-found view under a 200 because the prerendered shell is sent first; the field is ported (on tokens, about 14 KB gzipped, loaded after idle, off on phones for now); the instrument is not yet.
