@@ -2,7 +2,19 @@
 
 Two bars dock to the edges of the viewport: the main nav and the timeline. Nothing else docks. This is the answer to the "web OS" thought without the windows — panels snap to edges, content keeps the center — and the same bars work on a phone because top and bottom are the only docks there.
 
-## Decisions
+## As built (Oct 15)
+
+Where the exploration in the browser has landed so far; the sections after this are the original plan and are kept for the reasoning.
+
+- **Begin.** The page opens dark with one button, begin. Pressing it fades in the field, starts the music and the visualizer, and brings in both docks.
+- **One bar component, two behaviors.** `lib/dock/bar.ts` is the shell (outline, orientation, placement); `draggable` and `spanOpposite` are added to it.
+- **Main nav.** Top or bottom only, so its words stay upright; it locks to the corners or the center of the edge. Starts centered on the top. Contents: a typing cursor (Kevin Conboy, Alternate.org, *View Source*; it stops at the first interaction and steps on when the nav moves), then timeline, work, influences, colophon, centered, then ambience at the far end.
+- **Ambience.** A popover with sound on/off (on by default, starting with begin), animation on/off, and reset composition (a new shatter and a new key).
+- **Timeline.** Spans the whole edge opposite the nav. One block per phase, newest first, sized by its years, with a marker for where in time the page is. A press scrolls the page there, eased, never a jump.
+- **Visualizer.** The music as one waveform in the gaps beside the nav, out to the window's edges; flat and still when the sound is off.
+- **Panes.** Each dock refracts the field under it through its own small fixed shatter.
+
+## Decisions (original plan)
 
 - Two docks: the main nav and the timeline (the era strip).
 - Dock anywhere along any edge. Positions are continuous along the whole perimeter, not fixed slots.

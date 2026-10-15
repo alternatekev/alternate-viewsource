@@ -16,6 +16,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en">
       <head>
         <style>{cssVariables()}</style>
+        {/* Kevin's Adobe Fonts kit: Argent Pixel CF */}
+        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="" />
+        <link rel="preconnect" href="https://p.typekit.net" crossOrigin="" />
+        <link rel="stylesheet" href="https://use.typekit.net/xml4asp.css" />
       </head>
       <body>
         <Air />
