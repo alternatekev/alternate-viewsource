@@ -67,3 +67,18 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 /* field only, for now: five empty beats, one per phase, a viewport tall each */
 .beat { height: 100vh; height: 100dvh; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* docks: wireframe for now. Every value comes from tokens/dock.ts as a custom property. */
+.dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; }
+.dock[data-edge="right"], .dock[data-edge="left"] { flex-direction: column; }
+.dock[data-lifted] { opacity: var(--dock-lifted); }
+.dock-grip { flex: none; width: var(--dock-grip-hit); height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: grab; touch-action: none;
+  background-image: repeating-linear-gradient(90deg, var(--dock-grip) 0 var(--dock-grip-line), transparent var(--dock-grip-line) var(--dock-grip-step));
+  background-size: var(--dock-grip-w) var(--dock-grip-h); background-repeat: no-repeat; background-position: center; }
+.dock[data-edge="right"] .dock-grip, .dock[data-edge="left"] .dock-grip { width: 100%; height: var(--dock-grip-hit);
+  background-image: repeating-linear-gradient(0deg, var(--dock-grip) 0 var(--dock-grip-line), transparent var(--dock-grip-line) var(--dock-grip-step));
+  background-size: var(--dock-grip-h) var(--dock-grip-w); }
+.dock[data-lifted] .dock-grip { cursor: grabbing; }
+.dock-grip:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-ghost { position: fixed; left: 0; top: 0; z-index: 9; box-sizing: border-box; border: var(--dock-border) dashed var(--dock-ghost); pointer-events: none; opacity: 0; transition: opacity var(--dock-ghost-fade); }
+.dock-ghost[data-on="1"] { opacity: 1; }
