@@ -2,6 +2,7 @@
 // offset along it; internally one number p in [0, 4), clockwise from the top-left corner, so sliding
 // around a corner is continuous and p can feed the field and the music.
 //   - with stops, it locks to the nearest one along the edge (the nav: corners and center)
+//   - with zones, the whole screen is the target: its halves pick the edge and its thirds the stop
 //   - a press becomes a drag only after the pointer moves; a click leaves the bar alone
 //   - while dragging, the bar collapses to a stub that trails the pointer, and a ghost shows where it lands
 //   - on release it is simply there, with no travel
@@ -15,7 +16,7 @@ import { applyBox, edgeLength, EDGES, emit, horizontal, vh, vw, type Bar, type B
 
 export type Place = { edge: Edge; t: number }; // t in [0, 1] along the free run of the edge, clockwise
 
-export function draggable(bar: Bar, opts: { maxLength: number; edges?: Edge[]; start?: Place; stops?: number[] }) {
+export function draggable(bar: Bar, opts: { maxLength: number; edges?: Edge[]; start?: Place; stops?: number[]; zones?: boolean }) {
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const thick = bar.thick;
   const allowed = (opts.edges ?? EDGES).filter((e) => !bar.coarse || horizontal(e));
@@ -55,6 +56,9 @@ export function draggable(bar: Bar, opts: { maxLength: number; edges?: Edge[]; s
     const edge = allowed.reduce((a, b) => (d[b] < d[a] ? b : a));
     const L = lengthOn(edge), run = Math.max(1, edgeLength(edge) - 2 * D.inset - L);
     const along = edge === "top" ? x : edge === "right" ? y : edge === "bottom" ? vw() - x : vh() - y;
+    // zones: the whole screen is the target. The nearest edge takes the drop wherever the pointer is,
+    // and with stops, the screen splits into as many sections along the edge as there are stops
+    if (opts.zones && stops) return { edge, t: stops[Math.min(stops.length - 1, Math.floor((along / edgeLength(edge)) * stops.length))], dist: 0 };
     const t = lock(Math.min(1, Math.max(0, (along - D.inset - L / 2) / run)));
     return { edge, t, dist: d[edge] };
   }
@@ -119,7 +123,7 @@ export function draggable(bar: Bar, opts: { maxLength: number; edges?: Edge[]; s
     const horiz = horizontal(place.edge);
     animateTo({ x: e.clientX - hold.x, y: e.clientY - hold.y, w: horiz ? D.stub : thick, h: horiz ? thick : D.stub }, D.followSec, snap);
     const p = project(e.clientX, e.clientY);
-    pending = p.dist <= D.reach ? p : null;
+    pending = opts.zones || p.dist <= D.reach ? p : null;
     ghost.dataset.on = pending ? "1" : "";
     if (pending) { ghost.dataset.edge = pending.edge; applyBox(ghost, rect(pending)); emit("dock:move", { id: bar.id, p: pOf(pending), edge: pending.edge, t: pending.t }); }
   }

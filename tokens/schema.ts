@@ -48,6 +48,8 @@ export const MotionTokens = z.object({
   // which spring each field value follows
   follow: z.record(z.string(), z.enum(["quick", "deliberate", "slow", "tidal"])),
   dockSnapMs: z.number().int().positive(),
+  zoom: z.object({ ms: z.number().int().positive(), fill: z.number().min(0.2).max(1), read: z.number().min(0.1).max(1), fieldPx: z.number().min(2).max(24), near: z.number().positive().max(0.5), close: z.number().positive().max(0.5), edge: z.number().min(0).max(0.4), edgeSpeed: z.number().min(0).max(5000) }),
+  beginDropMs: z.number().int().positive(),
   crossfadeMs: z.number().int().positive(),
   fieldFadeInMs: z.number().int().positive(),
   signals: z.object({
@@ -96,6 +98,8 @@ export const ShatterTokens = z.object({
   }),
   // exploration: a second shatter whose shards are windows onto the main field
   windowMask: z.boolean().default(false),
+  glow: z.object({ amount: z.number().min(0).max(1), blur: z.number().min(0).max(8) }).default({ amount: 0, blur: 4 }),
+  portrait: z.object({ src: z.string().startsWith("/"), amount: z.number().min(0).max(1), height: z.number().min(0.1).max(1), right: z.number().min(0).max(0.5), easeSec: z.number().positive(), soft: z.number().min(0).max(40), keep: z.number().min(0).max(1), fracture: z.number().min(0).max(3), catch: z.number().min(0).max(1) }).default({ src: "/hello/portrait.webp", amount: 0, height: 0.8, right: 0.05, easeSec: 1, soft: 6, keep: 0.1, fracture: 1, catch: 0.5 }),
   // which tiers run the field; glance (phones, no GPU) is open
   tiers: z.array(z.enum(["glance", "read", "inhabit"])),
 });
@@ -114,14 +118,16 @@ export const DockTokens = z.object({
   navStart: z.object({ edge: z.enum(["top", "right", "bottom", "left"]), t: z.number().min(0).max(1) }),
   navMaxLength: z.number().positive(),
   navEdges: z.array(z.enum(["top", "right", "bottom", "left"])).min(1),
+  visualizerReach: z.number().min(0).max(0.5),
+  helloSpan: z.number().positive(),
   timelineScrollMs: z.number().min(200),
   stops: z.array(z.number().min(0).max(1)).min(1),
   keyStep: z.number().positive().max(0.5),
   dragStartPx: z.number().min(1),
   followSec: z.number().positive().max(0.5),
   grip: z.object({ hit: z.number().min(24), lines: z.tuple([z.number().positive(), z.number().positive()]), lineSpacing: z.number().min(2), lineWidth: z.number().positive() }),
-  refraction: z.object({ on: z.boolean(), cell: z.number().min(4), shift: z.tuple([z.number().min(0), z.number().min(0)]) }),
-  typing: z.object({ charMs: z.number().positive(), eraseMs: z.number().positive(), holdMs: z.number().min(0), gapMs: z.number().min(0), pauseMs: z.number().min(0), blinkMs: z.number().positive() }),
+  refraction: z.object({ on: z.boolean(), cell: z.number().min(4), shift: z.tuple([z.number().min(0), z.number().min(0)]), hoverGain: z.number().min(0), hoverFloor: z.number().min(0).max(0.5), hoverSec: z.number().positive() }),
+  typing: z.object({ charMs: z.number().positive(), eraseMs: z.number().positive(), holdMs: z.number().min(0), gapMs: z.number().min(0), pauseMs: z.number().min(0), blinkMs: z.number().positive(), revealSteps: z.number().int().min(1), popoverPace: z.number().positive().max(1), longChars: z.number().int().min(4) }),
   look: z.object({
     lineAlpha: z.number().min(0).max(1), gripAlpha: z.number().min(0).max(1), ghostAlpha: z.number().min(0).max(1),
     liftedOpacity: z.number().min(0).max(1), ghostFadeMs: z.number().min(0), borderWidth: z.number().positive(),

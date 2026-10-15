@@ -23,7 +23,7 @@ Eight primitives, each buildable alone:
 - **Turn** — the opening that looks like one thing and becomes a place when touched.
 - **Trace** — the space remembers where you went.
 
-Two docks, and nothing else docks: the main nav and the timeline, dockable anywhere along any edge, placed fresh each visit by the composition's seed, built in DOM and Pointer Events rather than React. The nav's doors are Now, Built, Writing, About and an influences page, an old-school blogroll with a line on each; their contents are Kevin's to dictate. See `docs/dock.md`.
+Two docks, and nothing else docks: the main nav and the timeline, dockable anywhere along any edge, placed fresh each visit by the composition's seed, built in DOM and Pointer Events rather than React. The nav's doors are Now, Built, Writing, About, and influences on the colophon, an old-school blogroll with a line on each; their contents are Kevin's to dictate. See `docs/dock.md`.
 
 Three tiers, from capability rather than screen width: **glance** (small screen, no GPU: the spine, the summaries, the transcript), **read** (pointer, laptop: the surface, objects, presence), **inhabit** (desktop GPU, sound on: everything). One content model, three renderings.
 
