@@ -34,5 +34,6 @@ export const shatter = {
     exposure: { base: 0.88, arousal: 0.22, pause: -0.18, openedCapped: 0.08 },
     vignette: { base: 0.45, linger: 0.35, pause: 0.25, select: 0.2 },
   },
+  windowMask: true,
   tiers: ["read", "inhabit"],
 } satisfies ShatterTokens;
