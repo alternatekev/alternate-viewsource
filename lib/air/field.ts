@@ -9,9 +9,10 @@
 // tuned. What is left in code is mechanism: geometry, the simulation, the GL plumbing.
 
 import { toLinear, type Rgb } from "@/lib/color";
-import { color, fieldPalette, motion, shatter } from "@/tokens";
+import { timePlace } from "@/lib/time";
+import { color, dock, fieldPalette, motion, shatter } from "@/tokens";
 import type { Linear, Signal } from "@/tokens/schema";
-import type { DockEdge } from "@/tokens/color";
+import { schemeEdgeFor, type DockEdge } from "@/tokens/color";
 
 type Vec3 = [number, number, number];
 type Shard = {
@@ -23,6 +24,10 @@ type Spring = { x: number; v: number };
 export type FieldHandle = {
   setTimeOfDay(hour: number | null): void;
   setMusic(x: number, y: number, energy: number): void;
+  /** starts a field created paused, or one paused since */
+  play(): void;
+  /** holds the field still where it is */
+  pause(): void;
   subscribe(fn: (snapshot: Record<string, unknown>) => void): () => void;
   readonly numbers: Record<string, unknown>;
   readonly seed: number;
@@ -99,6 +104,26 @@ const BG_VS = `attribute vec2 p; varying vec2 v; void main(){ v = p; gl_Position
 const BG_FS = `precision mediump float; varying vec2 v; uniform vec3 uBg; uniform float uVig;
 ${ENCODE}
 void main(){ float vig = 1.0 - smoothstep(0.1, 1.7 - uVig*0.6, length(v*vec2(1.0, 0.85))); gl_FragColor = vec4(encode(mix(uBg*(0.6 - uVig*0.35), uBg*1.35 + 0.001, vig)), 1.0); }`;
+// The docks as fractured panes: inside a dock's box, the finished frame is seen through a small
+// Voronoi shatter fixed to the bar (along/across, so it survives turning a corner). Each piece
+// shifts what is behind it in its own direction, by its own amount.
+const PANE_FS = `precision highp float;
+uniform sampler2D uScene; uniform vec2 uRes; uniform vec4 uRect; uniform float uHoriz, uCell, uShiftMin, uShiftMax, uSeed;
+vec2 hash2(vec2 p){ p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))) + uSeed; return fract(sin(p)*43758.5453); }
+void main(){
+  vec2 px = gl_FragCoord.xy - uRect.xy;
+  vec2 loc = uHoriz > 0.5 ? px : px.yx;
+  vec2 g = floor(loc/uCell), f = fract(loc/uCell), id = g;
+  float best = 1e9;
+  for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) {
+    vec2 o = vec2(float(i), float(j)), r = o + hash2(g + o) - f; float d = dot(r, r);
+    if (d < best) { best = d; id = g + o; }
+  }
+  vec2 h = hash2(id + 17.0);
+  vec2 off = vec2(cos(h.x*6.2831853), sin(h.x*6.2831853)) * mix(uShiftMin, uShiftMax, h.y);
+  if (uHoriz < 0.5) off = off.yx;
+  gl_FragColor = texture2D(uScene, clamp((gl_FragCoord.xy + off)/uRes, 0.0, 1.0));
+}`;
 const VIG_FS = `precision mediump float; varying vec2 v; uniform float uVig;
 void main(){ float d = length(v*vec2(1.0, 0.8)); gl_FragColor = vec4(0.0, 0.0, 0.0, smoothstep(0.55, 1.5, d) * uVig * 0.75); }`;
 
@@ -107,7 +132,7 @@ void main(){ float d = length(v*vec2(1.0, 0.8)); gl_FragColor = vec4(0.0, 0.0, 0
  * is complete without it. Reader signals are read from elements carrying data-valence and
  * data-arousal (and optionally data-x, data-y), which the content's mood frontmatter writes.
  */
-export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; simulateMusic?: boolean } = {}): FieldHandle | null {
+export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; simulateMusic?: boolean; paused?: boolean } = {}): FieldHandle | null {
   const gl = canvas.getContext("webgl", { antialias: true, alpha: false, premultipliedAlpha: false, stencil: true });
   if (!gl) return null;
   const deriv = !!gl.getExtension("OES_standard_derivatives");
@@ -293,7 +318,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     const openedCapped = Math.min(1, s.opened);
     const v = clamp(m.v, -1, 1);
     const a = clamp(m.a + ms.tension * s.tension + ms.openedCapped * openedCapped + ms.pause * s.pause, 0, 1);
-    const scrollFrac = clamp(scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight), 0, 1);
+    const scrollFrac = timePlace(); // where in time: scrolling, or the timeline
     if (input.music.simulated) {
       input.music.x = 0.4 * Math.sin(T * 0.071); input.music.y = 0.3 * Math.sin(T * 0.113 + 1.3);
       input.music.energy = 0.5 + 0.5 * Math.sin(T * 0.19) * Math.sin(T * 0.053 + 2);
@@ -312,7 +337,13 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
     // the color matrix: the nav's edge picks the scheme, the timeline picks the color inside it.
     // Until the timeline scrubs, scrolling down through the phases stands in for the year.
-    const edge = (document.querySelector<HTMLElement>('.dock[data-dock="nav"]')?.dataset.edge ?? "top") as DockEdge;
+    // the nav's edge picks the scheme when centered; its corners pick the side schemes
+    const navEl = document.querySelector<HTMLElement>('.dock[data-dock="nav"]');
+    const navEdge = (navEl?.dataset.edge ?? "top") as DockEdge;
+    const along = navEl?.dataset.p ? +navEl.dataset.p % 1 : 0.5; // t, clockwise: on the bottom it runs right to left
+    const leftward = navEdge === "bottom" || navEdge === "left" ? along > 0.75 : along < 0.25;
+    const rightward = navEdge === "bottom" || navEdge === "left" ? along < 0.25 : along > 0.75;
+    const edge = schemeEdgeFor(navEdge, leftward ? "left" : rightward ? "right" : "center");
     const h = hourNow(), pal = fieldPalette(h, v, a, { edge, year: scrollFrac });
     const t = {
       expand: e(D.expand), spinRate: e(D.spin), depth: e(D.depth), swirl: e(D.swirl), sink: e(D.sink), countFrac: clamp(e(D.count), 0, 1),
@@ -417,6 +448,11 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   ["aLocal", "aUV", "aRand", "aAxis", "aPos", "aDyn"].forEach((n) => (A[n] = gl.getAttribLocation(prog, n)));
   const BU = { p: gl.getAttribLocation(bgProg, "p"), uBg: gl.getUniformLocation(bgProg, "uBg"), uVig: gl.getUniformLocation(bgProg, "uVig") };
   const VU = { p: gl.getAttribLocation(vigProg, "p"), uVig: gl.getUniformLocation(vigProg, "uVig") };
+  const pane = dock.refraction, paneProg = link(BG_VS, PANE_FS);
+  const PU = Object.fromEntries(["uScene", "uRes", "uRect", "uHoriz", "uCell", "uShiftMin", "uShiftMax", "uSeed"].map((n) => [n, gl.getUniformLocation(paneProg, n)]));
+  const PA = gl.getAttribLocation(paneProg, "p");
+  const sceneTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, sceneTex);
+  ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
   const sBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, sBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(staticData), gl.STATIC_DRAW);
   const dynData = new Float32Array(VERTS * 6);
   const dBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, dBuf); gl.bufferData(gl.ARRAY_BUFFER, dynData.byteLength, gl.DYNAMIC_DRAW);
@@ -479,6 +515,34 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.disable(g.STENCIL_TEST);
 
     g.useProgram(vigProg); g.uniform1f(VU.uVig, vig); fullscreen(VU.p);
+    if (pane.on) panes();
+  }
+  function panes() {
+    const g = gl!, docks = document.querySelectorAll<HTMLElement>(".dock");
+    if (!docks.length) return;
+    const pad = Math.ceil(pane.shift[1] * dpr) + 2, cw = canvas.width, ch = canvas.height;
+    g.disable(g.BLEND); g.enable(g.SCISSOR_TEST);
+    g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, sceneTex);
+    // copy what is under every dock first, so one pane never refracts another
+    const boxes = [...docks].map((el) => {
+      const r = el.getBoundingClientRect();
+      const x = Math.max(0, Math.floor(r.left * dpr)), y = Math.max(0, Math.floor((cssH - r.bottom) * dpr));
+      const w = Math.min(cw - x, Math.ceil(r.width * dpr)), h = Math.min(ch - y, Math.ceil(r.height * dpr));
+      const cx = Math.max(0, x - pad), cy = Math.max(0, y - pad);
+      if (w > 0 && h > 0) g.copyTexSubImage2D(g.TEXTURE_2D, 0, cx, cy, cx, cy, Math.min(cw - cx, w + 2 * pad), Math.min(ch - cy, h + 2 * pad));
+      return { x, y, w, h, horiz: r.width >= r.height, id: el.dataset.dock ?? "" };
+    });
+    g.useProgram(paneProg);
+    g.uniform1i(PU.uScene, 0); g.uniform2f(PU.uRes, cw, ch);
+    g.uniform1f(PU.uCell, pane.cell * dpr); g.uniform1f(PU.uShiftMin, pane.shift[0] * dpr); g.uniform1f(PU.uShiftMax, pane.shift[1] * dpr);
+    for (const b of boxes) {
+      if (b.w <= 0 || b.h <= 0) continue;
+      g.scissor(b.x, b.y, b.w, b.h);
+      g.uniform4f(PU.uRect, b.x, b.y, b.w, b.h); g.uniform1f(PU.uHoriz, b.horiz ? 1 : 0);
+      g.uniform1f(PU.uSeed, (seed % 997) + [...b.id].reduce((a, c) => a + c.charCodeAt(0), 0));
+      fullscreen(PA);
+    }
+    g.disable(g.SCISSOR_TEST);
   }
   function drawShards(sBuf: WebGLBuffer | null, dBuf: WebGLBuffer | null, dynData: Float32Array, iBuf: WebGLBuffer | null, idxData: Uint16Array | Uint32Array, idxCount: number, bg: Rgb) {
     const g = gl!;
@@ -499,10 +563,14 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.drawElements(g.TRIANGLES, idxCount, idxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
     Object.values(A).forEach((l) => g.disableVertexAttribArray(l));
   }
-  function resize() { sizeWorld(); canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr); }
+  function resize() {
+    sizeWorld(); canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    gl!.bindTexture(gl!.TEXTURE_2D, sceneTex);
+    gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGB, canvas.width, canvas.height, 0, gl!.RGB, gl!.UNSIGNED_BYTE, null);
+  }
 
   // ---------- frame ----------
-  let last = performance.now(), raf = 0, running = true;
+  let last = performance.now(), raf = 0, running = true, paused = !!opts.paused;
   const T0 = last;
   const listeners = new Set<(s: Record<string, unknown>) => void>();
   function snapshot() {
@@ -513,6 +581,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   const camH = 2 * cam.distance * Math.tan(cam.fov / 2);
   function frame(now: number) {
     if (!running) return;
+    if (paused) { last = now; writeDynamic(); render(); return; } // a still: drawn once, waiting for play()
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     updateSignals(dt, now);
     const delta = scrollDelta; scrollDelta = 0;
@@ -526,9 +595,10 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     if (listeners.size) { const snap = snapshot(); listeners.forEach((fn) => { try { fn(snap); } catch (err) { console.error(err); } }); }
     raf = requestAnimationFrame(frame);
   }
-  const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(raf); } else { last = performance.now(); raf = requestAnimationFrame(frame); } };
+  const onVisibility = () => { if (document.hidden) { cancelAnimationFrame(raf); } else if (!paused) { last = performance.now(); raf = requestAnimationFrame(frame); } };
   document.addEventListener("visibilitychange", onVisibility);
-  addEventListener("resize", resize);
+  const onResize = () => { resize(); if (paused) raf = requestAnimationFrame(frame); };
+  addEventListener("resize", onResize);
 
   // ---------- boot ----------
   resize();
@@ -548,6 +618,8 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
   return {
     setTimeOfDay(h) { input.tod = h == null ? null : ((h % 24) + 24) % 24; },
+    play() { if (!paused) return; paused = false; cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(frame); },
+    pause() { paused = true; },
     setMusic(x, y, energy) { input.music.simulated = false; Object.assign(input.music, { x, y, energy }); },
     subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); },
     get numbers() { return snapshot(); },
@@ -556,7 +628,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       running = false; cancelAnimationFrame(raf); mo.disconnect();
       removeEventListener("scroll", onScroll); activity.forEach((t) => removeEventListener(t, touch));
       document.removeEventListener("selectionchange", onSelect); document.removeEventListener("toggle", onToggle, true);
-      document.removeEventListener("visibilitychange", onVisibility); removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", onVisibility); removeEventListener("resize", onResize);
       gl.getExtension("WEBGL_lose_context")?.loseContext();
     },
   };

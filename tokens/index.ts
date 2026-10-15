@@ -37,6 +37,7 @@ export function cssVariables(): string {
     "--dock-grip-h": px(G.lines[1]),
     "--dock-grip-step": px(G.lineSpacing),
     "--dock-grip-line": px(G.lineWidth),
+    "--dock-caret-blink": `${dock.typing.blinkMs}ms`,
   });
   return `:root{${Object.entries(vars).map(([k, v]) => `${k}:${v}`).join(";")}}`;
 }
