@@ -111,11 +111,17 @@ export const DockTokens = z.object({
   gap: z.number().min(0),
   reach: z.number().positive(),
   stub: z.number().positive(),
+  navStart: z.object({ edge: z.enum(["top", "right", "bottom", "left"]), t: z.number().min(0).max(1) }),
   navMaxLength: z.number().positive(),
+  navEdges: z.array(z.enum(["top", "right", "bottom", "left"])).min(1),
+  timelineScrollMs: z.number().min(200),
+  stops: z.array(z.number().min(0).max(1)).min(1),
   keyStep: z.number().positive().max(0.5),
   dragStartPx: z.number().min(1),
   followSec: z.number().positive().max(0.5),
   grip: z.object({ hit: z.number().min(24), lines: z.tuple([z.number().positive(), z.number().positive()]), lineSpacing: z.number().min(2), lineWidth: z.number().positive() }),
+  refraction: z.object({ on: z.boolean(), cell: z.number().min(4), shift: z.tuple([z.number().min(0), z.number().min(0)]) }),
+  typing: z.object({ charMs: z.number().positive(), eraseMs: z.number().positive(), holdMs: z.number().min(0), gapMs: z.number().min(0), pauseMs: z.number().min(0), blinkMs: z.number().positive() }),
   look: z.object({
     lineAlpha: z.number().min(0).max(1), gripAlpha: z.number().min(0).max(1), ghostAlpha: z.number().min(0).max(1),
     liftedOpacity: z.number().min(0).max(1), ghostFadeMs: z.number().min(0), borderWidth: z.number().positive(),
@@ -124,6 +130,7 @@ export const DockTokens = z.object({
 export type DockTokens = z.input<typeof DockTokens>;
 
 // ---------- sound ----------
+const Voice = z.object({ wave: z.enum(["square", "triangle", "sawtooth", "sine"]), loud: z.number().min(0).max(1), drive: z.number().min(0).max(1) });
 const Pedals = z.object({
   flMix: z.number(), flRate: z.number(), flDepth: z.number(), flFb: z.number(),
   ccMix: z.number(), ccTime: z.number().max(0.4), ccFb: z.number().max(0.9), ccMod: z.number(),
@@ -136,18 +143,23 @@ export const SoundTokens = z.object({
   modeWeights: z.record(z.string(), z.number().min(0)),
   voicings: z.array(z.object({ name: z.string(), steps: z.array(z.number().int()) })).min(1),
   register: z.object({ lowestRoot: z.number().int(), highestRoot: z.number().int() }),
-  boards: z.array(z.object({ name: z.string(), fl: z.number(), cc: z.number(), jt: z.number(), size: z.number(), tone: z.number() })).length(3),
+  boards: z.array(z.object({
+    name: z.string(), fl: z.number(), cc: z.number(), jt: z.number(), size: z.number(), tone: z.number(),
+    ccMix: z.number().min(0).max(1), jtMix: z.number().min(0).max(1), sonar: z.number().min(0).max(1), pre: z.number().min(0).max(1), dim: z.number().min(0).max(1),
+    jets: z.object({ voice: z.enum(["blur", "swell"]), oct: z.number().int(), shape: z.enum(["sine", "rampUp", "triangle", "square"]), envMode: z.literal("repeat"), trigger: z.literal("poly"), capture: z.number().positive() }),
+  })).length(3),
   phases: z.object({
-    dialup: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), pedals: Pedals }),
-    broadband: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), pedals: Pedals }),
-    apps: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), pedals: Pedals }),
-    components: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), pedals: Pedals }),
-    agents: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), pedals: Pedals }),
+    dialup: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), voice: Voice, pedals: Pedals }),
+    broadband: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), voice: Voice, pedals: Pedals }),
+    apps: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), voice: Voice, pedals: Pedals }),
+    components: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), voice: Voice, pedals: Pedals }),
+    agents: z.object({ fathom: z.enum(["lofi", "plate", "hall", "sonar"]), voice: Voice, pedals: Pedals }),
   }),
   drone: z.object({ breathBeats: z.number(), level: z.number().max(0.1), surgeLevel: z.number().max(0.1) }),
   swells: z.object({ everySec: z.tuple([z.number(), z.number()]), bloomSec: z.number(), level: z.number().max(0.05) }),
   drift: z.object({ everyChords: z.tuple([z.number().int(), z.number().int()]), dissonance: z.number().min(0).max(1) }),
-  surge: z.object({ decadeIsFull: z.number(), decaySec: z.number(), keyChangeYears: z.number() }),
+  surge: z.object({ decadeIsFull: z.number(), decaySec: z.number(), keyChangeYears: z.number(), feedback: z.number().min(0).max(0.5), reverb: z.number().min(0).max(1), brightness: z.number().min(0), freezeAt: z.number().min(0).max(1.01), duck: z.number().min(0).max(0.9), attackFloor: z.number().min(0.05).max(3.9), quicken: z.number().min(0).max(0.9) }),
+  leveler: z.object({ thresholdDb: z.number().max(0), kneeDb: z.number().min(0), ratio: z.number().min(1), attackSec: z.number().min(0), releaseSec: z.number().min(0) }),
   calmAtRest: z.number().min(0).max(1),
   masterLevel: z.number().max(1),
 });
