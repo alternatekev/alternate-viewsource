@@ -95,11 +95,17 @@ export type Chapter = ChapterMeta & { slug: string; body: string; path: string }
 
 // Writing I published before this site, brought in whole (cleared by me piece by piece), with the
 // place it first appeared as its source. html is cleaned: no scripts, no embeds, images local.
+// Portfolio work and albums from my old site come in the same way (kind work, album): org is who it
+// was for or with, end when it ended, approximate when the date is read from the text. A portfolio
+// entry that was only ever a name in a list has no words (html is empty)
 export const Writing = z.object({
   key: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string().min(1),
   date: isoDate,
-  kind: z.enum(["essay", "music"]),
+  end: isoDate.optional(),
+  approximate: z.boolean().optional(),
+  kind: z.enum(["essay", "music", "work", "album"]),
+  org: z.string().min(1).optional(),
   source: z.object({ label: z.string().min(1), url: z.string().url() }),
   html: z.string(),
 });

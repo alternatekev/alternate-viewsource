@@ -9,6 +9,8 @@ import Surface from "./surface";
 // Words here are the sourced spine only; chapters arrive when Kevin dictates them.
 // Oldest first (Kevin, Oct 15): dial-up at the top, scrolling down through time to agents, then the welcome.
 const year = (d: string) => new Date(d).getUTCFullYear();
+// a piece of work's years: one year, or the span it ran
+const span = (w: { date: string; end?: string }) => (w.end && year(w.end) !== year(w.date) ? `${year(w.date)}–${year(w.end)}` : String(year(w.date)));
 
 // the welcome: the line from my old homepage, as I have since edited it
 const WELCOME = {
@@ -23,7 +25,9 @@ export default async function Home() {
       {phases.map((p) => {
         const marks = milestones.filter((m) => m.phase === p.key);
         const sites = designs.filter((d) => d.start >= p.start && d.start <= p.end);
-        const pieces = writing.filter((w) => w.date >= p.start && w.date <= p.end);
+        const here = writing.filter((w) => w.date >= p.start && w.date <= p.end);
+        // what has words is a piece to dive into; work that was only ever a name in a list is a line
+        const pieces = here.filter((w) => w.html), names = here.filter((w) => !w.html);
         return (
           <section
             key={p.key}
@@ -62,12 +66,19 @@ export default async function Home() {
                         {d.snapshot && <a href={d.snapshot.url}>Archived {d.snapshot.captured}</a>}
                       </p>
                     ))}
+                    {names.map((w) => (
+                      <p key={w.key} className="near-work">
+                        <span className="near-year">{w.approximate ? "c. " : ""}{span(w)}</span> {w.title}{w.org ? `, ${w.org}` : ""}.{" "}
+                        <span className="near-source"><a href={w.source.url}>{w.source.label}</a></span>
+                      </p>
+                    ))}
                   </div>
                   {pieces.map((w) => (
                     <article key={w.key} className="piece" id={`piece-${w.key}`} data-dive={`piece-${w.key}`}>
                       <button type="button" className="dive" data-dive={`piece-${w.key}`}>
-                        <span className="near-year">{w.date}</span>
+                        <span className="near-year">{w.kind === "work" || w.kind === "album" ? `${w.approximate ? "c. " : ""}${span(w)}` : w.date}</span>
                         <h3>{w.title}</h3>
+                        {w.org && <span className="piece-org">{w.org}</span>}
                       </button>
                       <div className="piece-body" dangerouslySetInnerHTML={{ __html: w.html }} />
                       <p className="piece-source">First published at <a href={w.source.url}>{w.source.label}</a></p>
