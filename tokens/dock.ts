@@ -28,5 +28,10 @@ export const dock = {
   // boxes set in and withdraw in revealSteps steps at the same speeds. The logotype also holds each
   // name for holdMs, waits gapMs between, and pauses pauseMs after the last before starting over.
   typing: { charMs: 60, eraseMs: 25, holdMs: 3200, gapMs: 900, pauseMs: 8000, blinkMs: 1060, revealSteps: 16, popoverPace: 0.35, longChars: 24 }, // longChars: text longer than this types several letters a step, finishing in about the time this many take // the popover answers a press, so it runs at about a third of the time
+  // Each bar and the popover are a pane of frosted glass (Kevin, Oct 16): words that pass beneath are
+  // blurred past reading and the field still glows through. blur in px; saturate lifts the field's
+  // color through the frost; the tint is paper at tintAlpha. Without backdrop-filter, or when the
+  // reader asks for less transparency, the pane is the reading column's scrim instead.
+  glass: { blur: 20, saturate: 1.4, tintAlpha: 0.6 },
   look: { lineAlpha: 0.45, gripAlpha: 0.5, ghostAlpha: 0.35, liftedOpacity: 0.5, ghostFadeMs: 120, borderWidth: 1 },
 } satisfies DockTokens;

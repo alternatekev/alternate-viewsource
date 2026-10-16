@@ -90,7 +90,8 @@ export default function Docks() {
         ],
         location.pathname,
       );
-      const fx = popover(navBar, { id: "ambience", label: "ambience", buttonClass: "dock-ambience" });
+      // on a phone the popover holds the pages too, so its button is the menu; on a desktop, ambience
+      const fx = popover(navBar, { id: "ambience", label: isColumn() ? "menu" : "ambience", buttonClass: "dock-ambience" });
       // the logotype is the way home: pressing it travels, eased, to Hello, the top of the page
       const home = document.createElement("button");
       home.type = "button"; home.className = "dock-home"; home.setAttribute("aria-label", "Kevin Conboy: go to Hello");

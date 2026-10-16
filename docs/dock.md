@@ -14,6 +14,7 @@ Where the exploration in the browser has landed so far; the sections after this 
 - **Color.** The nav's place picks the field's scheme: centered, its edge's own (Compass on top, Hue wheel on the bottom); in a left corner Warm/cool, in a right corner Archive.
 - **Visualizer.** The music as one waveform in the gaps beside the nav, out to the window's edges; flat and still when the sound is off.
 - **Panes.** Each dock refracts the field under it through its own small fixed shatter.
+- **Glass.** Each dock and the ambience popover is frosted glass over the page: words that pass beneath are blurred past reading, and the field glows through (`dock.glass`: blur, saturation, paper tint). Without `backdrop-filter`, or with `prefers-reduced-transparency`, the pane is the reading column's scrim instead.
 
 ## Decisions (original plan)
 
@@ -52,7 +53,7 @@ Carried over from a 2020 investigation of the same idea: always docked, never fl
 
 Top and bottom only; a side rail is an eighth of a 390 px screen. The nav takes the top and the timeline the bottom by default; sliding along the edge still works, and dragging one bar to the other edge swaps them. Thickness 56 px, targets 44 px, `100dvh`, safe-area insets.
 
-As built, Oct 16 (Kevin's calls): the timeline shows hello, then the year each phase began (’22 … ’91), the full span kept in each block's label, and the phase you're in types its name, since a phone has no hover; a phase is current from its first line, because a phone's column runs many screens. The nav holds the logotype and ambience; the pages move into the ambience popover, above the effects. Nothing in a bar can widen the page.
+As built, Oct 16 (Kevin's calls): the timeline shows hello, then the year each phase began (’22 … ’91), the full span kept in each block's label, and the phase you're in types its name, since a phone has no hover; a phase is current from its first line, because a phone's column runs many screens. The nav holds the logotype and the popover's button, which reads menu there; the pages move into the popover, above the effects. Nothing in a bar can widen the page.
 
 ## Fresh each visit
 

@@ -24,12 +24,14 @@ export function cssVariables(): string {
     "--scrim": toCss(u.paper, u.scrimAlpha),
   };
   for (const [k, v] of Object.entries(color.phases)) vars[`--${k}`] = toCss(v);
-  const L = dock.look, G = dock.grip, px = (n: number) => `${n}px`;
+  const L = dock.look, G = dock.grip, GL = dock.glass, px = (n: number) => `${n}px`;
   Object.assign(vars, {
     "--dock-line": toCss(u.ink, L.lineAlpha),
     "--dock-grip": toCss(u.ink, L.gripAlpha),
     "--dock-ghost": toCss(u.ink, L.ghostAlpha),
     "--dock-focus": toCss(u.ink),
+    "--dock-glass": toCss(u.paper, GL.tintAlpha),
+    "--dock-glass-filter": `blur(${GL.blur}px) saturate(${GL.saturate})`,
     "--dock-border": px(L.borderWidth),
     "--dock-lifted": String(L.liftedOpacity),
     "--dock-ghost-fade": `${L.ghostFadeMs}ms`,
