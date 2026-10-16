@@ -1,5 +1,7 @@
-import { getDesigns, getMilestones, getPhases, getWriting } from "@/lib/content";
+import { getDesigns, getMilestones, getPhases, getUsage, getWriting } from "@/lib/content";
 import Surface from "./surface";
+import Usage from "./usage";
+import { Sources, When } from "./when";
 
 // The spine as one typographic surface (David Small's pattern: zoom is navigation, and type stays
 // type at every scale). Each phase is a full-height beat. Far: the phase's name. Near, set small
@@ -9,8 +11,6 @@ import Surface from "./surface";
 // Words here are the sourced spine only; chapters arrive when Kevin dictates them.
 // Oldest first (Kevin, Oct 15): dial-up at the top, scrolling down through time to agents, then the welcome.
 const year = (d: string) => new Date(d).getUTCFullYear();
-// a piece of work's years: one year, or the span it ran
-const span = (w: { date: string; end?: string }) => (w.end && year(w.end) !== year(w.date) ? `${year(w.date)}–${year(w.end)}` : String(year(w.date)));
 
 // the welcome: the line from my old homepage, as I have since edited it
 const WELCOME = {
@@ -18,14 +18,15 @@ const WELCOME = {
 };
 
 export default async function Home() {
-  const [phases, milestones, designs, writing] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting()]);
+  const [phases, milestones, designs, writing, usage] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting(), getUsage()]);
   return (
     <div className="beats" data-order="oldest-first">
       <h1 className="visually-hidden">viewsource</h1>
       {phases.map((p) => {
         const marks = milestones.filter((m) => m.phase === p.key);
         const sites = designs.filter((d) => d.start >= p.start && d.start <= p.end);
-        const here = writing.filter((w) => w.date >= p.start && w.date <= p.end);
+        // my music (posts about it and the albums) lives somewhere of its own, not on the timeline (Kevin, Oct 16)
+        const here = writing.filter((w) => w.kind !== "music" && w.kind !== "album" && w.date >= p.start && w.date <= p.end);
         // what has words is a piece to dive into; work that was only ever a name in a list is a line
         const pieces = here.filter((w) => w.html), names = here.filter((w) => !w.html);
         return (
@@ -50,28 +51,33 @@ export default async function Home() {
                 </button>
                 {/* the intro, in my words, under the name; its links travel to the pieces they came from */}
                 {p.intro.html && <p className="phase-intro" data-status={p.intro.status} dangerouslySetInnerHTML={{ __html: p.intro.html }} />}
+                {/* agents: my use of them, a day at a time, part of the phase's description (Kevin, Oct 16) */}
+                {p.key === "agents" && <Usage days={usage} />}
                 {/* near: everything from these years, in full, as paragraphs set too small to read until you dive in */}
                 <div className="near" id={`near-${p.key}`}>
                   <div className="near-col">
                     <p className="near-web">{p.web}</p>
                     {marks.map((m) => (
-                      <p key={m.key} className="near-mark">
-                        <span className="near-year">{m.approximate ? "c. " : ""}{year(m.date)}</span> {m.label}.{" "}
-                        <span className="near-source">
-                          {m.sources.map((s, i) => (s.url ? <a key={i} href={s.url}>{s.label}</a> : <span key={i}>{s.label}</span>))}
-                        </span>
+                      <p key={m.key} className="near-mark dated">
+                        <When date={m.date} approximate={m.approximate} />{" "}
+                        <span className="dated-what">{m.label}. <Sources sources={m.sources} className="near-source" /></span>
                       </p>
                     ))}
                     {sites.map((d) => (
-                      <p key={d.key} className="near-site">
-                        <span className="near-year">{year(d.start)}</span> {d.name}. <em>{d.tagline}</em> {d.stack}.{" "}
-                        {d.snapshot && <a href={d.snapshot.url}>Archived {d.snapshot.captured}</a>}
+                      <p key={d.key} className="near-site dated">
+                        <When date={d.start} />{" "}
+                        <span className="dated-what">
+                          {d.name}. <em>{d.tagline}</em> {d.stack}.{" "}
+                          {d.snapshot && <a href={d.snapshot.url}>Archived {d.snapshot.captured}</a>}
+                        </span>
                       </p>
                     ))}
                     {names.map((w) => (
-                      <p key={w.key} className="near-work">
-                        <span className="near-year">{w.approximate ? "c. " : ""}{span(w)}</span> {w.title}{w.org ? `, ${w.org}` : ""}.{" "}
-                        <span className="near-source"><a href={w.source.url}>{w.source.label}</a></span>
+                      <p key={w.key} className="near-work dated">
+                        <When date={w.date} end={w.end} approximate={w.approximate} />{" "}
+                        <span className="dated-what">
+                          {w.title}{w.org ? `, ${w.org}` : ""}. <Sources sources={[w.source]} className="near-source" />
+                        </span>
                       </p>
                     ))}
                   </div>
@@ -82,7 +88,7 @@ export default async function Home() {
                       {pieces.filter((w) => year(w.date) === y).map((w) => (
                         <article key={w.key} className="piece" id={`piece-${w.key}`} data-dive={`piece-${w.key}`}>
                           <button type="button" className="dive" data-dive={`piece-${w.key}`}>
-                            <span className="near-year">{w.kind === "work" || w.kind === "album" ? `${w.approximate ? "c. " : ""}${span(w)}` : w.date}</span>
+                            <When date={w.date} end={w.end} approximate={w.approximate} full={w.kind !== "work"} />
                             <h3>{w.title}</h3>
                             {w.org && <span className="piece-org">{w.org}</span>}
                           </button>

@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import { ChapterMeta, Design, Milestone, Phase, PHASE_KEYS, Writing } from "../lib/content/schema";
+import { ChapterMeta, Design, Milestone, UsageDay, Phase, PHASE_KEYS, Writing } from "../lib/content/schema";
 
 const root = path.join(process.cwd(), "content");
 let problems = 0;
@@ -34,6 +34,11 @@ async function main() {
     if (m.sources.length === 0) fail("spine/milestones.json", `${m.key} has no source`);
   }
 
+  const usage = (await json("spine/usage.json")).map((x) => UsageDay.parse(x));
+  for (const [i, u] of usage.entries()) {
+    if (i && u.day <= usage[i - 1].day) fail("spine/usage.json", `${u.day} is out of order or repeated`);
+    if (!(u.opus + u.fable + u.sonnet + u.haiku)) fail("spine/usage.json", `${u.day} has no replies; leave the day out`);
+  }
   const designs = (await json("spine/designs.json")).map((x) => Design.parse(x));
   for (const d of designs) if (d.snapshot.captured < d.start) fail("spine/designs.json", `${d.key} captured before it started`);
 
