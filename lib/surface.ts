@@ -10,6 +10,7 @@
 // in only once it has scrolled into view.
 
 import { onBegin } from "@/lib/begin";
+import { isColumn } from "@/lib/column";
 import { travelTo } from "@/lib/travel";
 import { retype, setIn } from "@/lib/type";
 import { motion } from "@/tokens/motion";
@@ -19,11 +20,15 @@ type Cam = { x: number; y: number; k: number };
 export function surface() {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const Z = motion.zoom;
-  document.documentElement.setAttribute("data-surface", "");
+  // phones have no zoom (Kevin, Oct 16): each phase is a column read by scrolling, at reading size,
+  // everything already open. The journeys, the set-in on arrival and the rest of the surface still apply.
+  const column = isColumn();
+  document.documentElement.setAttribute("data-surface", column ? "column" : "zoom");
   const beats = [...document.querySelectorAll<HTMLElement>(".beat")];
 
   const spaces = beats.map((beat) => {
     const space = beat.querySelector<HTMLElement>(".space")!;
+    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined };
     const stack: HTMLElement[] = []; // the targets dived into, outermost first
     let run: Animation | null = null;
 
@@ -80,6 +85,8 @@ export function surface() {
     }
     function settle() {
       beat.dataset.depth = String(stack.length);
+      // dived into something bigger than the screen, a finger moves through it instead of the page
+      beat.toggleAttribute("data-pan", pannable(stack[stack.length - 1]));
       void retype(back, stack.length ? "back" : "");
       back.tabIndex = stack.length ? 0 : -1;
     }
@@ -149,6 +156,75 @@ export function surface() {
       if ((lean.x || lean.y) && !slide) { last = performance.now(); slide = requestAnimationFrame(glide); }
     });
     beat.addEventListener("pointerleave", () => { lean = { x: 0, y: 0 }; });
+    // touch: the same three gestures, by finger. One finger dived in drags through what's open and, at
+    // its end, carries on down the page, with the glide a native scroll has when let go. Two fingers
+    // spreading dive in one level over what's between them; pinching together steps back out.
+    const fingers = new Map<number, { x: number; y: number }>();
+    let pinch0 = 0, pinched = false, dragged = false, fling = 0, flingV = { x: 0, y: 0 }, lastMove = 0;
+    const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    // moves what's open by a finger's motion; what the piece can't take, the page does
+    function drag(dx: number, dy: number) {
+      const y0 = panY;
+      pan(dx, dy);
+      const rest = dy - (panY - y0);
+      if (Math.abs(rest) > 0.5) window.scrollBy({ top: rest, behavior: "instant" });
+    }
+    function glideOn() {
+      let t0 = performance.now();
+      const step = (t: number) => {
+        const dt = Math.min(32, t - t0); t0 = t;
+        flingV = { x: flingV.x * Math.pow(0.95, dt / 16), y: flingV.y * Math.pow(0.95, dt / 16) };
+        if (Math.hypot(flingV.x, flingV.y) < 0.02) { fling = 0; return; }
+        drag(flingV.x * dt, flingV.y * dt);
+        fling = requestAnimationFrame(step);
+      };
+      fling = requestAnimationFrame(step);
+    }
+    beat.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") return;
+      cancelAnimationFrame(fling); fling = 0; flingV = { x: 0, y: 0 };
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size === 1) { dragged = false; pinched = false; }
+      if (fingers.size === 2) pinch0 = spread();
+    });
+    beat.addEventListener("pointermove", (e) => {
+      const was = e.pointerType === "touch" && fingers.get(e.pointerId);
+      if (!was) return;
+      const now = { x: e.clientX, y: e.clientY };
+      fingers.set(e.pointerId, now);
+      if (fingers.size >= 2) {
+        if (pinched || !pinch0) return;
+        const r = spread() / pinch0;
+        if (r < 1.25 && r > 0.8) return;
+        pinched = true; dragged = true; // one level per gesture
+        if (r <= 0.8) { out(); return; }
+        const [a, b] = [...fingers.values()];
+        const under = document.elementFromPoint((a.x + b.x) / 2, (a.y + b.y) / 2)?.closest<HTMLElement>("[data-dive]");
+        const btn = under && beat.contains(under) ? under
+          : space.querySelector<HTMLElement>(stack.length ? `#${stack[stack.length - 1].id} [data-dive]` : "[data-dive]");
+        const target = btn && document.getElementById(btn.dataset.dive!);
+        if (target) dive(target);
+        return;
+      }
+      if (pinched || !pannable(stack[stack.length - 1]) || !base) return;
+      const dx = was.x - now.x, dy = was.y - now.y;
+      if (!dragged && Math.hypot(dx, dy) < 2) return;
+      dragged = true;
+      const t = performance.now(), dt = Math.max(1, t - lastMove); lastMove = t;
+      flingV = { x: flingV.x * 0.6 + (dx / dt) * 0.4, y: flingV.y * 0.6 + (dy / dt) * 0.4 };
+      drag(dx, dy);
+    });
+    const lift = (e: PointerEvent) => {
+      if (!fingers.delete(e.pointerId)) return;
+      if (fingers.size) return;
+      pinch0 = 0;
+      // let go mid-drag: it glides on; held still before letting go: it stays
+      if (dragged && !pinched && !reduced && performance.now() - lastMove < 80) glideOn();
+    };
+    beat.addEventListener("pointerup", lift);
+    beat.addEventListener("pointercancel", lift);
+    // a drag or a pinch is not a press: the click it would end in doesn't dive or follow a link
+    beat.addEventListener("click", (e) => { if (dragged) { e.preventDefault(); e.stopImmediatePropagation(); dragged = false; } }, true);
     let quiet = 0;
     beat.addEventListener("wheel", (e) => {
       if (!e.ctrlKey) {
@@ -192,7 +268,7 @@ export function surface() {
         const s = spaces.find((x) => x.beat === e.target);
         if (s) arrive(s);
       }
-    }, { threshold: 0.5 });
+    }, column ? { rootMargin: "0px 0px -20% 0px" } : { threshold: 0.5 }); // a column is taller than the screen: it sets in as its top comes into view
     spaces.forEach((s) => seen!.observe(s.beat));
   });
 
@@ -213,7 +289,9 @@ export function surface() {
       while (s.depth() && still()) { s.out(); if (here) await wait(Z.ms * 0.8); }
     }
     if (!still()) return;
-    await travelTo(to.beat.offsetTop);
+    // in a column the trip goes to the thing itself, clear of the dock across the top
+    const topDock = column ? Math.max(0, ...[...document.querySelectorAll<HTMLElement>(".dock")].map((d) => d.getBoundingClientRect()).filter((r) => r.top < innerHeight / 2).map((r) => r.bottom)) : 0;
+    await travelTo(column && el !== to.beat.querySelector("h2") ? el.getBoundingClientRect().top + scrollY - topDock - 24 : to.beat.offsetTop);
     if (!still()) return;
     arrive(to);
     // stepping out on the way rewrote the address; a link to a phase or to Hello keeps its own

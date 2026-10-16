@@ -42,7 +42,7 @@ Five chapters of the web, with Kevin early in each: Dial-up (1991–2000), Broad
 
 ## What is open
 
-Kevin's calls: the type, the palette (one dark world or a light tier), the field's source shape, the pedal anchors per phase, what the turn opens from, the presence's character, and whether the field runs on phones.
+Kevin's calls: the type, the palette (one dark world or a light tier), the field's source shape, the pedal anchors per phase, what the turn opens from, and the presence's character. Decided Oct 16: phones run the field and read the site as a column, with no zoom.
 
 ## Sequence
 

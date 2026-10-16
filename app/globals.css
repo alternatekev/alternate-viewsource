@@ -30,7 +30,7 @@ main::before {
   mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
 }
 /* the field: fixed behind everything, never takes a pointer, fades in once it is running */
-.air { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; opacity: 0; transition-property: opacity; transition-timing-function: ease-in-out; }
+.air { position: fixed; left: 0; top: 0; width: 100%; height: 100%; height: 100lvh; z-index: -2; pointer-events: none; opacity: 0; transition-property: opacity; transition-timing-function: ease-in-out; }
 .air[data-on] { opacity: 1; }
 h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
 h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 .5rem; }
@@ -69,7 +69,8 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 }
 
 /* the surface: five beats, one per phase, a viewport tall each. Without JavaScript it is a plain
-   document; with it (html[data-surface]) each beat is a space you dive into (lib/surface.ts) */
+   document; with it (html[data-surface="zoom"]) each beat is a space you dive into (lib/surface.ts). On a
+   phone (html[data-surface="column"]) there is no zoom: the document is the experience, read by scrolling */
 .beat { position: relative; min-height: 100vh; min-height: 100dvh; padding: 15vh 8vw; }
 .beat .dive { all: unset; cursor: pointer; display: block; }
 .beat .dive:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 6px; }
@@ -90,29 +91,32 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .near-source > * + *::before { content: " · "; }
 .piece { margin: 3rem 0 0; }
 .piece h3 { margin: .3rem 0 1rem; font: 400 1.6rem/1.15 var(--face-display); letter-spacing: 0; }
+.piece-body, .near { overflow-wrap: anywhere; } /* a long address breaks instead of widening a phone's page */
+.piece-body pre { max-width: 100%; overflow-x: auto; } /* code keeps its lines and scrolls sideways on its own */
 .piece-body img { display: block; max-width: 100%; height: auto; margin: 1rem 0; }
 .piece-body figure { margin: 1rem 0; }
 .piece-body figcaption { color: var(--quiet); font-size: .85em; }
 .piece-body blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 1px solid var(--rule); color: var(--quiet); }
 
-html[data-surface] .beat { height: 100vh; height: 100dvh; padding: 0; overflow: hidden; }
+html[data-surface="zoom"] .beat { height: 100vh; height: 100dvh; padding: 0; overflow: hidden; touch-action: pan-y; } /* the page scrolls; a pinch is the surface's (lib/surface.ts) */
+html[data-surface="zoom"] .beat[data-pan] { touch-action: none; } /* dived in, a finger moves through what's open */
 /* a beat is unseen until it scrolls into view after begin; then each part sets in as a box (no typing) */
 html[data-surface] .space:not([data-arrived]) { visibility: hidden; }
-html[data-surface] .space { position: absolute; left: 8vw; top: 22vh; transform-origin: 0 0; }
-html[data-surface] .far { position: relative; }
+html[data-surface="zoom"] .space { position: absolute; left: 8vw; top: 22vh; transform-origin: 0 0; }
+html[data-surface="zoom"] .far { position: relative; }
 /* near sits beside the far title, set small: the era's notes first, then the posts as blocks, a row per
    year (time runs down, the year's posts run across); you dive into a post to read it */
-html[data-surface] .near { position: absolute; left: 100%; top: 0; max-width: none; width: max-content; margin: 0 0 0 4rem;
+html[data-surface="zoom"] .near { position: absolute; left: 100%; top: 0; max-width: none; width: max-content; margin: 0 0 0 4rem;
   display: flex; flex-direction: column; gap: 4rem;
   transform: scale(var(--zoom-near)); transform-origin: 0 0; }
-html[data-surface] .near-col { width: 34rem; }
-html[data-surface] .near-row { display: flex; gap: 2.5rem; align-items: flex-start; }
-html[data-surface] .near-row-year { flex: none; width: 6rem; margin: 1.6rem 0 0; font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
-html[data-surface] .piece { flex: none; width: 34rem; margin: 0; padding: 1.6rem 1.8rem 1.8rem; border: 1px solid var(--rule); }
+html[data-surface="zoom"] .near-col { width: 34rem; }
+html[data-surface="zoom"] .near-row { display: flex; gap: 2.5rem; align-items: flex-start; }
+html[data-surface="zoom"] .near-row-year { flex: none; width: 6rem; margin: 1.6rem 0 0; font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
+html[data-surface="zoom"] .piece { flex: none; width: 34rem; margin: 0; padding: 1.6rem 1.8rem 1.8rem; border: 1px solid var(--rule); }
 /* only the current level takes presses; deeper words are there, just too small to aim at yet */
-html[data-surface] .beat .near, html[data-surface] .beat .near * { pointer-events: none; }
-html[data-surface] .beat[data-depth="1"] .near [data-dive], html[data-surface] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
-html[data-surface] .beat[data-depth="2"] .piece a { pointer-events: auto; }
+html[data-surface="zoom"] .beat .near, html[data-surface="zoom"] .beat .near * { pointer-events: none; }
+html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive], html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
+html[data-surface="zoom"] .beat[data-depth="2"] .piece a { pointer-events: auto; }
 .surface-back { position: absolute; left: 8vw; top: 12vh; margin: 0; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); background: none; border: 0; cursor: pointer; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -128,7 +132,7 @@ html[data-surface] .beat[data-depth="2"] .piece a { pointer-events: auto; }
 /* colors change at typing speed: the current timeline block, a switch turning off, a hovered link */
 .dock-block, .dock-option, .dock-links a, .dock-ambience { transition: color calc(var(--type-char) * var(--type-steps)) steps(var(--type-steps)); }
 /* docks: wireframe for now. Every value comes from tokens/dock.ts as a custom property. */
-.dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; }
+.dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; overflow: hidden; } /* what doesn't fit stays inside the bar, never widens the page */
 .dock[data-edge="right"], .dock[data-edge="left"] { flex-direction: column; }
 .dock-content { flex: 1; min-width: 0; min-height: 0; display: flex; align-items: center; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
 /* on a side edge the contents run along the bar */
@@ -157,6 +161,9 @@ html[data-surface] .beat[data-depth="2"] .piece a { pointer-events: auto; }
 .dock-links a[aria-current="page"] { color: var(--ink); }
 .dock-ambience { margin: 0; padding: 0 12px; height: 100%; font: inherit; letter-spacing: inherit; background: none; border: 0; cursor: pointer; }
 .dock-links a:focus-visible, .dock-ambience:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* on a phone the pages sit in the ambience popover, a list above the effects, and ambience takes the bar's far end */
+html[data-surface="column"] .dock-ambience { margin-inline-start: auto; }
+.dock-popover .dock-links { display: grid; gap: 12px; margin: 0 0 24px; justify-items: start; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
 .dock-popover { margin: 0; inset: auto; position: fixed; min-inline-size: 240px; padding: 16px; color: var(--ink); background: transparent; border: var(--dock-border) solid var(--dock-line); }
 .dock-option { display: block; margin: 0 0 12px; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: 0; cursor: pointer; text-align: start; }
 .dock-option:last-child { margin-bottom: 0; }

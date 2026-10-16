@@ -10,12 +10,17 @@ import { motion, shatter } from "@/tokens";
 // the field module loads as its own chunk, still and hidden until begin, when it fades in. It never
 // takes a pointer event. Ambience can hold it still, or reset the composition: a new shatter on a
 // new canvas fades in over the old one, which is let go once it is covered.
+// Tiers come from capability, not screen width: a phone with a real GPU runs the field too (lib/air/field
+// budgets it for the smaller GPU). Glance is for asked-for data saving and devices too slight to keep it smooth.
 function tier(): "glance" | "read" | "inhabit" {
   const fine = matchMedia("(pointer: fine)").matches;
   const wide = matchMedia("(min-width: 768px)").matches;
   const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  if (!fine || !wide || conn?.saveData || matchMedia("(prefers-reduced-data: reduce)").matches) return "glance";
-  return (navigator.hardwareConcurrency ?? 4) >= 8 ? "inhabit" : "read";
+  const cores = navigator.hardwareConcurrency ?? 4;
+  const memory = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+  if (conn?.saveData || matchMedia("(prefers-reduced-data: reduce)").matches) return "glance";
+  if (!fine || !wide) return cores >= 4 && memory >= 3 ? "read" : "glance";
+  return cores >= 8 ? "inhabit" : "read";
 }
 
 function FieldCanvas({ generation, fadeMs }: { generation: number; fadeMs: number }) {

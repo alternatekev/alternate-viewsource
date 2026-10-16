@@ -10,7 +10,9 @@ Reader signals, measured as data: reading position (each section weighted by its
 
 Hooks: `doooomgaze.subscribe(fn)` is called every frame with all signals and field values; `doooomgaze.setMusic(x, y, energy)` lets the instrument write back; `setTimeOfDay(h)`, `numbers`, `seed`, `pattern`.
 
-Open: the thematic source shape (a rectangle until Kevin supplies one; Doooom Shatter GL takes any image's alpha); whether the field runs on phones or rests there as a still frame; the one-third rule as a measured budget.
+Phones run the field (Kevin, Oct 16): the same look at a lower pixel density, sized to the whole screen so the URL bar sliding in and out never rescales it. Glance, with no field, is for data saving and devices too slight to keep it smooth.
+
+Open: the thematic source shape (a rectangle until Kevin supplies one; Doooom Shatter GL takes any image's alpha); the one-third rule as a measured budget.
 
 ## dooombient — the instrument
 
