@@ -20,4 +20,19 @@ export const motion = {
   signals: { scrollFollowPerSec: 4, selectFollowPerSec: 1.5, openedDecaySec: 7, lingerSec: 14, pauseRampSec: [4, 16] },
   reduced: { expand: 0.15, spin: 0, swirl: 0, camera: 0, parallax: 0 },
   changingShareMax: 0.34,
+  // The work page (Kevin, Oct 16): you dive through the timeline into time, the shatter's source
+  // becomes a circle, and scrolling travels back a year at a time. First sketch, from the prototype.
+  // shapeSec, gatherSec: how long the square becomes the circle, and the shards take to come back
+  // together at the oldest year; each eases in and out. surge: the rush a year crossing adds, its
+  // ceiling and how fast it drains; at full rush the shards travel surgeSpeed units a second toward
+  // the camera and turn surgeSpin times faster. pushSpeed: their speed during a dive. gatherScale: how
+  // much of the screen's height the gathered circle fills. diveMs: the trip into the work page.
+  // settleMs: after the reader stops scrolling, the page settles on the nearest year.
+  // yearScreens: a year is this many screens of scrolling. depthPx: how far apart the years sit in depth.
+  flight: {
+    shapeSec: 2.4, gatherSec: 4,
+    surgePerYear: 0.35, surgeMax: 2.6, surgeDecaySec: 1.7, surgeSpeed: 1.1, surgeSpin: 0.8, pushSpeed: 3.2,
+    gatherScale: 0.62,
+    diveMs: 2600, settleMs: 260, yearScreens: 1, depthPx: 1100,
+  },
 } satisfies MotionTokens;
