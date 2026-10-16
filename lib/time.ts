@@ -1,12 +1,13 @@
 // Where in time the page is: 0 at the first phase (dial-up), 1 at the last (agents), whichever way
-// the page runs. The field's color and the music read it. Scrolling moves it; the timeline moves it
+// the page runs (on the work page: 0 at the oldest year, 1 at now). The field's color and the music read it. Scrolling moves it; the timeline moves it
 // by scrolling the page. It is read from the phase beats only, so anything above or below them (the
 // welcome) sits at the nearest end: the welcome, after agents, is now.
 
 let place = 0, fromScroll = true;
-export const newestFirst = () => document.querySelector(".beats")?.getAttribute("data-order") === "newest-first";
+export const newestFirst = () => document.querySelector(".beats, .stops")?.getAttribute("data-order") === "newest-first";
 const scrollPlace = () => {
-  const beats = [...document.querySelectorAll<HTMLElement>(".beat[data-key]")], n = beats.length - 1;
+  // the home page's phases, or the work page's years
+  const beats = [...document.querySelectorAll<HTMLElement>(".beat[data-key], .stop[data-key]")], n = beats.length - 1;
   if (n < 1) return 0;
   // which beat the middle of the view is in, and how far through it; a beat's middle is its phase
   const mid = scrollY + innerHeight / 2;

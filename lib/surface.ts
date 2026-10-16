@@ -12,7 +12,8 @@
 import { onBegin } from "@/lib/begin";
 import { isColumn } from "@/lib/column";
 import { travelTo } from "@/lib/travel";
-import { retype, setIn } from "@/lib/type";
+import { onLeave } from "@/lib/route";
+import { retype, setIn, setOut, typeOut } from "@/lib/type";
 import { motion } from "@/tokens/motion";
 
 type Cam = { x: number; y: number; k: number };
@@ -325,5 +326,8 @@ export function surface() {
   // the docks ask for a journey when the page opens on a link (lib/begin: the opening trip)
   const onGo = (e: Event) => { void journey((e as CustomEvent<string>).detail); };
   addEventListener("viewsource:go", onGo);
-  return { destroy() { off(); seen?.disconnect(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo); } };
+  // going to another page: every phase that has set in types out and withdraws
+  const offLeave = onLeave(() => Promise.all(spaces.filter((s) => "arrived" in s.space.dataset).map((s) =>
+    Promise.all([typeOut(s.space), ...[...s.space.children].map((part) => setOut(part as HTMLElement))]))));
+  return { destroy() { offLeave(); off(); seen?.disconnect(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo); } };
 }
