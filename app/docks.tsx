@@ -109,7 +109,13 @@ export default function Docks() {
       timelineBar.content.append(blocks.el);
 
       const viz = visualizer(navBar, sound);
-      void Promise.all([arrive(navBar.el), arrive(timelineBar.el)]).then(() => blocks.travel(document.documentElement.scrollHeight));
+      // the opening trip: down through every phase to Hello, or, when the page was opened on a link to
+      // a phase or a piece, a journey to it (lib/surface.ts)
+      const opened = location.hash.slice(1);
+      void Promise.all([arrive(navBar.el), arrive(timelineBar.el)]).then(() =>
+        opened && /^(phase-|piece-|welcome$)/.test(opened) && document.getElementById(opened)
+          ? dispatchEvent(new CustomEvent("viewsource:go", { detail: opened }))
+          : blocks.travel(document.documentElement.scrollHeight));
       cleanup.push(() => {
         removeEventListener("dock:drop", onDrop);
         viz.destroy(); blocks.destroy(); timeline.destroy(); timelineBar.destroy();

@@ -41,6 +41,9 @@ export const Phase = z.object({
   opens: z.object({ event: z.string(), date: isoDate, source: Source.optional() }).nullable(),
   // the phase's point in the mood space, read by the field while the phase is in view
   mood: Mood,
+  // a paragraph under the phase's name, in my words: drafted from what I published (each link goes to
+  // the piece it came from), stub until there are words, draft until I've read it, told after
+  intro: z.object({ status: z.enum(["stub", "draft", "told"]), html: z.string() }).default({ status: "stub", html: "" }),
 });
 export type Phase = z.infer<typeof Phase>;
 
@@ -97,14 +100,15 @@ export type Chapter = ChapterMeta & { slug: string; body: string; path: string }
 // place it first appeared as its source. html is cleaned: no scripts, no embeds, images local.
 // Portfolio work and albums from my old site come in the same way (kind work, album): org is who it
 // was for or with, end when it ended, approximate when the date is read from the text. A portfolio
-// entry that was only ever a name in a list has no words (html is empty)
+// entry that was only ever a name in a list has no words (html is empty). Posts from the old
+// alternate.org blog (2000–2011) come in as kind post, or music when they were about music
 export const Writing = z.object({
   key: z.string().regex(/^[a-z0-9-]+$/),
   title: z.string().min(1),
   date: isoDate,
   end: isoDate.optional(),
   approximate: z.boolean().optional(),
-  kind: z.enum(["essay", "music", "work", "album"]),
+  kind: z.enum(["essay", "post", "music", "work", "album"]),
   org: z.string().min(1).optional(),
   source: z.object({ label: z.string().min(1), url: z.string().url() }),
   html: z.string(),

@@ -78,6 +78,9 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .welcome-source { margin: 1.5rem 0 0; font: 13px/1 var(--face-pixel); }
 .welcome-source a { color: var(--quiet); }
 .far h2 { margin: 0; font: 400 clamp(56px, 11vw, 160px)/0.9 var(--face-display); letter-spacing: -.01em; }
+.phase-intro { max-width: 34rem; margin: 1.6rem 0 0; font: 400 1.12rem/1.55 var(--face-text); text-wrap: pretty; }
+.phase-intro a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.phase-intro a:hover, .phase-intro a:focus-visible { text-decoration-color: currentColor; }
 .far-years, .near-year { font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
 .near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
 .near p, .piece-body li { text-wrap: pretty; }
@@ -97,12 +100,15 @@ html[data-surface] .beat { height: 100vh; height: 100dvh; padding: 0; overflow: 
 html[data-surface] .space:not([data-arrived]) { visibility: hidden; }
 html[data-surface] .space { position: absolute; left: 8vw; top: 22vh; transform-origin: 0 0; }
 html[data-surface] .far { position: relative; }
-/* near sits beside the far title, set small: a wide field of columns, the era's notes first, then each
-   piece of writing whole; you dive into a piece to read it */
+/* near sits beside the far title, set small: the era's notes first, then the posts as blocks, a row per
+   year (time runs down, the year's posts run across); you dive into a post to read it */
 html[data-surface] .near { position: absolute; left: 100%; top: 0; max-width: none; width: max-content; margin: 0 0 0 4rem;
-  display: grid; grid-auto-flow: column; grid-auto-columns: 34rem; gap: 4rem; align-items: start;
+  display: flex; flex-direction: column; gap: 4rem;
   transform: scale(var(--zoom-near)); transform-origin: 0 0; }
-html[data-surface] .piece { margin: 0; }
+html[data-surface] .near-col { width: 34rem; }
+html[data-surface] .near-row { display: flex; gap: 2.5rem; align-items: flex-start; }
+html[data-surface] .near-row-year { flex: none; width: 6rem; margin: 1.6rem 0 0; font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
+html[data-surface] .piece { flex: none; width: 34rem; margin: 0; padding: 1.6rem 1.8rem 1.8rem; border: 1px solid var(--rule); }
 /* only the current level takes presses; deeper words are there, just too small to aim at yet */
 html[data-surface] .beat .near, html[data-surface] .beat .near * { pointer-events: none; }
 html[data-surface] .beat[data-depth="1"] .near [data-dive], html[data-surface] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
