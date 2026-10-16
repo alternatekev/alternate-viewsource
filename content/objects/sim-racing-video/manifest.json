@@ -1,0 +1,37 @@
+{
+  "kind": "video",
+  "title": "Twenty seconds at a time",
+  "date": "2026-10-11",
+  "phase": "agents",
+  "caption": "Cuts from Racing Desk recordings on the rig, 720p, each from a 0.5–2.4 GB MP4 with a telemetry sidecar beside it.",
+  "files": [
+    {
+      "file": "2026-10-11_12-24-55-a.mp4",
+      "poster": "2026-10-11_12-24-55-poster.jpg",
+      "date": "2026-10-11",
+      "caption": "Seven AI cars on the Lake Murray race layout (v0.17) under an overcast sky, recorded the day the three layouts were installed.",
+      "source": "Racing Desk recording, Assetto Corsa"
+    },
+    {
+      "file": "2026-10-11_12-22-48-b.mp4",
+      "poster": "2026-10-11_12-22-48-poster.jpg",
+      "date": "2026-10-11",
+      "caption": "The race corridor from the seat: an Alvarado-wide lane per direction, open turn boxes.",
+      "source": "Racing Desk recording, Assetto Corsa"
+    },
+    {
+      "file": "2026-10-07_18-47-44-a.mp4",
+      "poster": "2026-10-07_18-47-44-poster.jpg",
+      "date": "2026-10-07",
+      "caption": "Road Atlanta, Ligier JS P320: the Racing Desk in-car HUD over a live iRacing session, face cam in the corner.",
+      "source": "Racing Desk recording, iRacing"
+    },
+    {
+      "file": "2026-10-07_21-59-49-a.mp4",
+      "poster": "2026-10-07_21-59-49-poster.jpg",
+      "date": "2026-10-07",
+      "caption": "Mount Panorama, Porsche 911 Cup: the glance layout over a race.",
+      "source": "Racing Desk recording, iRacing"
+    }
+  ]
+}
