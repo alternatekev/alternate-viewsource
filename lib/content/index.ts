@@ -28,9 +28,19 @@ async function readUsage() {
   const rows = await readJson("spine/usage.json", (x) => UsageDay.parse(x));
   return rows.sort((a, b) => a.day.localeCompare(b.day));
 }
+// The old posts' pictures load as they come near and decode off the main thread, so the page's
+// first load carries none of them. An image that already says how it loads keeps that.
+const lazyImages = (html: string) =>
+  html.replace(/<img\b[^>]*>/g, (tag) => {
+    let out = tag.replace(/\s*\/?>$/, "");
+    if (!/\sloading=/.test(out)) out += ' loading="lazy"';
+    if (!/\sdecoding=/.test(out)) out += ' decoding="async"';
+    return out + (tag.endsWith("/>") ? " />" : ">");
+  });
+
 async function readWriting() {
   const rows = [...await readJson("writing/posts.json", (x) => Writing.parse(x)), ...await readJson("writing/work.json", (x) => Writing.parse(x)), ...await readJson("writing/old.json", (x) => Writing.parse(x))];
-  return rows.sort((a, b) => a.date.localeCompare(b.date));
+  return rows.map((w) => ({ ...w, html: lazyImages(w.html) })).sort((a, b) => a.date.localeCompare(b.date));
 }
 async function readChapters(): Promise<Chapter[]> {
   const src = contentSource();
