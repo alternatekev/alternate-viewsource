@@ -13,11 +13,15 @@ import { timePlace } from "@/lib/time";
 import { color, dock, fieldPalette, motion, shatter } from "@/tokens";
 import type { Linear, Signal } from "@/tokens/schema";
 import { schemeEdgeFor, type DockEdge } from "@/tokens/color";
+import { drain, flight } from "@/lib/flight";
 
 type Vec3 = [number, number, number];
 type Shard = {
   start: number; n: number; x: number; y: number; z: number; angle: number; scale: number; alpha: number;
   alive: boolean; k: number; zf: number; spin: number; depth: number;
+  // where the shard sat in the unbroken art (the rectangle's cut and the circle's), and the small
+  // turn it keeps when the shards gather back together, so the circle is almost whole, never quite
+  hx: number; hy: number; cx: number; cy: number; rest: number;
 };
 type Spring = { x: number; v: number };
 
@@ -56,15 +60,18 @@ function evaluate(lin: Linear, s: Record<Signal, number>, slow: number) {
 const VS = `
 precision highp float;
 attribute vec2 aLocal; attribute vec2 aUV; attribute vec4 aRand; attribute vec4 aAxis;
+attribute vec2 aLocal2; attribute vec2 aUV2;
 attribute vec3 aPos; attribute vec3 aDyn;
-uniform mat4 uPV; uniform float uGap;
+uniform mat4 uPV; uniform float uGap, uMorph;
 varying vec2 vUV; varying vec3 vN; varying vec3 vPos; varying float vEdge; varying vec4 vRand; varying float vAlpha;
 vec3 rot(vec3 v, vec3 k, float a){ float c = cos(a), s = sin(a); return v*c + cross(k, v)*s + k*dot(k, v)*(1.0 - c); }
 void main(){
   vec3 k = normalize(aAxis.xyz);
-  vec3 p = rot(vec3(aLocal*(1.0 - uGap)*aDyn.y, 0.0), k, aDyn.x);
+  // the outline of each piece: cut from the rectangle (0) or from the circle (1), and anywhere between
+  vec2 local = mix(aLocal, aLocal2, uMorph);
+  vec3 p = rot(vec3(local*(1.0 - uGap)*aDyn.y, 0.0), k, aDyn.x);
   vN = rot(vec3(0.0, 0.0, 1.0), k, aDyn.x);
-  vPos = aPos + p; vUV = aUV; vEdge = aAxis.w; vRand = aRand; vAlpha = aDyn.z;
+  vPos = aPos + p; vUV = mix(aUV, aUV2, uMorph); vEdge = aAxis.w; vRand = aRand; vAlpha = aDyn.z;
   gl_Position = uPV * vec4(vPos, 1.0);
 }`;
 // Colors arrive in linear light and are lit there; the last step encodes to sRGB.
@@ -216,6 +223,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
   // ---------- Voronoi fracture ----------
   type P = [number, number];
+  // floats per vertex: the rectangle's local corner and texture place, four random numbers, the
+  // turning axis and the edge flag, then the circle's local corner and texture place
+  const STRIDE = 16;
   function genSites(rnd: () => number, n: number, [ix, iy]: P) {
     const pts: P[] = [], maxR = Math.hypot(W, H) * 0.75;
     const inRect = (x: number, y: number) => Math.abs(x) < W / 2 && Math.abs(y) < H / 2;
@@ -247,29 +257,67 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     }
     return out;
   }
+  // a piece's two outlines get the same number of corners, so one can become the other: the one
+  // with fewer gains corners along its longest edges, and the circle's starts nearest the rectangle's
+  function centroidOf(poly: P[]) {
+    let A = 0, cx = 0, cy = 0;
+    for (let k = 0; k < poly.length; k++) { const a = poly[k], b = poly[(k + 1) % poly.length], cr = a[0] * b[1] - b[0] * a[1]; A += cr; cx += (a[0] + b[0]) * cr; cy += (a[1] + b[1]) * cr; }
+    A *= 0.5; return Math.abs(A) < 1e-7 ? null : { A, cx: cx / (6 * A), cy: cy / (6 * A) };
+  }
+  function corners(poly: P[], n: number) {
+    const out = poly.slice();
+    while (out.length < n) {
+      let best = 0, len = -1;
+      for (let k = 0; k < out.length; k++) { const a = out[k], b = out[(k + 1) % out.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > len) { len = l; best = k; } }
+      const a = out[best], b = out[(best + 1) % out.length];
+      out.splice(best + 1, 0, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]);
+    }
+    return out;
+  }
+  function align(a: P[], ac: { cx: number; cy: number }, b: P[], bc: { cx: number; cy: number }) {
+    const a0 = Math.atan2(a[0][1] - ac.cy, a[0][0] - ac.cx);
+    let best = 0, diff = Infinity;
+    b.forEach((p, k) => { const d = Math.abs(Math.atan2(Math.sin(Math.atan2(p[1] - bc.cy, p[0] - bc.cx) - a0), Math.cos(Math.atan2(p[1] - bc.cy, p[0] - bc.cx) - a0))); if (d < diff) { diff = d; best = k; } });
+    return b.slice(best).concat(b.slice(0, best));
+  }
   function fracture(rnd: () => number, n: number, imp: P) {
     const shards: Shard[] = [], staticData: number[] = [];
     const pts = genSites(rnd, n, imp);
     const rect: P[] = [[-W / 2, -H / 2], [W / 2, -H / 2], [W / 2, H / 2], [-W / 2, H / 2]];
+    // the circle the work page is cut from: around the rectangle, so every site is inside it
+    const RC = Math.hypot(W, H) / 2;
+    const circle: P[] = Array.from({ length: 64 }, (_, k) => [Math.cos((k / 64) * Math.PI * 2) * RC, Math.sin((k / 64) * Math.PI * 2) * RC]);
     const idx = pts.map((_, j) => j);
     for (let i = 0; i < pts.length; i++) {
       const s = pts[i];
       const d2 = (j: number) => (pts[j][0] - s[0]) ** 2 + (pts[j][1] - s[1]) ** 2;
       const order = idx.filter((j) => j !== i).sort((a, b) => d2(a) - d2(b));
       const reach = (p: P[]) => p.reduce((m, v) => Math.max(m, (v[0] - s[0]) ** 2 + (v[1] - s[1]) ** 2), 0);
-      let poly = rect, R2 = reach(poly);
-      for (const j of order) { if (d2(j) > 4 * R2) break; poly = clip(poly, s, pts[j]); if (poly.length < 3) break; R2 = reach(poly); }
+      const cut = (shape: P[]) => {
+        let poly = shape, R2 = reach(poly);
+        for (const j of order) { if (d2(j) > 4 * R2) break; poly = clip(poly, s, pts[j]); if (poly.length < 3) break; R2 = reach(poly); }
+        return poly;
+      };
+      let poly = cut(rect);
       if (poly.length < 3) continue;
-      let A = 0, cx = 0, cy = 0;
-      for (let k = 0; k < poly.length; k++) { const a = poly[k], b = poly[(k + 1) % poly.length], cr = a[0] * b[1] - b[0] * a[1]; A += cr; cx += (a[0] + b[0]) * cr; cy += (a[1] + b[1]) * cr; }
-      A *= 0.5; if (Math.abs(A) < 1e-7) continue; cx /= 6 * A; cy /= 6 * A;
+      const c1 = centroidOf(poly); if (!c1) continue;
+      let poly2 = cut(circle); let c2 = poly2.length >= 3 ? centroidOf(poly2) : null;
+      if (!c2) { poly2 = poly; c2 = c1; }
+      const m = Math.max(poly.length, poly2.length);
+      poly = corners(poly, m); poly2 = align(poly, c1, corners(poly2, m), c2);
+      const { cx, cy } = c1;
       const r = [rnd(), rnd(), rnd(), rnd()];
       const ax = rnd() * 2 - 1, ay = rnd() * 2 - 1, az = (rnd() * 2 - 1) * 0.35, al = Math.hypot(ax, ay, az) || 1;
-      const start = staticData.length / 12;
-      const push = (x: number, y: number, e: number) => staticData.push(x - cx, y - cy, (x + W / 2) / W, (y + H / 2) / H, r[0], r[1], r[2], r[3], ax / al, ay / al, az / al, e);
-      for (let k = 0; k < poly.length; k++) { const a = poly[k], b = poly[(k + 1) % poly.length]; push(cx, cy, 1); push(a[0], a[1], 0); push(b[0], b[1], 0); }
-      shards.push({ start, n: poly.length * 3, x: 0, y: 0, z: 0, angle: 0, scale: 1, alpha: 1, alive: true,
-        k: 0.55 + r[0] * 0.9, zf: (0.2 + r[1] * 1.1) * (r[3] < 0.72 ? 1 : -1), spin: (0.3 + r[2] * 1.4) * (r[0] < 0.5 ? -1 : 1), depth: 0 });
+      const start = staticData.length / STRIDE;
+      const push = (k: number, e: number) => {
+        const [x, y] = k < 0 ? [cx, cy] : poly[k], [x2, y2] = k < 0 ? [c2!.cx, c2!.cy] : poly2[k];
+        staticData.push(x - cx, y - cy, (x + W / 2) / W, (y + H / 2) / H, r[0], r[1], r[2], r[3], ax / al, ay / al, az / al, e,
+          x2 - c2!.cx, y2 - c2!.cy, (x2 + W / 2) / W, (y2 + H / 2) / H);
+      };
+      for (let k = 0; k < m; k++) { push(-1, 1); push(k, 0); push((k + 1) % m, 0); }
+      shards.push({ start, n: m * 3, x: 0, y: 0, z: 0, angle: 0, scale: 1, alpha: 1, alive: true,
+        k: 0.55 + r[0] * 0.9, zf: (0.2 + r[1] * 1.1) * (r[3] < 0.72 ? 1 : -1), spin: (0.3 + r[2] * 1.4) * (r[0] < 0.5 ? -1 : 1), depth: 0,
+        hx: cx, hy: cy, cx: c2.cx, cy: c2.cy, rest: (r[3] - 0.5) * 0.16 });
     }
     return { shards, staticData };
   }
@@ -281,7 +329,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   const maskRnd = mulberry32(seed ^ 0x2545f491);
   const maskSet = fracture(maskRnd, pool, [(maskRnd() - 0.5) * 0.7 * W, (maskRnd() - 0.5) * 0.7 * H]);
   const maskShards = maskSet.shards, maskStatic = maskSet.staticData;
-  const VERTS = staticData.length / 12;
+  const VERTS = staticData.length / STRIDE;
 
   // ---------- reader signals: how the page is read, as data ----------
   const sig = { scrollSpeed: 0, linger: 0, opened: 0, select: 0, pause: 0, tension: 0 };
@@ -430,6 +478,16 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
       }
     }
   }
+  // ---------- flight: the work page's outline, rush and gathering (lib/flight.ts) ----------
+  // each eases in and out: two springs in series, so a change starts gently and lands gently, and a
+  // new target mid-way bends the motion instead of restarting it
+  const FL = motion.flight;
+  type Eased = { a: Spring; b: Spring };
+  const eased = (x: number): Eased => ({ a: { x, v: 0 }, b: { x, v: 0 } });
+  const follow2 = (s: Eased, target: number, dt: number, T: number) => { damp(s.a, target, dt, T / 2); damp(s.b, s.a.x, dt, T / 2); };
+  const shapeS = eased(flight.shape), gatherS = eased(flight.gather);
+  const shapeNow = () => clamp(shapeS.b.x, 0, 1);
+  const gatherNow = () => clamp(gatherS.b.x, 0, 1);
   const val = (k: string) => (cur[k] as Spring).x;
   const col = (k: string) => (cur[k] as Spring[]).map((s) => s.x) as Rgb;
 
@@ -457,7 +515,15 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
   // ---------- simulation: rates change, positions never jump ----------
   const srnd = mulberry32(seed ^ 0x5f3759df), msrnd = mulberry32(seed ^ 0x6c8e9cf5);
-  function respawn(s: Shard, srnd: () => number) {
+  function respawn(s: Shard, srnd: () => number, far = false) {
+    if (far) {
+      // flying through time: a shard that has passed the camera comes back far ahead, anywhere in view
+      s.z = -8 + srnd() * 2.5;
+      const halfH = (cam.distance - s.z) * Math.tan(cam.fov / 2), halfW = (halfH * cssW) / cssH;
+      s.x = (srnd() * 2 - 1) * halfW; s.y = (srnd() * 2 - 1) * halfH;
+      s.scale = 0.6; s.alpha = 0; s.alive = true;
+      return;
+    }
     const a = srnd() * Math.PI * 2, r = 0.05 + srnd() * 0.45;
     s.x = val("pointX") + Math.cos(a) * r; s.y = val("pointY") + Math.sin(a) * r * 0.8;
     s.z = (srnd() - 0.5) * 0.3; s.scale = 0.02; s.alpha = 0; s.alive = true;
@@ -465,20 +531,34 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   function simulate(shards: Shard[], srnd: () => number, dt: number, parallaxDy: number) {
     const ex = val("expand"), sp = val("spinRate"), dp = val("depth"), sw = val("swirl"), sk = val("sink");
     const px = val("pointX"), py = val("pointY");
-    const active = Math.round(val("countFrac") * shards.length);
+    // the work page: crossing years rushes the shards toward the camera and turns them faster; at
+    // the oldest year they slow, and gather back into the circle they were cut from
+    const g = gatherNow(), free = 1 - g, m = shapeNow();
+    const fly = (reduced ? R.expand : 1) * (flight.push * FL.pushSpeed + flight.surge * FL.surgeSpeed) * free;
+    const spinUp = 1 + (reduced ? 0 : flight.surge * FL.surgeSpin);
+    const home = (FL.gatherScale * cam.distance * Math.tan(cam.fov / 2)) / (Math.hypot(W, H) / 2);
+    const pull = 1 - Math.exp(-dt * 1.4 * g);
+    const active = Math.round(lerp(val("countFrac"), 1, g) * shards.length);
     for (let i = 0; i < shards.length; i++) {
       const s = shards[i], want = i < active;
-      if (!s.alive) { if (want) respawn(s, srnd); else continue; }
+      if (!s.alive) { if (want) respawn(s, srnd, fly > 0.4); else continue; }
       const dx = s.x - px, dy = s.y - py, rate = ex * s.k;
-      s.x += (dx * rate - dy * sw * s.k * 0.35) * dt;
-      s.y += (dy * rate + dx * sw * s.k * 0.35 - sk) * dt + parallaxDy * (1 + s.z * 0.35);
-      s.z += rate * s.zf * dp * 1.6 * dt;
-      s.angle += s.spin * sp * dt;
-      s.scale += (1 - s.scale) * Math.min(1, dt * 0.45);
+      s.x += (dx * rate - dy * sw * s.k * 0.35) * dt * free;
+      s.y += ((dy * rate + dx * sw * s.k * 0.35 - sk) * dt + parallaxDy * (1 + s.z * 0.35)) * free;
+      s.z += rate * s.zf * dp * 1.6 * dt * free + fly * (0.6 + 0.5 * s.k) * dt;
+      s.angle += s.spin * sp * spinUp * dt * free;
+      s.scale += (lerp(1, home, g) - s.scale) * Math.min(1, dt * 0.45);
       s.alpha += ((want ? 1 : 0) - s.alpha) * Math.min(1, dt * 0.5);
+      if (g > 0.001) {
+        // each piece drifts back to where it sat in the circle, flat to the camera, nearly
+        s.x += (lerp(s.hx, s.cx, m) * home - s.x) * pull;
+        s.y += (lerp(s.hy, s.cy, m) * home - s.y) * pull;
+        s.z += (0 - s.z) * pull;
+        s.angle += (Math.round(s.angle / (Math.PI * 2)) * Math.PI * 2 + s.rest - s.angle) * pull;
+      }
       const p = ndc(s.x, s.y, s.z);
-      const gone = p[2] < 0.6 || Math.abs(p[0]) > 1.35 || Math.abs(p[1]) > 1.35 || s.z < -9;
-      if (gone || (!want && s.alpha < 0.004)) { if (want) respawn(s, srnd); else s.alive = false; }
+      const gone = g < 0.3 && (p[2] < 0.6 || Math.abs(p[0]) > 1.35 || Math.abs(p[1]) > 1.35 || s.z < -9);
+      if (gone || (!want && s.alpha < 0.004)) { if (want) respawn(s, srnd, fly > 0.4); else s.alive = false; }
     }
   }
 
@@ -487,8 +567,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   function link(vs: string, fs: string) { const p = gl!.createProgram()!; gl!.attachShader(p, sh(gl!.VERTEX_SHADER, vs)); gl!.attachShader(p, sh(gl!.FRAGMENT_SHADER, fs)); gl!.linkProgram(p); if (!gl!.getProgramParameter(p, gl!.LINK_STATUS)) throw new Error(gl!.getProgramInfoLog(p) ?? "link"); return p; }
   const prog = link(VS, fragment(deriv)), bgProg = link(BG_VS, BG_FS), vigProg = link(BG_VS, VIG_FS);
   const U: Record<string, WebGLUniformLocation | null> = {}, A: Record<string, number> = {};
-  ["uPV", "uGap", "uTex", "uCam", "uColA", "uColB", "uCrack", "uBg", "uLight", "uRim", "uOpacity", "uOpVar", "uDof", "uFocal", "uKeyI", "uSpec", "uExposure"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
-  ["aLocal", "aUV", "aRand", "aAxis", "aPos", "aDyn"].forEach((n) => (A[n] = gl.getAttribLocation(prog, n)));
+  const STATIC_ATTRS = [["aLocal", 2, 0], ["aUV", 2, 2], ["aRand", 4, 4], ["aAxis", 4, 8], ["aLocal2", 2, 12], ["aUV2", 2, 14]] as const;
+  ["uPV", "uGap", "uMorph", "uTex", "uCam", "uColA", "uColB", "uCrack", "uBg", "uLight", "uRim", "uOpacity", "uOpVar", "uDof", "uFocal", "uKeyI", "uSpec", "uExposure"].forEach((n) => (U[n] = gl.getUniformLocation(prog, n)));
+  ["aLocal", "aUV", "aRand", "aAxis", "aLocal2", "aUV2", "aPos", "aDyn"].forEach((n) => (A[n] = gl.getAttribLocation(prog, n)));
   const BU = { p: gl.getAttribLocation(bgProg, "p"), uBg: gl.getUniformLocation(bgProg, "uBg"), uVig: gl.getUniformLocation(bgProg, "uVig"),
     uGlow: gl.getUniformLocation(bgProg, "uGlow"), uGlowAmt: gl.getUniformLocation(bgProg, "uGlowAmt"), uGlowLod: gl.getUniformLocation(bgProg, "uGlowLod") };
   // the glow: the shards drawn small into their own texture each frame, then read back heavily blurred
@@ -506,8 +587,8 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   const glow = shatter.glow;
   // the portrait: loaded once, drawn inside the windows while Hello is in view
   const P = shatter.portrait, portraitProg = link(VS, PORTRAIT_FS);
-  const PRU = Object.fromEntries(["uImg", "uRect", "uAmt", "uSoft", "uKeep", "uShift", "uCatch", "uLight", "uDark", "uPV", "uGap"].map((n) => [n, gl.getUniformLocation(portraitProg, n)]));
-  const PRA = Object.fromEntries(["aLocal", "aUV", "aRand", "aAxis", "aPos", "aDyn"].map((n) => [n, gl.getAttribLocation(portraitProg, n)]));
+  const PRU = Object.fromEntries(["uImg", "uRect", "uAmt", "uSoft", "uKeep", "uShift", "uCatch", "uLight", "uDark", "uPV", "uGap", "uMorph"].map((n) => [n, gl.getUniformLocation(portraitProg, n)]));
+  const PRA = Object.fromEntries(["aLocal", "aUV", "aRand", "aAxis", "aLocal2", "aUV2", "aPos", "aDyn"].map((n) => [n, gl.getAttribLocation(portraitProg, n)]));
   const portraitTex = gl.createTexture(); let portraitAspect = 0, helloness = 0;
   if (P.amount > 0) {
     const img = new Image(); img.decoding = "async"; img.src = P.src;
@@ -527,10 +608,10 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
     g.useProgram(portraitProg);
     g.bindBuffer(g.ARRAY_BUFFER, msBuf);
-    ([["aLocal", 2, 0], ["aUV", 2, 2], ["aRand", 4, 4], ["aAxis", 4, 8]] as const).forEach(([n, sz, off]) => { if (PRA[n] < 0) return; g.enableVertexAttribArray(PRA[n]); g.vertexAttribPointer(PRA[n], sz, g.FLOAT, false, 48, off * 4); });
+    STATIC_ATTRS.forEach(([n, sz, off]) => { if (PRA[n] < 0) return; g.enableVertexAttribArray(PRA[n]); g.vertexAttribPointer(PRA[n], sz, g.FLOAT, false, STRIDE * 4, off * 4); });
     g.bindBuffer(g.ARRAY_BUFFER, mdBuf);
     ([["aPos", 3, 0], ["aDyn", 3, 3]] as const).forEach(([n, sz, off]) => { if (PRA[n] < 0) return; g.enableVertexAttribArray(PRA[n]); g.vertexAttribPointer(PRA[n], sz, g.FLOAT, false, 24, off * 4); });
-    g.uniformMatrix4fv(PRU.uPV, false, new Float32Array(PV)); g.uniform1f(PRU.uGap, val("gap"));
+    g.uniformMatrix4fv(PRU.uPV, false, new Float32Array(PV)); g.uniform1f(PRU.uGap, val("gap")); g.uniform1f(PRU.uMorph, shapeNow());
     g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, portraitTex);
     g.uniform1i(PRU.uImg, 0); g.uniform4f(PRU.uRect, x, y, w, h); g.uniform1f(PRU.uAmt, P.amount * helloness);
     g.uniform1f(PRU.uSoft, P.soft * dpr); g.uniform1f(PRU.uKeep, P.keep); g.uniform1f(PRU.uShift, P.fracture); g.uniform1f(PRU.uCatch, P.catch);
@@ -565,7 +646,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
   ([[gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR], [gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE]] as const).forEach(([p, v]) => gl.texParameteri(gl.TEXTURE_2D, p, v));
   const idxData = VERTS > 65535 && uint32 ? new Uint32Array(VERTS) : new Uint16Array(VERTS);
   let idxCount = 0;
-  const MVERTS = maskStatic.length / 12;
+  const MVERTS = maskStatic.length / STRIDE;
   const msBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, msBuf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(maskStatic), gl.STATIC_DRAW);
   const mDynData = new Float32Array(MVERTS * 6);
   const mdBuf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, mdBuf); gl.bufferData(gl.ARRAY_BUFFER, mDynData.byteLength, gl.DYNAMIC_DRAW);
@@ -680,13 +761,13 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.useProgram(prog);
     g.enable(g.BLEND); g.blendFunc(g.SRC_ALPHA, g.ONE_MINUS_SRC_ALPHA);
     g.bindBuffer(g.ARRAY_BUFFER, sBuf);
-    ([["aLocal", 2, 0], ["aUV", 2, 2], ["aRand", 4, 4], ["aAxis", 4, 8]] as const).forEach(([n, sz, off]) => { g.enableVertexAttribArray(A[n]); g.vertexAttribPointer(A[n], sz, g.FLOAT, false, 48, off * 4); });
+    STATIC_ATTRS.forEach(([n, sz, off]) => { if (A[n] < 0) return; g.enableVertexAttribArray(A[n]); g.vertexAttribPointer(A[n], sz, g.FLOAT, false, STRIDE * 4, off * 4); });
     // each set of shards goes to the GPU once a frame; the passes after the first reuse it
     const fresh = !sent.has(dBuf!); sent.add(dBuf!);
     g.bindBuffer(g.ARRAY_BUFFER, dBuf); if (fresh) g.bufferSubData(g.ARRAY_BUFFER, 0, dynData);
     ([["aPos", 3, 0], ["aDyn", 3, 3]] as const).forEach(([n, sz, off]) => { g.enableVertexAttribArray(A[n]); g.vertexAttribPointer(A[n], sz, g.FLOAT, false, 24, off * 4); });
     g.uniformMatrix4fv(U.uPV, false, new Float32Array(PV));
-    g.uniform1f(U.uGap, val("gap")); g.uniform1f(U.uRim, val("rim")); g.uniform1f(U.uOpacity, val("opacity")); g.uniform1f(U.uOpVar, val("opVar"));
+    g.uniform1f(U.uGap, val("gap")); g.uniform1f(U.uMorph, shapeNow()); g.uniform1f(U.uRim, val("rim")); g.uniform1f(U.uOpacity, val("opacity")); g.uniform1f(U.uOpVar, val("opVar"));
     g.uniform1f(U.uDof, val("dof")); g.uniform1f(U.uKeyI, val("keyI")); g.uniform1f(U.uSpec, val("spec")); g.uniform1f(U.uExposure, val("exposure"));
     g.uniform1f(U.uFocal, val("dolly") + val("focusOff"));
     g.uniform3fv(U.uCam, eye); g.uniform3fv(U.uLight, col("light"));
@@ -694,7 +775,7 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D, glTex); g.uniform1i(U.uTex, 0);
     g.bindBuffer(g.ELEMENT_ARRAY_BUFFER, iBuf); if (fresh) g.bufferData(g.ELEMENT_ARRAY_BUFFER, idxData.subarray(0, idxCount), g.DYNAMIC_DRAW);
     g.drawElements(g.TRIANGLES, idxCount, idxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
-    Object.values(A).forEach((l) => g.disableVertexAttribArray(l));
+    Object.values(A).forEach((l) => { if (l >= 0) g.disableVertexAttribArray(l); });
   }
   let sized = false;
   function resize() {
@@ -725,6 +806,9 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     const delta = scrollDelta; scrollDelta = 0;
     const t = targets((now - T0) / 1000);
     stepSprings(t, dt, false);
+    drain(dt);
+    follow2(shapeS, flight.shape, dt, FL.shapeSec);
+    follow2(gatherS, flight.gather, dt, FL.gatherSec);
     computeCamera();
     const parallax = (reduced ? R.parallax : 1) * (delta / cssH) * camH * 0.28;
     simulate(shards, srnd, dt, parallax);

@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   poweredByHeader: false,
   images: { formats: ["image/avif", "image/webp"] },
+  // the link preview reads its frames from disk (app/opengraph-image.tsx), so they ship with it
+  outputFileTracingIncludes: { "/opengraph-image": ["./public/og/*.jpg"] },
   async headers() {
     return [{ source: "/(.*)", headers }];
   },
