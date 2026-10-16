@@ -1,6 +1,7 @@
-// The timeline's contents: one block per beat of the page, in page order. A phase's block is sized
-// by the years it covers and shows its span; Hello, at the end, gets a short block of its own
-// (dock.helloSpan) so the marker can say you are there, not in agents. A marker shows where the
+// The timeline's contents: one block per beat of the page, in page order (newest first: Hello, then
+// agents down to dial-up). A phase's block is sized by the years it covers and shows its span;
+// Hello, the first block, gets a short block of its own (dock.helloSpan) so the marker can say you
+// are there, not in agents. A marker shows where the
 // reader is, read from the scroll position across all the beats. Pressing a block scrolls the page to that phase,
 // animated, never a jump; the field and the music follow the scroll, and a long trip surges them.
 // The trip itself is lib/travel.ts, shared with every other trip down the page.

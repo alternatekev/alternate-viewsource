@@ -30,6 +30,8 @@ export function work() {
   setShape(true);
 
   const stops = [...document.querySelectorAll<HTMLElement>(".stop")];
+  // the quiet years are hidden in the document (app/work/page.tsx); the corridor is where they show, as distance
+  if (!column) for (const s of stops) if (s.classList.contains("quiet")) s.hidden = false;
   const spaces = stops.map((s) => s.querySelector<HTMLElement>(".stop-space")!);
   const n = stops.length;
   // one year of scrolling, and where the camera is in years from now

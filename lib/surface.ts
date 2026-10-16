@@ -4,10 +4,11 @@
 // scale: diving in is moving the camera, never swapping the words.
 //
 // Scroll travels between phases. Pressing dives one level in (the phase name, then a milestone or a
-// design); so does a pinch or ctrl + wheel over it. Escape, the back control, or pinching out steps
-// back out. Each beat keeps its own depth. The camera eases there over zoom.ms; with reduced motion
-// it is simply there. The back control types in and out like every other word. A beat sets
-// in only once it has scrolled into view.
+// design); so does a pinch or ctrl + wheel over it, or the one control above the name, which reads
+// "dive in" at the surface. Escape, that control (reading "back" once dived in), or pinching out
+// steps back out. Each beat keeps its own depth. The camera eases there over zoom.ms; with reduced
+// motion it is simply there. The control types in and out like every other word. A beat sets in
+// only once it has scrolled into view.
 
 import { onBegin } from "@/lib/begin";
 import { isColumn } from "@/lib/column";
@@ -29,13 +30,15 @@ export function surface() {
 
   const spaces = beats.map((beat) => {
     const space = beat.querySelector<HTMLElement>(".space")!;
-    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined };
+    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined, hint() {} };
     const stack: HTMLElement[] = []; // the targets dived into, outermost first
     let run: Animation | null = null;
 
+    // one quiet control: once the beat has set in it reads "dive in" and takes you into the field;
+    // dived in it reads "back" and steps out one level (Kevin, Oct 16: a way into the far state)
+    const field = space.querySelector<HTMLElement>(".near");
     const back = document.createElement("button");
     back.type = "button"; back.className = "surface-back"; back.textContent = "";
-    back.setAttribute("aria-label", "Back out one level");
     back.tabIndex = -1;
     beat.append(back);
 
@@ -88,8 +91,10 @@ export function surface() {
       beat.dataset.depth = String(stack.length);
       // dived into something bigger than the screen, a finger moves through it instead of the page
       beat.toggleAttribute("data-pan", pannable(stack[stack.length - 1]));
-      void retype(back, stack.length ? "back" : "");
-      back.tabIndex = stack.length ? 0 : -1;
+      const hint = !stack.length && !!field && "arrived" in space.dataset;
+      void retype(back, stack.length ? "back" : hint ? "dive in" : "");
+      back.setAttribute("aria-label", stack.length ? "Back out one level" : "Dive into this phase");
+      back.tabIndex = stack.length || hint ? 0 : -1;
     }
     // the address names what you're reading: a piece while you're in one, otherwise nothing extra
     function address() {
@@ -121,7 +126,7 @@ export function surface() {
       const target = document.getElementById(btn.dataset.dive!);
       if (target) dive(target);
     });
-    back.addEventListener("click", out);
+    back.addEventListener("click", () => { if (stack.length) out(); else if (field) dive(field); });
     // a pinch (ctrl + wheel to the browser) dives in over a target, or steps out; one level per gesture.
     // Plain scrolling travels the page, except inside a piece being read, where it reads down the piece
     // until its end, and then travels on
@@ -246,8 +251,7 @@ export function surface() {
     }, { passive: false });
     addEventListener("resize", () => { if (stack.length) move(frame(stack[stack.length - 1])); });
     settle();
-    const field = space.querySelector<HTMLElement>(".near");
-    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1] };
+    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1], hint: settle };
   });
 
   // Escape steps out of the beat the reader is looking at
@@ -309,6 +313,7 @@ export function surface() {
     // Hello each set in as one box, which is one clip each instead of thousands of letters
     s.space.dataset.arrived = "";
     for (const part of s.space.children) setIn(part as HTMLElement);
+    s.hint(); // the way in, "dive in", types once the beat is here to dive into
   }
   const linkable = (id: string) => /^(phase-|piece-|welcome$)/.test(id) && !!document.getElementById(id);
   const onLink = (e: MouseEvent) => {
