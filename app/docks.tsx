@@ -61,8 +61,8 @@ export default function Docks() {
     document.body.append(intro);
     void arrive(intro);
     go.focus({ preventScroll: true });
-    // the page waits at dial-up, the top, unseen behind the begin screen; once everything has come
-    // in, it travels down through every phase to the welcome at the end
+    // the page waits at the top, Hello, unseen behind the begin screen, and stays there once
+    // everything has come in (Kevin, Oct 16: no opening trip; newest is first, from here down)
     window.scrollTo({ top: 0, behavior: "instant" });
 
     go.addEventListener("click", () => {
@@ -91,7 +91,7 @@ export default function Docks() {
         location.pathname,
       );
       const fx = popover(navBar, { id: "ambience", label: "ambience", buttonClass: "dock-ambience" });
-      // the logotype is the way home: pressing it travels, eased, to Hello
+      // the logotype is the way home: pressing it travels, eased, to Hello, the top of the page
       const home = document.createElement("button");
       home.type = "button"; home.className = "dock-home"; home.setAttribute("aria-label", "Kevin Conboy: go to Hello");
       home.append(cursor.el);
@@ -153,8 +153,7 @@ export default function Docks() {
       };
       links.el.addEventListener("click", onLink);
       home.addEventListener("click", () => {
-        const hello = document.querySelector<HTMLElement>(".beat.welcome");
-        if (hello) travel(hello.offsetTop); else void go(HOME);
+        if (document.querySelector(".beat.welcome")) travel(0); else void go(HOME);
       });
       live.current = {
         timeline,
@@ -162,13 +161,12 @@ export default function Docks() {
       };
 
       const viz = visualizer(navBar, sound);
-      // the opening trip: down through every phase to Hello, or, when the page was opened on a link to
-      // a phase or a piece, a journey to it (lib/surface.ts). The work page opens where it is, at now.
+      // the page opens where it is, at Hello; opened on a link to a phase or a piece, it journeys
+      // there (lib/surface.ts). The work page opens where it is, at now.
       const opened = location.hash.slice(1), atHome = location.pathname === HOME;
       void Promise.all([arrive(navBar.el), timeline(atHome)]).then(() => {
         if (!atHome) return;
         if (opened && /^(phase-|piece-|welcome$)/.test(opened) && document.getElementById(opened)) dispatchEvent(new CustomEvent("viewsource:go", { detail: opened }));
-        else travel(document.documentElement.scrollHeight);
       });
       cleanup.push(() => {
         removeEventListener("dock:drop", onDrop); live.current = null;

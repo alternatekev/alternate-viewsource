@@ -200,6 +200,8 @@ html[data-surface="column"] .dock-ambience { margin-inline-start: auto; }
 .dock-block { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 10px; overflow: hidden; white-space: nowrap;
   font: inherit; letter-spacing: inherit; color: var(--quiet); background: none; border: 0; border-inline-start: var(--dock-border) solid var(--dock-line); cursor: pointer; text-align: start; }
 .dock-block:first-child { border-inline-start: 0; }
+/* hello's block is a word, not a span of years: it keeps its whole word on the narrowest timeline */
+.dock-block[aria-label="hello"] { flex-basis: auto; flex-shrink: 0; min-width: max-content; }
 .dock-block[aria-current] { color: var(--ink); }
 .dock-block-year { font-variant-numeric: tabular-nums; }
 .dock-block-name[data-typing]::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
@@ -264,3 +266,30 @@ html[data-work="corridor"] .stop-space[data-here] { pointer-events: auto; }
 html[data-work="corridor"] .stop.quiet .stop-space { display: block; text-align: center; overflow: visible; }
 .stop-quiet { font: 400 clamp(42px, 7vw, 96px)/1 var(--face-display); color: var(--quiet); }
 html[data-work="column"] .stop-stack { margin-top: 2rem; }
+
+/* work page and colophon (Oct 16) */
+/* words over the field: a soft scrim behind a year's words and behind a quiet year's number
+   (docs/audit.md, finding 6), paper at 78% over a blur, fading out at its edges so it is a haze
+   and not a card. The scrim lives in the box's own padding, inside the one transition's clip, and
+   the negative margin keeps the words exactly where they were. */
+.stop-head, .stop-quiet { position: relative; z-index: 0; padding: 1.25rem 1.5rem; margin: -1.25rem -1.5rem; }
+.stop-head { max-width: calc(36rem + 3rem); }
+.stop-quiet { display: inline-block; }
+.stop-head::before, .stop-quiet::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: color-mix(in oklab, var(--paper) 78%, transparent);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent), linear-gradient(180deg, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent), linear-gradient(180deg, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+/* the corridor's box grows by the scrim's margins so its scroll edge doesn't clip them; the words stay put */
+html[data-work="corridor"] .stop-space { width: calc(min(1040px, 84vw) + 3rem); max-height: calc(80vh + 2.5rem); padding: 1.25rem 1.5rem; }
+
+/* the colophon: the work page's column, read straight down. Its headings are set like a piece's title. */
+.colophon .stop { padding-bottom: 4vh; }
+.colophon .stop + .stop { padding-top: 4vh; }
+.colophon h2 { margin: 0 0 1rem; font: 400 1.5rem/1.15 var(--face-display); letter-spacing: 0; }
+.colophon .stop-body { margin: 0 0 2.4rem; }
+.colophon .stop-body a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.colophon .stop-work { text-wrap: pretty; }
