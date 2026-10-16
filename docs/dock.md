@@ -14,6 +14,7 @@ Where the exploration in the browser has landed so far; the sections after this 
 - **Color.** The nav's place picks the field's scheme: centered, its edge's own (Compass on top, Hue wheel on the bottom); in a left corner Warm/cool, in a right corner Archive.
 - **Visualizer.** The music as one waveform in the gaps beside the nav, out to the window's edges; flat and still when the sound is off.
 - **Panes.** Each dock refracts the field under it through its own small fixed shatter.
+- **Glass.** Each dock and the ambience popover is frosted glass over the page: words that pass beneath are blurred past reading, and the field glows through (`dock.glass`: blur, saturation, paper tint). Without `backdrop-filter`, or with `prefers-reduced-transparency`, the pane is the reading column's scrim instead.
 
 ## Decisions (original plan)
 

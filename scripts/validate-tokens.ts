@@ -45,6 +45,14 @@ for (const [name, c, min] of [["ink", u.ink, 4.5], ["quiet", u.quiet, 4.5], ["ac
   if (lo < min) fail(`${name} falls to ${lo.toFixed(2)}:1 over the field (needs ${min}:1)`);
   else console.log(`  ${name}: at least ${lo.toFixed(2)}:1 over anything the field shows`);
 }
+// The docks' words sit on the glass: paper at the tint over the blurred field, whose worst is its
+// brightest background (the blur spreads a highlight out). Ink and quiet must hold AA there.
+const glassY = dock.glass.tintAlpha * paperY + (1 - dock.glass.tintAlpha) * brightestBg;
+for (const [name, c] of [["ink", u.ink], ["quiet", u.quiet]] as const) {
+  const r = contrast(luminance(c as Oklch), glassY);
+  if (r < 4.5) fail(`${name} falls to ${r.toFixed(2)}:1 on the dock glass (needs 4.5:1)`);
+  else console.log(`  ${name}: at least ${r.toFixed(2)}:1 on the dock glass`);
+}
 // Phase accents mark things; they need 3:1 against paper as non-text color.
 for (const [k, c] of Object.entries(color.phases)) {
   const r = contrast(luminance(c as Oklch), paperY);

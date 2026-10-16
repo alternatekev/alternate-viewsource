@@ -190,7 +190,13 @@ html[data-surface="zoom"] .beat[data-depth="2"] .piece a { pointer-events: auto;
 /* on a phone the pages sit in the ambience popover, a list above the effects, and ambience takes the bar's far end */
 html[data-surface="column"] .dock-ambience { margin-inline-start: auto; }
 .dock-popover .dock-links { display: grid; gap: 12px; margin: 0 0 24px; justify-items: start; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
-.dock-popover { margin: 0; inset: auto; position: fixed; min-inline-size: 240px; padding: 16px; color: var(--ink); background: transparent; border: var(--dock-border) solid var(--dock-line); }
+.dock-popover { margin: 0; inset: auto; position: fixed; min-inline-size: 240px; padding: 16px; color: var(--ink); border: var(--dock-border) solid var(--dock-line); }
+/* the bars and the popover are frosted glass: what passes beneath is blurred past reading, the field
+   glows through. They set in with their box, so the glass arrives with them (tokens/dock.ts glass) */
+.dock, .dock-popover { background: var(--dock-glass); -webkit-backdrop-filter: var(--dock-glass-filter); backdrop-filter: var(--dock-glass-filter); }
+/* no backdrop-filter, or a reader who asks for less transparency: the reading column's scrim instead */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .dock, .dock-popover { background: var(--scrim); } }
+@media (prefers-reduced-transparency: reduce) { .dock, .dock-popover { background: var(--scrim); -webkit-backdrop-filter: none; backdrop-filter: none; } }
 .dock-option { display: block; margin: 0 0 12px; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: 0; cursor: pointer; text-align: start; }
 .dock-option:last-child { margin-bottom: 0; }
 .dock-option[aria-pressed="false"], .dock-option:disabled { color: var(--quiet); }
