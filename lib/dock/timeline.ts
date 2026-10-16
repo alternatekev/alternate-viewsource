@@ -3,8 +3,9 @@
 // (dock.helloSpan) so the marker can say you are there, not in agents. A marker shows where the
 // reader is, read from the scroll position across all the beats. Pressing a block scrolls the page to that phase,
 // animated, never a jump; the field and the music follow the scroll, and a long trip surges them.
-// A wheel, touch or key during the trip hands control back to the visitor.
+// The trip itself is lib/travel.ts, shared with every other trip down the page.
 
+import { travelTo } from "@/lib/travel";
 import { retype } from "@/lib/type";
 import { dock } from "@/tokens/dock";
 
@@ -39,25 +40,7 @@ export function timelineBlocks(onPress?: () => void) {
     el.append(btn);
     return btn;
   });
-  // the trip: eased in and out over the token's duration; reduced motion goes straight there
-  let trip = 0;
-  const stopTrip = () => { cancelAnimationFrame(trip); trip = 0; };
-  const INTERRUPT = ["wheel", "touchstart", "keydown"] as const;
-  INTERRUPT.forEach((t) => addEventListener(t, stopTrip, { passive: true }));
-  function scrollToY(to: number) {
-    stopTrip();
-    const max = document.documentElement.scrollHeight - innerHeight;
-    to = Math.max(0, Math.min(max, to));
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { window.scrollTo({ top: to, behavior: "instant" }); return; }
-    const from = scrollY, t0 = performance.now(), ms = dock.timelineScrollMs;
-    const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-    const step = (now: number) => {
-      const x = Math.min(1, (now - t0) / ms);
-      window.scrollTo({ top: from + (to - from) * ease(x), behavior: "instant" });
-      trip = x < 1 ? requestAnimationFrame(step) : 0;
-    };
-    trip = requestAnimationFrame(step);
-  }
+  const scrollToY = (y: number) => void travelTo(y);
   const marker = document.createElement("span");
   marker.className = "dock-marker"; marker.setAttribute("aria-hidden", "true");
   el.append(marker);
@@ -92,6 +75,6 @@ export function timelineBlocks(onPress?: () => void) {
     el,
     /** an eased trip to a scroll position, the same one a block press makes */
     travel: scrollToY,
-    destroy() { off(); stopTrip(); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); },
+    destroy() { off(); el.remove(); },
   };
 }
