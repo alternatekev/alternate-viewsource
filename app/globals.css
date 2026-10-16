@@ -94,6 +94,8 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
 .near p, .piece-body li { text-wrap: pretty; }
 .near-mark, .near-site, .near-work { margin: 0 0 .8rem; }
+/* agents work, set apart under where it happened (app/marks.tsx): the small pixel label, a step quieter */
+.near-where, .stop-where { margin: 1.6rem 0 .8rem; font: 13px/1.5 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); text-wrap: balance; }
 .piece-org { display: block; color: var(--quiet); font-size: .85em; }
 .near-source, .near-source a, .piece-source { color: var(--quiet); font-size: .85em; }
 .near-source > * + *::before { content: " · "; }

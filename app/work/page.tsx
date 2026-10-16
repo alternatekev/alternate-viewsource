@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getMilestones, getPhases, getWriting } from "@/lib/content";
 import type { Milestone, Phase, Writing } from "@/lib/content/schema";
 import { Sources, When } from "../when";
+import { Marks } from "../marks";
 import Corridor from "./corridor";
 
 // Work: a time capsule opened at now. It starts at the newest year and scrolls back through time,
@@ -50,11 +51,7 @@ export default async function Work() {
             <div className="stop-space">
               <div className="stop-head">
                 <h2 id={`year-${y}-h`} className="stop-year">{y}</h2>
-                {marks.map((m) => (
-                  <p key={m.key} className="stop-mark">
-                    {m.label}. <Sources sources={m.sources} className="stop-source" />
-                  </p>
-                ))}
+                <Marks marks={marks} className="stop-mark" sourceClass="stop-source" headClass="stop-where" dated={false} />
                 {work.map((w) =>
                   w.html ? (
                     <details key={w.key} className="stop-work" id={`work-${w.key}`}>
