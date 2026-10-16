@@ -10,6 +10,8 @@
 // in only once it has scrolled into view.
 
 import { onBegin } from "@/lib/begin";
+import { isColumn } from "@/lib/column";
+import { travelTo } from "@/lib/travel";
 import { retype, setIn } from "@/lib/type";
 import { motion } from "@/tokens/motion";
 
@@ -18,11 +20,15 @@ type Cam = { x: number; y: number; k: number };
 export function surface() {
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const Z = motion.zoom;
-  document.documentElement.setAttribute("data-surface", "");
+  // phones have no zoom (Kevin, Oct 16): each phase is a column read by scrolling, at reading size,
+  // everything already open. The journeys, the set-in on arrival and the rest of the surface still apply.
+  const column = isColumn();
+  document.documentElement.setAttribute("data-surface", column ? "column" : "zoom");
   const beats = [...document.querySelectorAll<HTMLElement>(".beat")];
 
   const spaces = beats.map((beat) => {
     const space = beat.querySelector<HTMLElement>(".space")!;
+    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined };
     const stack: HTMLElement[] = []; // the targets dived into, outermost first
     let run: Animation | null = null;
 
@@ -79,14 +85,22 @@ export function surface() {
     }
     function settle() {
       beat.dataset.depth = String(stack.length);
+      // dived into something bigger than the screen, a finger moves through it instead of the page
+      beat.toggleAttribute("data-pan", pannable(stack[stack.length - 1]));
       void retype(back, stack.length ? "back" : "");
       back.tabIndex = stack.length ? 0 : -1;
+    }
+    // the address names what you're reading: a piece while you're in one, otherwise nothing extra
+    function address() {
+      const top = stack[stack.length - 1], id = top && isPiece(top) ? top.id : "";
+      if (location.hash.slice(1) !== id) history.replaceState(history.state, "", id ? `#${id}` : location.pathname + location.search);
     }
     function dive(target: HTMLElement) {
       if (stack.includes(target)) return;
       stack.push(target);
       move(frame(target));
       settle();
+      address();
       // focus follows the reader in, without scrolling the page
       target.querySelector<HTMLElement>(".dive, a")?.focus({ preventScroll: true });
     }
@@ -95,6 +109,7 @@ export function surface() {
       const from = stack.pop()!;
       move(stack.length ? frame(stack[stack.length - 1]) : { x: 0, y: 0, k: 1 });
       settle();
+      address();
       const opener = space.querySelector<HTMLElement>(`[data-dive="${from.id}"]`);
       opener?.focus({ preventScroll: true });
     }
@@ -141,6 +156,75 @@ export function surface() {
       if ((lean.x || lean.y) && !slide) { last = performance.now(); slide = requestAnimationFrame(glide); }
     });
     beat.addEventListener("pointerleave", () => { lean = { x: 0, y: 0 }; });
+    // touch: the same three gestures, by finger. One finger dived in drags through what's open and, at
+    // its end, carries on down the page, with the glide a native scroll has when let go. Two fingers
+    // spreading dive in one level over what's between them; pinching together steps back out.
+    const fingers = new Map<number, { x: number; y: number }>();
+    let pinch0 = 0, pinched = false, dragged = false, fling = 0, flingV = { x: 0, y: 0 }, lastMove = 0;
+    const spread = () => { const [a, b] = [...fingers.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+    // moves what's open by a finger's motion; what the piece can't take, the page does
+    function drag(dx: number, dy: number) {
+      const y0 = panY;
+      pan(dx, dy);
+      const rest = dy - (panY - y0);
+      if (Math.abs(rest) > 0.5) window.scrollBy({ top: rest, behavior: "instant" });
+    }
+    function glideOn() {
+      let t0 = performance.now();
+      const step = (t: number) => {
+        const dt = Math.min(32, t - t0); t0 = t;
+        flingV = { x: flingV.x * Math.pow(0.95, dt / 16), y: flingV.y * Math.pow(0.95, dt / 16) };
+        if (Math.hypot(flingV.x, flingV.y) < 0.02) { fling = 0; return; }
+        drag(flingV.x * dt, flingV.y * dt);
+        fling = requestAnimationFrame(step);
+      };
+      fling = requestAnimationFrame(step);
+    }
+    beat.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") return;
+      cancelAnimationFrame(fling); fling = 0; flingV = { x: 0, y: 0 };
+      fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (fingers.size === 1) { dragged = false; pinched = false; }
+      if (fingers.size === 2) pinch0 = spread();
+    });
+    beat.addEventListener("pointermove", (e) => {
+      const was = e.pointerType === "touch" && fingers.get(e.pointerId);
+      if (!was) return;
+      const now = { x: e.clientX, y: e.clientY };
+      fingers.set(e.pointerId, now);
+      if (fingers.size >= 2) {
+        if (pinched || !pinch0) return;
+        const r = spread() / pinch0;
+        if (r < 1.25 && r > 0.8) return;
+        pinched = true; dragged = true; // one level per gesture
+        if (r <= 0.8) { out(); return; }
+        const [a, b] = [...fingers.values()];
+        const under = document.elementFromPoint((a.x + b.x) / 2, (a.y + b.y) / 2)?.closest<HTMLElement>("[data-dive]");
+        const btn = under && beat.contains(under) ? under
+          : space.querySelector<HTMLElement>(stack.length ? `#${stack[stack.length - 1].id} [data-dive]` : "[data-dive]");
+        const target = btn && document.getElementById(btn.dataset.dive!);
+        if (target) dive(target);
+        return;
+      }
+      if (pinched || !pannable(stack[stack.length - 1]) || !base) return;
+      const dx = was.x - now.x, dy = was.y - now.y;
+      if (!dragged && Math.hypot(dx, dy) < 2) return;
+      dragged = true;
+      const t = performance.now(), dt = Math.max(1, t - lastMove); lastMove = t;
+      flingV = { x: flingV.x * 0.6 + (dx / dt) * 0.4, y: flingV.y * 0.6 + (dy / dt) * 0.4 };
+      drag(dx, dy);
+    });
+    const lift = (e: PointerEvent) => {
+      if (!fingers.delete(e.pointerId)) return;
+      if (fingers.size) return;
+      pinch0 = 0;
+      // let go mid-drag: it glides on; held still before letting go: it stays
+      if (dragged && !pinched && !reduced && performance.now() - lastMove < 80) glideOn();
+    };
+    beat.addEventListener("pointerup", lift);
+    beat.addEventListener("pointercancel", lift);
+    // a drag or a pinch is not a press: the click it would end in doesn't dive or follow a link
+    beat.addEventListener("click", (e) => { if (dragged) { e.preventDefault(); e.stopImmediatePropagation(); dragged = false; } }, true);
     let quiet = 0;
     beat.addEventListener("wheel", (e) => {
       if (!e.ctrlKey) {
@@ -161,7 +245,8 @@ export function surface() {
     }, { passive: false });
     addEventListener("resize", () => { if (stack.length) move(frame(stack[stack.length - 1])); });
     settle();
-    return { beat, space, out, depth: () => stack.length };
+    const field = space.querySelector<HTMLElement>(".near");
+    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1] };
   });
 
   // Escape steps out of the beat the reader is looking at
@@ -181,14 +266,64 @@ export function surface() {
         if (!e.isIntersecting) continue;
         seen!.unobserve(e.target);
         const s = spaces.find((x) => x.beat === e.target);
-        if (!s) continue;
-        // headings don't type (Kevin, Oct 15): the phase's name and years, the field beside it and
-        // Hello each set in as one box, which is one clip each instead of thousands of letters
-        s.space.dataset.arrived = "";
-        for (const part of s.space.children) setIn(part as HTMLElement);
+        if (s) arrive(s);
       }
-    }, { threshold: 0.5 });
+    }, column ? { rootMargin: "0px 0px -20% 0px" } : { threshold: 0.5 }); // a column is taller than the screen: it sets in as its top comes into view
     spaces.forEach((s) => seen!.observe(s.beat));
   });
-  return { destroy() { off(); seen?.disconnect(); removeEventListener("keydown", onKey); } };
+
+  // Following a link is a journey, never a jump: out of whatever you're reading, one level at a time,
+  // down (or up) the timeline to the phase it lives in, then in through the phase's field to the
+  // piece. A link to a phase stops at its name. Links anywhere on the page that point at a phase or
+  // a piece (#phase-…, #piece-…, #welcome) take it, and so do the browser's back and forward.
+  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, reduced ? 0 : ms));
+  let journeying = 0;
+  async function journey(id: string) {
+    const el = id ? document.getElementById(id) : null;
+    const to = el && spaces.find((s) => s.beat.contains(el));
+    if (!el || !to) return;
+    const run = ++journeying, still = () => run === journeying;
+    for (const s of spaces) {
+      if (s.top() === el) continue;
+      const here = inView(s.beat);
+      while (s.depth() && still()) { s.out(); if (here) await wait(Z.ms * 0.8); }
+    }
+    if (!still()) return;
+    // in a column the trip goes to the thing itself, clear of the dock across the top
+    const topDock = column ? Math.max(0, ...[...document.querySelectorAll<HTMLElement>(".dock")].map((d) => d.getBoundingClientRect()).filter((r) => r.top < innerHeight / 2).map((r) => r.bottom)) : 0;
+    await travelTo(column && el !== to.beat.querySelector("h2") ? el.getBoundingClientRect().top + scrollY - topDock - 24 : to.beat.offsetTop);
+    if (!still()) return;
+    arrive(to);
+    // stepping out on the way rewrote the address; a link to a phase or to Hello keeps its own
+    if (!el.classList.contains("piece") && location.hash.slice(1) !== id) history.replaceState(history.state, "", `#${id}`);
+    if (el.classList.contains("piece") && to.field) {
+      if (to.top() !== to.field && to.top() !== el) { to.dive(to.field); await wait(Z.ms * 0.9); }
+      if (still() && to.top() !== el) to.dive(el);
+    }
+  }
+  const inView = (b: HTMLElement) => { const r = b.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
+  function arrive(s: (typeof spaces)[number]) {
+    if ("arrived" in s.space.dataset) return;
+    // headings don't type (Kevin, Oct 15): the phase's name and years, the field beside it and
+    // Hello each set in as one box, which is one clip each instead of thousands of letters
+    s.space.dataset.arrived = "";
+    for (const part of s.space.children) setIn(part as HTMLElement);
+  }
+  const linkable = (id: string) => /^(phase-|piece-|welcome$)/.test(id) && !!document.getElementById(id);
+  const onLink = (e: MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+    const id = a?.getAttribute("href")!.slice(1);
+    if (!id || !linkable(id)) return;
+    e.preventDefault();
+    history.pushState(null, "", `#${id}`);
+    void journey(id);
+  };
+  document.addEventListener("click", onLink);
+  const onPop = () => { const id = location.hash.slice(1); if (linkable(id)) void journey(id); };
+  addEventListener("popstate", onPop);
+  // the docks ask for a journey when the page opens on a link (lib/begin: the opening trip)
+  const onGo = (e: Event) => { void journey((e as CustomEvent<string>).detail); };
+  addEventListener("viewsource:go", onGo);
+  return { destroy() { off(); seen?.disconnect(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo); } };
 }

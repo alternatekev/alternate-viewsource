@@ -25,7 +25,7 @@ async function readDesigns() {
   return rows.sort((a, b) => a.start.localeCompare(b.start));
 }
 async function readWriting() {
-  const rows = [...await readJson("writing/posts.json", (x) => Writing.parse(x)), ...await readJson("writing/work.json", (x) => Writing.parse(x))];
+  const rows = [...await readJson("writing/posts.json", (x) => Writing.parse(x)), ...await readJson("writing/work.json", (x) => Writing.parse(x)), ...await readJson("writing/old.json", (x) => Writing.parse(x))];
   return rows.sort((a, b) => a.date.localeCompare(b.date));
 }
 async function readChapters(): Promise<Chapter[]> {

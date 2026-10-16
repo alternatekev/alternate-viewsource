@@ -37,17 +37,25 @@ async function main() {
   const designs = (await json("spine/designs.json")).map((x) => Design.parse(x));
   for (const d of designs) if (d.snapshot.captured < d.start) fail("spine/designs.json", `${d.key} captured before it started`);
 
-  const writing = [...(await json("writing/posts.json")), ...(await json("writing/work.json"))].map((x) => Writing.parse(x));
+  const writing = [...(await json("writing/posts.json")), ...(await json("writing/work.json")), ...(await json("writing/old.json"))].map((x) => Writing.parse(x));
   const wkeys = new Set<string>();
   for (const w of writing) {
     if (wkeys.has(w.key)) fail("writing/posts.json", `duplicate key ${w.key}`);
     wkeys.add(w.key);
-    if (/<script|<iframe|on[a-z]+=/i.test(w.html)) fail("writing/posts.json", `${w.key} carries script, an embed or an event handler`);
+    if (/<script|<iframe|\son[a-z]+\s*=/i.test(w.html)) fail("writing/posts.json", `${w.key} carries script, an embed or an event handler`);
     for (const m of w.html.matchAll(/src="([^"]+)"/g)) {
       if (!m[1].startsWith("/writing/")) fail("writing/posts.json", `${w.key} loads ${m[1]} from elsewhere`);
       else if (!existsSync(path.join(root, "..", "public", m[1]))) fail("writing", `${w.key} shows ${m[1]}, which isn't in public/`);
     }
     if (w.end && w.end < w.date) fail("writing", `${w.key} ends before it starts`);
+  }
+
+  // a phase's intro is plain words and links into the site: each link goes to a piece that exists
+  const ids = new Set(writing.map((w) => `piece-${w.key}`));
+  for (const p of phases) {
+    if (p.intro.status === "stub" ? p.intro.html !== "" : !p.intro.html) fail("spine/phases.json", `${p.key} intro is ${p.intro.status} but ${p.intro.html ? "has" : "has no"} words`);
+    if (/<(?!\/?(a|em)\b)/i.test(p.intro.html)) fail("spine/phases.json", `${p.key} intro carries markup other than links and emphasis`);
+    for (const m of p.intro.html.matchAll(/href="([^"]+)"/g)) if (!m[1].startsWith("#") || !ids.has(m[1].slice(1))) fail("spine/phases.json", `${p.key} intro links to ${m[1]}, which isn't a piece here`);
   }
 
   const storyDir = path.join(root, "story");
