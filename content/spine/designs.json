@@ -7,7 +7,7 @@
     "snapshot": { "url": "https://web.archive.org/web/20010204053000/http://www.alternate.org/", "captured": "2001-02-04" } },
   { "key": "v3-2001", "start": "2001-02-01", "approximate": true, "name": "alternate://v3: #6699CC blue header, polls, comment counts", "tagline": "alternate://v3", "stack": "PHP3, MySQL, Red Hat; HTML 4.01 tables",
     "snapshot": { "url": "https://web.archive.org/web/20010517023840/http://www.alternate.org:80/", "captured": "2001-05-17" } },
-  { "key": "white-2003", "start": "2003-03-01", "approximate": true, "name": "Minimal white blog with orange titles and rotating taglines", "tagline": "'...the bilateral delusion of unilateral attention' - DFW", "stack": "XHTML 1.0 and his own PHP 4",
+  { "key": "white-2003", "start": "2003-03-01", "approximate": true, "name": "Minimal white blog with orange titles and rotating taglines", "tagline": "'...the bilateral delusion of unilateral attention' - DFW", "stack": "XHTML 1.0 and my own PHP 4",
     "snapshot": { "url": "https://web.archive.org/web/20030419082139/http://alternate.org:80/", "captured": "2003-04-19" } },
   { "key": "alternateorg-2005", "start": "2005-06-12", "name": "Red-accented alternateorg theme; a Mac and MP3 music blog", "tagline": "Blogging since before it wasn't cool", "stack": "WordPress 1.5 to 2.0; sIFR headings",
     "snapshot": { "url": "https://web.archive.org/web/20050624083530/http://www.alternate.org:80/", "captured": "2005-06-24" } },

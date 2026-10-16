@@ -13,7 +13,7 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 
 ## Content
 
-- Every claim is sourced or labeled as Kevin's own account (shown on the site as "My account").
+- Every claim is sourced, or recorded as firsthand (Kevin's own account; source label `firsthand`). Firsthand lines carry no source label on the site: only real sources are shown, as links.
 - The site speaks as Kevin, in the first person. Never refer to him in the third person in anything a visitor sees. A chapter with words needs `sources`; a milestone always does.
 - Chapters are in Kevin's words. Draft from existing material he wrote; do not invent his voice or his opinions. New material comes from his dictation.
 - `status` is honest: `stub` until there are words, `draft` until he has read or heard them, `told` after.
