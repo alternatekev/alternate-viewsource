@@ -1,5 +1,18 @@
 [
   {
+    "key": "work-cisco-magnetic",
+    "title": "Magnetic, the design system behind Cisco's network administration products",
+    "date": "2020-11-25",
+    "approximate": true,
+    "kind": "work",
+    "org": "Cisco Meraki",
+    "source": {
+      "label": "magnetic.cisco.com",
+      "url": "https://magnetic.cisco.com/"
+    },
+    "html": "<p>In the fall of 2020 Cisco Meraki hired four contractors to try an experiment: one React design system for the Meraki Dashboard, built in the open inside the company, that product teams would choose over rolling their own. I was one of the four. I'm the only one of the four still on it; the experiment became my job.</p>\n\n<p>It's called Magnetic. It's the component library, the design tokens and themes, the charts, the accessibility work and the release train behind Cisco's network administration products. As of July 2026 the lower bound was about 95 repositories across Cisco declaring it as a dependency (I built the scan myself, so I know what it does and doesn't count: a dependency is not a deployed product). It ships monthly. I give the release talk to a couple hundred engineers.</p>\n\n<p>The work in between is the work: a 2022 proposal to replace the third-party Select we'd started with, a 2023 Storybook project, a 2024 series called React for Everyone for people who didn't think they were React people, spacing-token audits, a second theme for One Cisco Design, and the long tail of a library that a lot of teams depend on and nobody wants to be surprised by.</p>\n\n<p>In 2025 I became the engineering manager for Magnetic. In 2026 I took on the other two teams under the same umbrella: the one that modernizes the existing Dashboard with it, and the one that owns the JavaScript platform underneath. Three teams, one output: the experience every Cisco administrator sees.</p>\n\n<p>In March 2026 we turned entirely to agentic development, and the design system became the first thing I opened to coding agents, so they read it and use it the way our developers do. That story continues in <a href=\"#phase-agents\">Agents</a>.</p>\n\n<p>What's not measured yet, honestly: time saved per team, and how many teams extend the library on their own. I'm working on both.</p>"
+  },
+  {
     "key": "work-automattic",
     "title": "WordPress.com",
     "date": "2012-01-11",
@@ -217,19 +230,6 @@
     "source": {
       "label": "alternate.org",
       "url": "https://alternate.org/visual/merrill-lynch"
-    },
-    "html": ""
-  },
-  {
-    "key": "work-office-of-the-director-of-national-intelligence",
-    "title": "Office of the Director of National Intelligence",
-    "date": "2010-01-01",
-    "end": "2010-11-17",
-    "kind": "work",
-    "org": "Effective UI",
-    "source": {
-      "label": "alternate.org",
-      "url": "https://alternate.org/visual/office-of-the-director-of-national-intelligence"
     },
     "html": ""
   },
