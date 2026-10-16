@@ -120,3 +120,13 @@ export const Writing = z.object({
   html: z.string(),
 });
 export type Writing = z.infer<typeof Writing>;
+
+// The colophon's "how this site is made": headed groups of short paragraphs in my words, about this
+// version of the site. html is paragraphs, lists, links, emphasis and code only; every link into
+// this repo must point at a file that exists (scripts/validate-content.ts). Status as for a chapter.
+export const Colophon = z.object({
+  status: z.enum(["stub", "draft", "told"]),
+  sources: z.array(Source).default([]),
+  sections: z.array(z.object({ key: z.string().regex(/^[a-z0-9-]+$/), heading: z.string().min(1), html: z.string() })),
+});
+export type Colophon = z.infer<typeof Colophon>;
