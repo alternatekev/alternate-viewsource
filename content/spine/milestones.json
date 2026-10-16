@@ -26,5 +26,13 @@
   { "key": "magnetic", "date": "2020-01-01", "approximate": true, "phase": "components", "label": "Magnetic, the design system at Cisco Meraki",
     "sources": [{ "label": "My account", "note": "to be sourced before it ships" }] },
   { "key": "agentic", "date": "2026-03-01", "approximate": true, "phase": "agents", "label": "Three teams turn to agentic development",
-    "sources": [{ "label": "My account", "note": "to be sourced before it ships" }] }
+    "sources": [{ "label": "My account", "note": "to be sourced before it ships" }] },
+  { "key": "prodrive", "date": "2026-03-05", "phase": "agents", "label": "First commit of a SimHub telemetry plugin for the racing rig; Pro Drive begins",
+    "sources": [{ "label": "prodrive-plugin on GitHub", "url": "https://github.com/k10-motorsports/prodrive-plugin" }] },
+  { "key": "seven-repos", "date": "2026-04-25", "phase": "agents", "label": "One repository becomes seven; a shared agents submodule carries every repo's instructions",
+    "sources": [{ "label": "prodrive-plugin on GitHub", "url": "https://github.com/k10-motorsports/prodrive-plugin" }, { "label": "k10-motorsports organization", "url": "https://github.com/k10-motorsports" }] },
+  { "key": "real-roads", "date": "2026-06-05", "phase": "agents", "label": "A pipeline that turns OpenStreetMap roads and USGS elevation into Assetto Corsa tracks",
+    "sources": [{ "label": "k10-colorado on GitHub", "url": "https://github.com/k10-motorsports/k10-colorado" }] },
+  { "key": "local-first", "date": "2026-09-16", "phase": "agents", "label": "The cloud comes out: Racing Desk, one driver, one rig",
+    "sources": [{ "label": "The compiled record", "note": "content/objects/sim-racing-record; the racing-desk repository is local to the rig" }] }
 ]

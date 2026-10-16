@@ -1,0 +1,33 @@
+{
+  "kind": "screenshots",
+  "title": "The HUD, March to October 2026",
+  "date": "2026-10-08",
+  "phase": "agents",
+  "caption": "The telemetry overlay as it drew itself: the first documented Pro Drive frame, then the Racing Desk layouts rendered by the overlay's own golden tests from synthetic telemetry.",
+  "files": [
+    {
+      "file": "2026-03-13-prodrive-dashboard.png",
+      "date": "2026-03-13",
+      "caption": "The first documented frame of the Pro Drive dashboard: an AI car-response message, fuel, tyre temperatures, a pedal histogram, iRating and safety rating, gear and speed.",
+      "source": "prodrive-plugin repository, docs/dashboard-screenshot.png"
+    },
+    {
+      "file": "2026-10-08-racing-desk-in-car.png",
+      "date": "2026-10-08",
+      "caption": "Racing Desk in-car HUD over a transparent background, as it sits over the game: a top strip, tyres and datastream low right, incidents low left. Golden-test render from synthetic data.",
+      "source": "racing-desk repository, overlay golden tests"
+    },
+    {
+      "file": "2026-10-08-racing-desk-glance.jpg",
+      "date": "2026-10-08",
+      "caption": "Racing Desk glance layout at 1180×820, the iPad/OBS frame: everything a driver reads at a glance. Golden-test render.",
+      "source": "racing-desk repository, overlay golden tests"
+    },
+    {
+      "file": "2026-09-16-ibt-outlines.png",
+      "date": "2026-09-16",
+      "caption": "Track outlines reconstructed from iRacing .ibt telemetry files on the rig: proof that the local corpus carries position data, so no cloud track database is needed.",
+      "source": "racing-desk repository, docs/phase0-probes"
+    }
+  ]
+}
