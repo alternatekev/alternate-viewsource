@@ -15,7 +15,7 @@ const isoDate = z.preprocess(
 export const Source = z.object({
   label: z.string().min(1),
   url: z.string().url().optional(),
-  // "Kevin's account" when there is no document yet; the site labels it as such.
+  // "firsthand" when there is no document yet: my own account. The site shows no label for it.
   note: z.string().optional(),
 });
 export type Source = z.infer<typeof Source>;
@@ -69,6 +69,12 @@ export const Design = z.object({
   snapshot: z.object({ url: z.string().url(), captured: isoDate, note: z.string().optional() }),
 });
 export type Design = z.infer<typeof Design>;
+
+// My use of agents, a day at a time: how many replies Claude Code gave me each day, by model family,
+// counted from my own session transcripts (Oct 16, 2026). Replies, not tokens; days with none are absent.
+const count = z.number().int().min(0);
+export const UsageDay = z.object({ day: isoDate, opus: count, fable: count, sonnet: count, haiku: count });
+export type UsageDay = z.infer<typeof UsageDay>;
 
 
 export const ChapterMeta = z.object({
