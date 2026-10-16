@@ -1,0 +1,27 @@
+{
+  "kind": "screenshots",
+  "title": "DOOOOM SPEEDSPORTS liveries",
+  "date": "2026-09-28",
+  "phase": "agents",
+  "caption": "Script-generated iRacing paints: the Lotus 79 through fourteen versions in a week, then the shatter treatment across eighteen cars.",
+  "files": [
+    {
+      "file": "2026-09-lotus79-v2-to-v14.jpg",
+      "date": "2026-09-28",
+      "caption": "The Lotus 79 top view through ten versions, left to right: v2 placed on the template, v4 to v6 the orange shadow and its angle, v7 the spine and wing, v8 and v9 the first full pass and its inversion, v10 \"Ring Dissolve\", v13 \"Shatter\", v14 inverted. Every version is a script output.",
+      "source": "doooom-iRacing-liveries repository, history/ and cars/"
+    },
+    {
+      "file": "2026-09-lotus79-flanks.jpg",
+      "date": "2026-09-28",
+      "caption": "The left flank at v8, v10 and the v13 sill strip: sponsor rows, the DOOOOM wordmark, the shard field.",
+      "source": "doooom-iRacing-liveries repository"
+    },
+    {
+      "file": "2026-09-22-lotus79-v13-paint-viewer.jpg",
+      "date": "2026-09-22",
+      "caption": "Lotus 79 v13 shatter in the iRacing paint viewer: matte black against gloss shards, an orange 36.",
+      "source": "Windows screenshot"
+    }
+  ]
+}

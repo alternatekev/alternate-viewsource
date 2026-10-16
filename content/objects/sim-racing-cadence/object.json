@@ -1,0 +1,24 @@
+{
+  "kind": "chart",
+  "title": "Commits per week, March\u2013October 2026, by workstream",
+  "date": "2026-10-16",
+  "phase": "agents",
+  "file": "rows.json",
+  "caption": "Human-authored commits per week across every sim-racing repository, deduplicated across repos that absorbed one another; CI-bot commits excluded. Peak week 20\u201326 April: 316.",
+  "method": "git log of 26 cloned repositories plus the reflogs of three local-only repos; dates bucketed in America/Denver; sessions are runs of commits less than 45 minutes apart.",
+  "totals": {
+    "commits_2026": 2259,
+    "active_days": 128,
+    "repositories": 29,
+    "pull_requests_merged": 374,
+    "sessions": 451,
+    "median_gap_minutes": 1.1,
+    "best_rate_per_hour": 26.1
+  },
+  "sources": [
+    {
+      "label": "k10-motorsports on GitHub",
+      "url": "https://github.com/k10-motorsports"
+    }
+  ]
+}
