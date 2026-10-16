@@ -1,7 +1,7 @@
 {
   "kind": "screenshots",
   "title": "The HUD, March to October 2026",
-  "date": "2026-10-08",
+  "date": "2026-10-16",
   "phase": "agents",
   "caption": "The telemetry overlay as it drew itself: the first documented Pro Drive frame, then the Racing Desk layouts rendered by the overlay's own golden tests from synthetic telemetry.",
   "files": [
@@ -28,6 +28,12 @@
       "date": "2026-09-16",
       "caption": "Track outlines reconstructed from iRacing .ibt telemetry files on the rig: proof that the local corpus carries position data, so no cloud track database is needed.",
       "source": "racing-desk repository, docs/phase0-probes"
+    },
+    {
+      "file": "2026-10-16-racing-desk-desk.jpg",
+      "date": "2026-10-16",
+      "caption": "The Racing Desk desk window live on the rig: the race-now verdict, composure, the hours that work and the ones that don't, previous races and a lap chart for Summit Point. Every number from local .ibt files.",
+      "source": "Screen capture on the rig"
     }
   ]
 }
