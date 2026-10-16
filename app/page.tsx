@@ -48,6 +48,8 @@ export default async function Home() {
                   <span className="far-years">{year(p.start)}–{year(p.end)}</span>
                   <h2 id={`phase-${p.key}`}>{p.name}</h2>
                 </button>
+                {/* the intro, in my words, under the name; its links travel to the pieces they came from */}
+                {p.intro.html && <p className="phase-intro" data-status={p.intro.status} dangerouslySetInnerHTML={{ __html: p.intro.html }} />}
                 {/* near: everything from these years, in full, as paragraphs set too small to read until you dive in */}
                 <div className="near" id={`near-${p.key}`}>
                   <div className="near-col">
@@ -73,16 +75,22 @@ export default async function Home() {
                       </p>
                     ))}
                   </div>
-                  {pieces.map((w) => (
-                    <article key={w.key} className="piece" id={`piece-${w.key}`} data-dive={`piece-${w.key}`}>
-                      <button type="button" className="dive" data-dive={`piece-${w.key}`}>
-                        <span className="near-year">{w.kind === "work" || w.kind === "album" ? `${w.approximate ? "c. " : ""}${span(w)}` : w.date}</span>
-                        <h3>{w.title}</h3>
-                        {w.org && <span className="piece-org">{w.org}</span>}
-                      </button>
-                      <div className="piece-body" dangerouslySetInnerHTML={{ __html: w.html }} />
-                      <p className="piece-source">First published at <a href={w.source.url}>{w.source.label}</a></p>
-                    </article>
+                  {/* the posts, as blocks: a row per year, time running down and the year's posts across */}
+                  {[...new Set(pieces.map((w) => year(w.date)))].map((y) => (
+                    <div key={y} className="near-row">
+                      <p className="near-row-year">{y}</p>
+                      {pieces.filter((w) => year(w.date) === y).map((w) => (
+                        <article key={w.key} className="piece" id={`piece-${w.key}`} data-dive={`piece-${w.key}`}>
+                          <button type="button" className="dive" data-dive={`piece-${w.key}`}>
+                            <span className="near-year">{w.kind === "work" || w.kind === "album" ? `${w.approximate ? "c. " : ""}${span(w)}` : w.date}</span>
+                            <h3>{w.title}</h3>
+                            {w.org && <span className="piece-org">{w.org}</span>}
+                          </button>
+                          <div className="piece-body" dangerouslySetInnerHTML={{ __html: w.html }} />
+                          <p className="piece-source">First published at <a href={w.source.url}>{w.source.label}</a></p>
+                        </article>
+                      ))}
+                    </div>
                   ))}
                 </div>
               </div>
