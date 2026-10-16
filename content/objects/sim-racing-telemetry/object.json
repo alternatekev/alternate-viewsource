@@ -1,0 +1,21 @@
+{
+  "kind": "chart",
+  "title": "Speed, throttle and brake from a Racing Desk telemetry sidecar",
+  "date": "2026-10-07",
+  "phase": "agents",
+  "file": "rows.json",
+  "caption": "McLaren 570S GT4, N\u00fcrburgring Gesamtstrecke, 7 October 2026: the first 192 seconds of a Racing Desk recording, downsampled from ~27 frames a second. The sidecar carries 38 channels per frame beside the MP4.",
+  "columns": [
+    "t_seconds",
+    "speed_mph",
+    "throttle_pct",
+    "brake_pct",
+    "lateral_g"
+  ],
+  "sources": [
+    {
+      "label": "Racing Desk recording and .telemetry.jsonl sidecar on the rig",
+      "note": "local file, 2026-10-07 17:16"
+    }
+  ]
+}

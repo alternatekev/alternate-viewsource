@@ -1,0 +1,39 @@
+{
+  "kind": "screenshots",
+  "title": "The rig, before and during",
+  "date": "2026-10-08",
+  "phase": "agents",
+  "caption": "Screenshots from the rig, in order: other people's tracks in 2025, then the roads built in 2026.",
+  "files": [
+    {
+      "file": "2025-01-12-elva-la-canyons.jpg",
+      "date": "2025-01-12",
+      "caption": "McLaren Elva on LA Canyons, Assetto Corsa. One of 41 screenshots from January to March 2025, 38 of them McLarens.",
+      "source": "Assetto Corsa screenshot"
+    },
+    {
+      "file": "2025-01-19-p1-la-canyons.jpg",
+      "date": "2025-01-19",
+      "caption": "McLaren P1 on LA Canyons, the same week as the abandoned McLaren Corsa site.",
+      "source": "Assetto Corsa screenshot"
+    },
+    {
+      "file": "2025-12-27-iracing-desktop.jpg",
+      "date": "2025-12-27",
+      "caption": "The full desktop before any software of its own: stock iRacing HUD on the 3440×1440 ultrawide, a READY card on the second display. Ten weeks before the first plugin commit.",
+      "source": "Windows screenshot"
+    },
+    {
+      "file": "2026-06-05-miata-nordschleife.jpg",
+      "date": "2026-06-05",
+      "caption": "Mazda Miata on the Nordschleife, the evening the track pipeline was scaffolded.",
+      "source": "Assetto Corsa screenshot"
+    },
+    {
+      "file": "2026-10-08-evora-fog.jpg",
+      "date": "2026-10-08",
+      "caption": "Lotus Evora in fog on a two-lane mountain road, Assetto Corsa, decoded from an HDR capture.",
+      "source": "NVIDIA capture (JPEG XR)"
+    }
+  ]
+}

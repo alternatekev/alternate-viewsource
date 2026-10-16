@@ -1,0 +1,22 @@
+{
+  "kind": "document",
+  "title": "The sim-racing work, 2025\u20132026: a compiled record",
+  "date": "2026-10-16",
+  "phase": "agents",
+  "file": "record.md",
+  "caption": "Everything built for the racing rig between March and October 2026, dated and counted from the git history of 29 repositories.",
+  "sources": [
+    {
+      "label": "k10-motorsports on GitHub",
+      "url": "https://github.com/k10-motorsports"
+    },
+    {
+      "label": "alternatekev on GitHub",
+      "url": "https://github.com/alternatekev"
+    },
+    {
+      "label": "Local-only repos (airoso, racing-desk, doooom-paints) on the rig",
+      "note": "reflogs read on 2026-10-16"
+    }
+  ]
+}
