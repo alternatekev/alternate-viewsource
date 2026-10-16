@@ -136,6 +136,7 @@ export const DockTokens = z.object({
   grip: z.object({ hit: z.number().min(24), lines: z.tuple([z.number().positive(), z.number().positive()]), lineSpacing: z.number().min(2), lineWidth: z.number().positive() }),
   refraction: z.object({ on: z.boolean(), cell: z.number().min(4), shift: z.tuple([z.number().min(0), z.number().min(0)]), hoverGain: z.number().min(0), hoverFloor: z.number().min(0).max(0.5), hoverSec: z.number().positive() }),
   typing: z.object({ charMs: z.number().positive(), eraseMs: z.number().positive(), holdMs: z.number().min(0), gapMs: z.number().min(0), pauseMs: z.number().min(0), blinkMs: z.number().positive(), revealSteps: z.number().int().min(1), popoverPace: z.number().positive().max(1), longChars: z.number().int().min(4) }),
+  glass: z.object({ blur: z.number().min(4).max(40), saturate: z.number().min(1).max(2), tintAlpha: z.number().min(0).max(1) }),
   look: z.object({
     lineAlpha: z.number().min(0).max(1), gripAlpha: z.number().min(0).max(1), ghostAlpha: z.number().min(0).max(1),
     liftedOpacity: z.number().min(0).max(1), ghostFadeMs: z.number().min(0), borderWidth: z.number().positive(),
