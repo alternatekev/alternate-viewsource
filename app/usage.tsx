@@ -6,22 +6,20 @@ import UsageRead from "./usage-read";
 // of true time. It stays still. Pointing at a day, or stepping along with the arrow keys, retypes
 // the line under it with that day's count; leaving types the whole back. Every line is written
 // here, on the server, so the page carries no numbers in its script and reads without one.
+// The tool is incidental and the site shows the transformation (Kevin, Oct 16): the lines lead with
+// what the days produced, the model families stay in the data (schema.ts) and off the page, and the
+// tool is named on the colophon, not here.
 
 const DAY = 86_400_000;
 const H = 48, STEP = 4, BAR = 2;
 const fmt = new Intl.NumberFormat("en-US");
 const when = (t: number) => new Date(t).toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: "UTC" });
-const FAMILIES = [["opus", "Opus"], ["fable", "Fable"], ["sonnet", "Sonnet"], ["haiku", "Haiku"]] as const;
 
 const total = (u: UsageDay) => u.opus + u.fable + u.sonnet + u.haiku;
 const plural = (n: number) => `${fmt.format(n)} ${n === 1 ? "reply" : "replies"}`;
 
-function line(t: number, u?: UsageDay) {
-  if (!u) return `${when(t)}: none.`;
-  const n = total(u), mix = FAMILIES.filter(([k]) => u[k] > 0);
-  if (mix.length === 1) return `${when(t)}: ${plural(n)}, all ${mix[0][1]}.`;
-  return `${when(t)}: ${plural(n)}; ${mix.sort(([a], [b]) => u[b] - u[a]).map(([k, name]) => `${fmt.format(u[k])} ${name}`).join(", ")}.`;
-}
+// a day's line: its date and its count, nothing more
+const line = (t: number, u?: UsageDay) => (u ? `${when(t)}: ${plural(total(u))}.` : `${when(t)}: none.`);
 
 export default function Usage({ days }: { days: UsageDay[] }) {
   if (!days.length) return null;
@@ -31,8 +29,9 @@ export default function Usage({ days }: { days: UsageDay[] }) {
   const max = Math.max(...days.map(total));
   const busiest = days.find((u) => total(u) === max)!;
   const all = days.reduce((s, u) => s + total(u), 0);
-  const whole = `${plural(all)} over ${days.length} days; the most, ${fmt.format(max)}, on ${when(Date.parse(busiest.day))}.`;
   const span = `${when(first)} to ${when(last)}, ${new Date(last).getUTCFullYear()}`;
+  const lead = `My use of coding agents, a day at a time, ${span}: ${plural(all)} over ${days.length} days. Quiet days are gaps of real time.`;
+  const whole = `The most, ${fmt.format(max)}, on ${when(Date.parse(busiest.day))}.`;
   return (
     <figure className="usage" data-usage data-read={whole}>
       <svg
@@ -42,7 +41,7 @@ export default function Usage({ days }: { days: UsageDay[] }) {
         width="100%"
         height={H}
         role="img"
-        aria-label={`Claude Code's replies to me each day, ${span}. ${whole} Use the arrow keys to read a day.`}
+        aria-label={`${lead} ${whole} Use the arrow keys to read a day.`}
         tabIndex={0}
       >
         <line className="usage-base" x1={0} x2={slots * STEP} y1={H - 0.5} y2={H - 0.5} />
@@ -52,7 +51,7 @@ export default function Usage({ days }: { days: UsageDay[] }) {
         })}
       </svg>
       <figcaption>
-        <span className="usage-what">Claude Code&rsquo;s replies to me, a day at a time, {span}.</span>{" "}
+        <span className="usage-what">{lead}</span>{" "}
         <span className="usage-read" aria-live="polite">{whole}</span>
       </figcaption>
       <UsageRead />
