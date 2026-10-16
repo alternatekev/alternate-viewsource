@@ -63,6 +63,14 @@ export const MotionTokens = z.object({
   reduced: z.object({ expand: z.number().min(0).max(1), spin: z.number().min(0).max(1), swirl: z.number().min(0).max(1), camera: z.number().min(0).max(1), parallax: z.number().min(0).max(1) }),
   // at most this share of the field visibly changing at once
   changingShareMax: z.number().min(0).max(1),
+  // the work page: travelling back through time (lib/flight.ts, lib/work.ts)
+  flight: z.object({
+    shapeSec: z.number().positive(), gatherSec: z.number().positive(),
+    surgePerYear: z.number().min(0), surgeMax: z.number().positive(), surgeDecaySec: z.number().positive(),
+    surgeSpeed: z.number().min(0), surgeSpin: z.number().min(0), pushSpeed: z.number().min(0),
+    gatherScale: z.number().positive().max(1),
+    diveMs: z.number().int().positive(), settleMs: z.number().int().positive(), yearScreens: z.number().positive(), depthPx: z.number().positive(),
+  }),
 });
 // authored shape (defaults optional); the build parses it against the schema
 export type MotionTokens = z.input<typeof MotionTokens>;
