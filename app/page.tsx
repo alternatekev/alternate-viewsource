@@ -9,26 +9,38 @@ import { Sources, When } from "./when";
 // smaller still beside each one: its sources. Scroll travels between phases; pressing dives in
 // (lib/surface.ts). Without JavaScript this is simply a document, every word in reading order.
 // Words here are the sourced spine only; chapters arrive when Kevin dictates them.
-// Oldest first (Kevin, Oct 15): dial-up at the top, scrolling down through time to agents, then the welcome.
+// Newest first (Kevin, Oct 16): Hello at the top, then agents, scrolling down through time to dial-up.
+// Inside each phase every list runs newest first too.
 const year = (d: string) => new Date(d).getUTCFullYear();
+const newest = <T extends { date: string }>(rows: T[]) => [...rows].sort((a, b) => b.date.localeCompare(a.date));
 
-// the welcome: the line from my old homepage, as I have since edited it
+// the welcome, in my words (Kevin, Oct 16)
 const WELCOME = {
-  text: "I'm Kevin, and I've been working to make the internet more usable, organized, and engaging since 1999.",
+  text: "I'm Kevin. I've spent 28 years learning each new way the web gets built, then teaching teams to build that way. In 2026 the material is agents: I run the design system behind Cisco's network administration products, my three teams went fully agentic in March, and most of what I build at home is built with agents too. Newest first, from here down.",
 };
 
 export default async function Home() {
   const [phases, milestones, designs, writing, usage] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting(), getUsage()]);
   return (
-    <div className="beats" data-order="oldest-first">
+    // the page's one landmark; the beats stay a child of the body, as the surface's styles expect
+    <div className="beats" role="main" data-order="newest-first">
       <h1 className="visually-hidden">viewsource</h1>
-      {phases.map((p) => {
-        const marks = milestones.filter((m) => m.phase === p.key);
-        const sites = designs.filter((d) => d.start >= p.start && d.start <= p.end);
+      <section className="beat welcome" aria-labelledby="welcome">
+        <div className="space">
+          <div className="far">
+            <h2 id="welcome">Hello</h2>
+          </div>
+          <p className="subhead">{WELCOME.text}</p>
+        </div>
+      </section>
+      {[...phases].reverse().map((p) => {
+        const marks = newest(milestones.filter((m) => m.phase === p.key));
+        const sites = designs.filter((d) => d.start >= p.start && d.start <= p.end).sort((a, b) => b.start.localeCompare(a.start));
         // my music (posts about it and the albums) lives somewhere of its own, not on the timeline (Kevin, Oct 16)
-        const here = writing.filter((w) => w.kind !== "music" && w.kind !== "album" && w.date >= p.start && w.date <= p.end);
+        const here = newest(writing.filter((w) => w.kind !== "music" && w.kind !== "album" && w.date >= p.start && w.date <= p.end));
         // what has words is a piece to dive into; work that was only ever a name in a list is a line
         const pieces = here.filter((w) => w.html), names = here.filter((w) => !w.html);
+        const years = [...new Set(pieces.map((w) => year(w.date)))].sort((a, b) => b - a);
         return (
           <section
             key={p.key}
@@ -45,7 +57,7 @@ export default async function Home() {
           >
             <div className="space">
               <div className="far">
-                <button type="button" className="dive" data-dive={`near-${p.key}`}>
+                <button type="button" className="dive" data-dive={`near-${p.key}`} aria-label={p.name}>
                   <span className="far-years">{year(p.start)}–{year(p.end)}</span>
                   <h2 id={`phase-${p.key}`}>{p.name}</h2>
                 </button>
@@ -81,13 +93,13 @@ export default async function Home() {
                       </p>
                     ))}
                   </div>
-                  {/* the posts, as blocks: a row per year, time running down and the year's posts across */}
-                  {[...new Set(pieces.map((w) => year(w.date)))].map((y) => (
+                  {/* the posts, as blocks: a row per year, newest year first, and the year's posts across, newest first */}
+                  {years.map((y) => (
                     <div key={y} className="near-row">
                       <p className="near-row-year">{y}</p>
                       {pieces.filter((w) => year(w.date) === y).map((w) => (
                         <article key={w.key} className="piece" id={`piece-${w.key}`} data-dive={`piece-${w.key}`}>
-                          <button type="button" className="dive" data-dive={`piece-${w.key}`}>
+                          <button type="button" className="dive" data-dive={`piece-${w.key}`} aria-label={w.title}>
                             <When date={w.date} end={w.end} approximate={w.approximate} full={w.kind !== "work"} />
                             <h3>{w.title}</h3>
                             {w.org && <span className="piece-org">{w.org}</span>}
@@ -104,14 +116,6 @@ export default async function Home() {
           </section>
         );
       })}
-      <section className="beat welcome" aria-labelledby="welcome">
-        <div className="space">
-          <div className="far">
-            <h2 id="welcome">Hello</h2>
-          </div>
-          <p className="subhead">{WELCOME.text}</p>
-        </div>
-      </section>
       <Surface />
     </div>
   );

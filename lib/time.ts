@@ -1,7 +1,8 @@
-// Where in time the page is: 0 at the first phase (dial-up), 1 at the last (agents), whichever way
-// the page runs (on the work page: 0 at the oldest year, 1 at now). The field's color and the music read it. Scrolling moves it; the timeline moves it
-// by scrolling the page. It is read from the phase beats only, so anything above or below them (the
-// welcome) sits at the nearest end: the welcome, after agents, is now.
+// Where in time the page is: 0 at dial-up, 1 at agents, whichever way the page runs (data-order on
+// .beats; on the work page: 0 at the oldest year, 1 at now). The field's color and the music read it.
+// Scrolling moves it; the timeline moves it by scrolling the page. It is read from the phase beats
+// only (.beat[data-key]), so anything above or below them sits at the nearest end: the welcome, now
+// first and above agents, is now (place 1), since a view above the first phase clamps to it.
 
 let place = 0, fromScroll = true;
 export const newestFirst = () => document.querySelector(".beats, .stops")?.getAttribute("data-order") === "newest-first";
