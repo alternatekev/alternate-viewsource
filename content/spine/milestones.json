@@ -27,10 +27,18 @@
     "sources": [{ "label": "firsthand", "note": "to be sourced before it ships" }] },
   { "key": "agentic", "date": "2026-03-01", "approximate": true, "phase": "agents", "label": "My team turned to agentic development, and then I took on all three",
     "sources": [{ "label": "firsthand", "note": "to be sourced before it ships" }] },
+  { "key": "prodrive", "date": "2026-03-05", "phase": "agents", "label": "Made the first commit of a SimHub telemetry plugin for my racing rig; Pro Drive began",
+    "sources": [{ "label": "prodrive-plugin on GitHub", "url": "https://github.com/k10-motorsports/prodrive-plugin" }] },
   { "key": "agent-ready-system", "date": "2026-03-15", "approximate": true, "phase": "agents", "label": "Opened our design system to coding agents, so they read and use it the way developers do, with a one-click setup for designers",
     "sources": [{ "label": "firsthand", "note": "draft wording, to be read" }] },
+  { "key": "seven-repos", "date": "2026-04-25", "phase": "agents", "label": "Split one repository into seven, with a shared agents submodule carrying every repo's instructions",
+    "sources": [{ "label": "prodrive-plugin on GitHub", "url": "https://github.com/k10-motorsports/prodrive-plugin" }, { "label": "k10-motorsports organization", "url": "https://github.com/k10-motorsports" }] },
   { "key": "agent-first-management", "date": "2026-05-01", "approximate": true, "phase": "agents", "label": "Built an agent-first system for running my teams: it reads the work where it happens, says how fresh and how sure every answer is, and drafts while I decide",
     "sources": [{ "label": "firsthand", "note": "draft wording, to be read" }] },
+  { "key": "real-roads", "date": "2026-06-05", "phase": "agents", "label": "Built a pipeline that turns OpenStreetMap roads and USGS elevation into Assetto Corsa tracks",
+    "sources": [{ "label": "k10-colorado on GitHub", "url": "https://github.com/k10-motorsports/k10-colorado" }] },
+  { "key": "local-first", "date": "2026-09-16", "phase": "agents", "label": "Took the cloud out: Racing Desk, one driver, one rig",
+    "sources": [{ "label": "The compiled record", "note": "content/objects/sim-racing-record; the racing-desk repository is local to the rig" }] },
   { "key": "outline-to-slides", "date": "2026-10-01", "approximate": true, "phase": "agents", "label": "Built an outline-to-slides system with agents: the talk's argument stays the source of truth, and decks from live HTML to Keynote are composed from it",
     "sources": [{ "label": "firsthand", "note": "draft wording, to be read" }] }
 ]
