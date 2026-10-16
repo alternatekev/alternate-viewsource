@@ -1,7 +1,8 @@
-// The sound switch, in the ambience popover. Sound is on by default and starts with begin (browsers
-// let a page make sound only after a click, tap or key press, and begin is that press). Turning it
-// off here fades it out; on again fades it back in. The instrument and its pedal models load only
-// when sound first starts.
+// The sound switch, in the ambience popover. Sound is off by default for now (Kevin, Oct 16); the
+// switch turns it on. The audio context is still created and resumed inside begin (browsers let a
+// page make sound only after a click, tap or key press, and begin is that press), so turning sound
+// on later needs no second press. Turning it off fades it out; on again fades it back in. The
+// instrument and its pedal models load only when sound first starts.
 
 import { onReset } from "@/lib/ambience";
 import { toggle } from "@/lib/dock/toggle";
@@ -12,8 +13,8 @@ const WORKLET = "/sound/pedals.js";
 type Field = { setMusic(x: number, y: number, energy: number): void };
 
 export function soundSwitch() {
-  let wanted = true, ac: AudioContext | null = null, inst: Instrument | null = null, failed = false;
-  const sw = toggle({ name: "sound", on: true, onChange: (on) => { wanted = on; if (on) start(); inst?.setOn(on); } });
+  let wanted = false, ac: AudioContext | null = null, inst: Instrument | null = null, failed = false;
+  const sw = toggle({ name: "sound", on: false, onChange: (on) => { wanted = on; if (on) start(); inst?.setOn(on); } });
   const button = sw.el;
   const fail = () => { failed = true; sw.unavailable("unavailable here"); };
 
@@ -47,8 +48,8 @@ export function soundSwitch() {
 
   return {
     el: button,
-    /** call inside the visitor's press (begin) */
-    start() { if (wanted) start(); },
+    /** call inside the visitor's press (begin): the context is made now; the instrument plays only when wanted */
+    start,
     get analyser() { return inst?.analyser ?? null; },
     get on() { return wanted && !!inst && ac?.state === "running"; },
     destroy() {

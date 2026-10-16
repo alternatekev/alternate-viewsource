@@ -24,7 +24,7 @@ If you are unsure whether something is public, it is not. Leave it out and say s
 - The glance tier comes first on every device: the HTML and its stylesheet carry the whole story. Nothing needs JavaScript to read a word.
 - Budgets: first round trip under 14 KB compressed, no WebGL before first paint, the read tier under 50 KB of JavaScript, the field and the instrument after idle.
 - Motion follows `.claude/skills/ambient-field-motion/SKILL.md`: atmosphere, not interface; slow, deliberate, data-informed; nothing jumps; nothing in the field is clickable; `prefers-reduced-motion` keeps mood changes and drops drift.
-- Sound is on by default and starts with begin, the press that starts the page (browsers allow no sound before a click, tap or key press). The switch in the ambience popover turns it off.
+- Sound is off by default for now; the switch in the ambience popover turns it on. The audio context still starts with begin, the press that starts the page (browsers allow no sound before a click, tap or key press), so the switch needs no second press.
 - WebGL-first with an accessible alternative for everything; the docks and the air are DOM, Pointer Events, WebGL and Web Audio, not React. React is the shell. TypeScript throughout; small modules, so rendering stays fast.
 - It must not look like an AI designed it. Light touch: the content and the voice carry the site; the ambience supports them.
 - Nothing changes at once, at any depth. A swap, a pop, a cut or a jump is a bug. The one exception Kevin has made is the dock landing where it is dropped.
