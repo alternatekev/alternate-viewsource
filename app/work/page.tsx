@@ -35,10 +35,11 @@ export default async function Work() {
       <h1 className="visually-hidden">Work</h1>
       {years.map(({ y, marks, work, phase }) => {
         const mood = { "data-valence": phase.mood.valence, "data-arousal": phase.mood.arousal, "data-x": phase.mood.x, "data-y": phase.mood.y };
-        // a quiet year is only distance: the corridor shows its number in passing; a reader without it never sees it
+        // a quiet year is only distance: the corridor shows its number in passing (lib/work.ts unhides it);
+        // a reader without it, with or without the stylesheet, never sees a run of bare numbers
         if (!marks.length && !work.length) {
           return (
-            <div key={y} className="stop quiet" data-key={`y${y}`} data-year={y} aria-hidden="true" {...mood}>
+            <div key={y} className="stop quiet" data-key={`y${y}`} data-year={y} aria-hidden="true" hidden {...mood}>
               <div className="stop-space"><span className="stop-quiet">{y}</span></div>
             </div>
           );
