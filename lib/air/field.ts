@@ -181,8 +181,15 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
 
   // ---------- world ----------
   let W = 8, H = 4.5, cssW = 1, cssH = 1, dpr = 1;
+  // the field takes its size from its own canvas, which CSS sets to the whole screen with the URL bar
+  // hidden (100lvh): the bar sliding in and out as a phone scrolls doesn't rescale the world mid-read,
+  // and a phone's zoom can't mis-size it. A turn of the phone resizes it for real. The pixel density is
+  // capped lower on touch screens, for the smaller GPU; the look is the same.
+  const coarse = matchMedia("(pointer: coarse)").matches;
   function sizeWorld() {
-    cssW = Math.max(1, innerWidth); cssH = Math.max(1, innerHeight); dpr = Math.min(1.75, devicePixelRatio || 1);
+    cssW = Math.max(1, canvas.clientWidth || document.documentElement.clientWidth);
+    cssH = Math.max(1, canvas.clientHeight || document.documentElement.clientHeight);
+    dpr = Math.min(coarse ? 1.5 : 1.75, devicePixelRatio || 1);
     H = 2 * cam.distance * Math.tan(cam.fov / 2) * cam.overscan; W = (H * cssW) / cssH;
   }
   sizeWorld();
@@ -689,8 +696,13 @@ export function createField(canvas: HTMLCanvasElement, opts: { seed?: number; si
     g.drawElements(g.TRIANGLES, idxCount, idxData instanceof Uint32Array ? g.UNSIGNED_INT : g.UNSIGNED_SHORT, 0);
     Object.values(A).forEach((l) => g.disableVertexAttribArray(l));
   }
+  let sized = false;
   function resize() {
-    sizeWorld(); canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
+    const was = [cssW, cssH];
+    sizeWorld();
+    if (sized && was[0] === cssW && was[1] === cssH) return; // nothing changed size (on a phone, only the URL bar moved)
+    sized = true;
+    canvas.width = Math.round(cssW * dpr); canvas.height = Math.round(cssH * dpr);
     gl!.bindTexture(gl!.TEXTURE_2D, sceneTex);
     gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGB, canvas.width, canvas.height, 0, gl!.RGB, gl!.UNSIGNED_BYTE, null);
   }
