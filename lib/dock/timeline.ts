@@ -3,8 +3,10 @@
 // (dock.helloSpan) so the marker can say you are there, not in agents. A marker shows where the
 // reader is, read from the scroll position across all the beats. Pressing a block scrolls the page to that phase,
 // animated, never a jump; the field and the music follow the scroll, and a long trip surges them.
-// A wheel, touch or key during the trip hands control back to the visitor.
+// The trip itself is lib/travel.ts, shared with every other trip down the page.
 
+import { isColumn } from "@/lib/column";
+import { travelTo } from "@/lib/travel";
 import { retype } from "@/lib/type";
 import { dock } from "@/tokens/dock";
 
@@ -15,6 +17,10 @@ export function timelineBlocks(onPress?: () => void) {
   const spans = beats.map((b) => (isPhase(b) ? Math.max(1, year(b.dataset.end) - year(b.dataset.start)) : dock.helloSpan));
   const total = spans.reduce((a, b) => a + b, 0);
 
+  // on a phone the spans shorten to the year each phase began ('91), and the phase you're in types its
+  // name, since there is no hovering there; the full span stays in each block's label
+  const column = isColumn();
+  const shows: ((on: boolean) => void)[] = [];
   const el = document.createElement("div");
   el.className = "dock-timeline";
   const blocks = beats.map((b, i) => {
@@ -28,36 +34,22 @@ export function timelineBlocks(onPress?: () => void) {
     btn.setAttribute("aria-label", `${label}, ${span}`);
     // the name is hidden until the block is hovered or focused, then types out like the logotype
     const name = document.createElement("span"); name.className = "dock-block-name"; name.setAttribute("aria-hidden", "true");
-    const yr = document.createElement("span"); yr.className = "dock-block-year"; yr.setAttribute("aria-hidden", "true"); yr.textContent = span;
+    const yr = document.createElement("span"); yr.className = "dock-block-year"; yr.setAttribute("aria-hidden", "true");
+    yr.textContent = column && isPhase(b) ? `’${String(Math.floor(year(b.dataset.start))).slice(2)}` : span;
     btn.append(yr, name);
-    if (!isPhase(b)) { btn.setAttribute("aria-label", label); btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); }); el.append(btn); return btn; }
+    if (!isPhase(b)) { shows.push(() => {}); btn.setAttribute("aria-label", label); btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); }); el.append(btn); return btn; }
     const show = () => { name.dataset.typing = ""; void retype(name, label); };
     const hide = () => { void retype(name, "").then(() => { if (!name.textContent) delete name.dataset.typing; }); };
-    btn.addEventListener("pointerenter", show); btn.addEventListener("focus", show);
-    btn.addEventListener("pointerleave", hide); btn.addEventListener("blur", hide);
+    shows.push((on) => (on ? show() : hide()));
+    if (!column) {
+      btn.addEventListener("pointerenter", show); btn.addEventListener("focus", show);
+      btn.addEventListener("pointerleave", hide); btn.addEventListener("blur", hide);
+    }
     btn.addEventListener("click", () => { scrollToY(b.offsetTop); onPress?.(); });
     el.append(btn);
     return btn;
   });
-  // the trip: eased in and out over the token's duration; reduced motion goes straight there
-  let trip = 0;
-  const stopTrip = () => { cancelAnimationFrame(trip); trip = 0; };
-  const INTERRUPT = ["wheel", "touchstart", "keydown"] as const;
-  INTERRUPT.forEach((t) => addEventListener(t, stopTrip, { passive: true }));
-  function scrollToY(to: number) {
-    stopTrip();
-    const max = document.documentElement.scrollHeight - innerHeight;
-    to = Math.max(0, Math.min(max, to));
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { window.scrollTo({ top: to, behavior: "instant" }); return; }
-    const from = scrollY, t0 = performance.now(), ms = dock.timelineScrollMs;
-    const ease = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-    const step = (now: number) => {
-      const x = Math.min(1, (now - t0) / ms);
-      window.scrollTo({ top: from + (to - from) * ease(x), behavior: "instant" });
-      trip = x < 1 ? requestAnimationFrame(step) : 0;
-    };
-    trip = requestAnimationFrame(step);
-  }
+  const scrollToY = (y: number) => void travelTo(y);
   const marker = document.createElement("span");
   marker.className = "dock-marker"; marker.setAttribute("aria-hidden", "true");
   el.append(marker);
@@ -68,7 +60,9 @@ export function timelineBlocks(onPress?: () => void) {
     const n = beats.length - 1, mid = scrollY + innerHeight / 2;
     let k = beats.findIndex((b) => mid < b.offsetTop + b.offsetHeight);
     if (k < 0) k = n;
-    const f = Math.max(0, Math.min(n, k + (mid - beats[k].offsetTop) / Math.max(1, beats[k].offsetHeight) - 0.5));
+    // a beat a screen tall is placed at its middle; a phone's column, screens long, is current from its
+    // first line, and the marker crosses its block as you read down it
+    const f = Math.max(0, Math.min(n, k + (mid - beats[k].offsetTop) / Math.max(1, beats[k].offsetHeight) - (column ? 0 : 0.5)));
     const i = Math.min(n, Math.floor(f + 1e-6)), t = f - i;
     // the marker is a single point travelling through time between phases, and opens into a
     // highlight over the label of the phase you've arrived at (whose text then reads black)
@@ -83,7 +77,9 @@ export function timelineBlocks(onPress?: () => void) {
     marker.style.insetInlineStart = `${point + (lStart - point) * eased}px`;
     marker.style.inlineSize = `${1 + (lLen - 1) * eased}px`;
     blocks.forEach((x, k) => (k === i ? x.setAttribute("aria-current", "step") : x.removeAttribute("aria-current")));
+    if (column && i !== named) { if (named >= 0) shows[named](false); shows[i](true); named = i; }
   }
+  let named = -1;
   addEventListener("scroll", sync, { passive: true });
   addEventListener("resize", sync);
   const off = () => { removeEventListener("scroll", sync); removeEventListener("resize", sync); };
@@ -92,6 +88,6 @@ export function timelineBlocks(onPress?: () => void) {
     el,
     /** an eased trip to a scroll position, the same one a block press makes */
     travel: scrollToY,
-    destroy() { off(); stopTrip(); INTERRUPT.forEach((t) => removeEventListener(t, stopTrip)); el.remove(); },
+    destroy() { off(); el.remove(); },
   };
 }

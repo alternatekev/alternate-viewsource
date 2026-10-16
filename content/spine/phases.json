@@ -18,6 +18,10 @@
       "arousal": 0.25,
       "x": -0.3,
       "y": 0.25
+    },
+    "intro": {
+      "status": "draft",
+      "html": "I was an “Arty Kid” and a “Computery Kid,” and I loved computers when I was a kid: <a href=\"#piece-why-im-a-designer-part-1-a-timeline\">they were clearly tools for making art</a>. I took my first coding class at a public school when I was 12, at a computer-math-science magnet school in San Diego. By 1999 I’d <a href=\"#piece-why-im-a-designer-part-2-view-source\">click “view source”</a> in my browser, copy out some of their clever HTML code, and learn from their ideas, and when Spiremedia posted for a receptionist, my email’s subject line said “I don’t want to be your receptionist.” <a href=\"#piece-my-days-are-dictated-by-code\">The night of July 7th, 2000, I couldn’t sleep</a>, so I took the main data points of my day and codified them into an XML/HTML-type language."
     }
   },
   {
@@ -32,6 +36,10 @@
       "arousal": 0.55,
       "x": 0.3,
       "y": -0.15
+    },
+    "intro": {
+      "status": "draft",
+      "html": "Then something funny happened that we weren’t expecting, but sort of hoping for: <a href=\"#piece-why-im-a-designer-part-4-ego-and-empathy\">the web became a tool everyone used</a>, all the time, for a ton of reasons. I spent those years being unemployed, doing lots of freelance, building a web page with only 5 kilobytes of code, and building custom Content Management Systems in PHP every time I launched a website for a client. In September 2005, I was 26 years old, and I was about to spend 4 years at a company in Boulder called <a href=\"#piece-design-space-wall-street-on-demand\">Wall Street on Demand</a>."
     }
   },
   {
@@ -53,6 +61,10 @@
       "arousal": 0.7,
       "x": 0.1,
       "y": 0.2
+    },
+    "intro": {
+      "status": "draft",
+      "html": "I spent 6 months designing a 15×10 GIF (among many other things) for the front page of <a href=\"#piece-work-the-new-york-times\">the New York Times</a>, and by late 2007 I oversaw 60-70% of the design and front-end engineering work. Then I got <a href=\"#piece-old-2010-automattical\">a job at Automattic</a>, working on the blogging system I was using to publish my posts. I discovered I had been developing an often-messy and laborious but enjoyable and endlessly-evolving process of <a href=\"#piece-full-stack-web-design\">designing and coding web interface functionality directly in the browser</a>."
     }
   },
   {
@@ -74,6 +86,10 @@
       "arousal": 0.35,
       "x": -0.25,
       "y": -0.2
+    },
+    "intro": {
+      "status": "draft",
+      "html": "In September 2014, I organized a workshop for four designers to bring <a href=\"#piece-work-automattic\">Calypso</a> into a more pure Atomic Design model, then created and edited core Calypso components to carry it across the entire app. When Automattic released Calypso’s source after the better part of two years, <a href=\"#piece-web-and-rockets\">I couldn’t be prouder</a>. At CA, I took Material UI and customized it for our needs, <a href=\"#piece-work-ca-computer-associates\">my first introduction to TypeScript</a>; at Community Funded, React and Next.js were my suggestions, and <a href=\"#piece-work-community-funded\">we launched to live clients</a> in the first quarter of 2020."
     }
   },
   {
@@ -95,6 +111,10 @@
       "arousal": 0.9,
       "x": 0.3,
       "y": 0.15
+    },
+    "intro": {
+      "status": "stub",
+      "html": ""
     }
   }
 ]

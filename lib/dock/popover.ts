@@ -54,12 +54,15 @@ export function popover(bar: Bar, opts: { id: string; label: string; buttonClass
   addEventListener("keydown", onKey);
   addEventListener("pointerdown", onOutside, true);
   addEventListener("dock:lift", close);
-  addEventListener("resize", close);
+  // a phone's URL bar sliding in or out is a resize too; only a real change of width closes it
+  let width = document.documentElement.clientWidth;
+  const onResize = () => { const w = document.documentElement.clientWidth; if (w !== width) { width = w; close(); } };
+  addEventListener("resize", onResize);
   return {
     button, panel,
     destroy() {
       removeEventListener("keydown", onKey); removeEventListener("pointerdown", onOutside, true);
-      removeEventListener("dock:lift", close); removeEventListener("resize", close); button.remove(); panel.remove();
+      removeEventListener("dock:lift", close); removeEventListener("resize", onResize); button.remove(); panel.remove();
     },
   };
 }

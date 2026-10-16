@@ -52,6 +52,8 @@ Carried over from a 2020 investigation of the same idea: always docked, never fl
 
 Top and bottom only; a side rail is an eighth of a 390 px screen. The nav takes the top and the timeline the bottom by default; sliding along the edge still works, and dragging one bar to the other edge swaps them. Thickness 56 px, targets 44 px, `100dvh`, safe-area insets.
 
+As built, Oct 16 (Kevin's calls): the timeline shows the year each phase began (’91, ’01 …, then hello), the full span kept in each block's label, and the phase you're in types its name, since a phone has no hover; a phase is current from its first line, because a phone's column runs many screens. The nav holds the logotype and ambience; the pages move into the ambience popover, above the effects. Nothing in a bar can widen the page.
+
 ## Fresh each visit
 
 Nothing is stored. The composition seed places the bars within the rules: on desktop it may pick `t` for both and the edge for the nav; the timeline starts top or bottom; on phones only `t`. Regenerate re-seeds the field and the music; the bars stay.

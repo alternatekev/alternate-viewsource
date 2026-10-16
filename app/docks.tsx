@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { begin } from "@/lib/begin";
+import { isColumn } from "@/lib/column";
 import { createBar } from "@/lib/dock/bar";
 import { draggable } from "@/lib/dock/draggable";
 import { ambienceControls, navLinks } from "@/lib/dock/nav";
@@ -80,9 +81,10 @@ export default function Docks() {
       const home = document.createElement("button");
       home.type = "button"; home.className = "dock-home"; home.setAttribute("aria-label", "Kevin Conboy: go to Hello");
       home.append(cursor.el);
-      navBar.content.append(home, links.el, fx.button);
       const controls = ambienceControls({ animation: setAnimation, reset: resetComposition });
-      fx.panel.append(sound.el, ...controls.els);
+      // on a phone the bar holds the logotype and ambience; the pages go in the popover, above the effects
+      if (isColumn()) { navBar.content.append(home, fx.button); fx.panel.append(links.el, sound.el, ...controls.els); }
+      else { navBar.content.append(home, links.el, fx.button); fx.panel.append(sound.el, ...controls.els); }
       (window as unknown as { dooombient: typeof sound }).dooombient = sound;
 
       // a new location steps the cursor on; a drag that lands where it started does not
@@ -109,7 +111,13 @@ export default function Docks() {
       timelineBar.content.append(blocks.el);
 
       const viz = visualizer(navBar, sound);
-      void Promise.all([arrive(navBar.el), arrive(timelineBar.el)]).then(() => blocks.travel(document.documentElement.scrollHeight));
+      // the opening trip: down through every phase to Hello, or, when the page was opened on a link to
+      // a phase or a piece, a journey to it (lib/surface.ts)
+      const opened = location.hash.slice(1);
+      void Promise.all([arrive(navBar.el), arrive(timelineBar.el)]).then(() =>
+        opened && /^(phase-|piece-|welcome$)/.test(opened) && document.getElementById(opened)
+          ? dispatchEvent(new CustomEvent("viewsource:go", { detail: opened }))
+          : blocks.travel(document.documentElement.scrollHeight));
       cleanup.push(() => {
         removeEventListener("dock:drop", onDrop);
         viz.destroy(); blocks.destroy(); timeline.destroy(); timelineBar.destroy();
