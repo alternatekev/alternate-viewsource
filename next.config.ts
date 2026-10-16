@@ -18,7 +18,15 @@ const nextConfig: NextConfig = {
   // the link preview reads its frames from disk (app/opengraph-image.tsx), so they ship with it
   outputFileTracingIncludes: { "/opengraph-image": ["./public/og/*.jpg"] },
   async headers() {
-    return [{ source: "/(.*)", headers }];
+    return [
+      { source: "/(.*)", headers },
+      // the old posts' pictures and my portrait keep their names, so they are not immutable; a day
+      // fresh, then a week served while the browser checks for a new one, saves every repeat visit a round trip each
+      ...["/writing/:path*", "/hello/:path*"].map((source) => ({
+        source,
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+      })),
+    ];
   },
 };
 
