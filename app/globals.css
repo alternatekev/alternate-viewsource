@@ -194,3 +194,47 @@ html[data-surface="column"] .dock-ambience { margin-inline-start: auto; }
 .begin:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
 .dock-ghost { position: fixed; left: 0; top: 0; z-index: 9; box-sizing: border-box; border: var(--dock-border) dashed var(--dock-ghost); pointer-events: none; opacity: 0; transition: opacity var(--dock-ghost-fade); }
 .dock-ghost[data-on="1"] { opacity: 1; }
+
+/* work: the years, newest first. Without JavaScript a plain document of the years that have work;
+   with it (html[data-work="corridor"]) each year is a screen of scrolling and its words sit fixed in
+   the middle of the view, placed in depth by lib/work.ts, so scrolling travels down a corridor through
+   time. On a phone (html[data-work="column"]) the years are a column read by scrolling. */
+.stop { position: relative; padding: 12vh 8vw; }
+.stop.quiet { display: none; }
+.stop-year { margin: 0 0 1.4rem; font: 400 clamp(56px, 11vw, 160px)/0.9 var(--face-display); letter-spacing: -.01em; font-variant-numeric: lining-nums; }
+.stop-head { min-width: 0; max-width: 36rem; font-family: var(--face-pixel); letter-spacing: .02em; font-size: 15px; }
+.stop-mark { margin: 0 0 1rem; text-wrap: pretty; }
+.stop-work { margin: 0 0 .9rem; }
+.stop-work summary { cursor: pointer; list-style: none; }
+.stop-work summary::-webkit-details-marker { display: none; }
+.stop-work summary:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+.stop-title { font: 400 1.5rem/1.15 var(--face-display); letter-spacing: 0; }
+.stop-org, .stop-span { display: block; color: var(--quiet); font-size: .85em; }
+.stop-line .stop-title { display: block; }
+.stop-source, .stop-source a { color: var(--quiet); font-size: .85em; }
+.stop-source > * + *::before { content: " · "; }
+.stop-body { margin: 1rem 0 0; font: 400 1rem/1.55 var(--face-text); letter-spacing: 0; overflow-wrap: anywhere; }
+.stop-body img { display: block; max-width: 100%; height: auto; margin: 1rem 0; }
+.stop-body figure { margin: 1rem 0; }
+.stop-stack { display: none; }
+
+html[data-work] .stop-space:not([data-arrived]) { visibility: hidden; }
+html[data-work] .stop-shot:not([data-set]) { visibility: hidden; }
+html[data-work] .stop-stack { display: block; position: relative; aspect-ratio: 16 / 11; min-width: 0; }
+/* a piece open: its year scrolls inside itself, and the stack stays in view beside the words */
+html[data-work="corridor"] .stop-space:has(details[open]) .stop-stack { align-self: start; position: sticky; top: 0; }
+/* the screenshots stacked into the space behind the year: each a step further back, smaller, offset */
+.stop-shot { position: absolute; left: 0; top: 0; width: 78%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left;
+  border: var(--dock-border) solid var(--dock-line); background: var(--paper);
+  transform: translate(calc(var(--i) * 8%), calc(var(--i) * 7%)) scale(calc(1 - var(--i) * .07)); transform-origin: 0 0; z-index: calc(10 - var(--i)); }
+
+html[data-work="corridor"] .stop { height: 100vh; height: 100dvh; padding: 0; }
+html[data-work="corridor"] .stop.quiet { display: block; }
+html[data-work="corridor"] .stop-space {
+  position: fixed; left: 50%; top: 50%; width: min(1040px, 84vw); max-height: 80vh; overflow: auto; overscroll-behavior: contain;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3rem; align-items: center;
+  transform: translate(-50%, -50%); will-change: transform, opacity; pointer-events: none; scrollbar-width: none; }
+html[data-work="corridor"] .stop-space[data-here] { pointer-events: auto; }
+html[data-work="corridor"] .stop.quiet .stop-space { display: block; text-align: center; overflow: visible; }
+.stop-quiet { font: 400 clamp(42px, 7vw, 96px)/1 var(--face-display); color: var(--quiet); }
+html[data-work="column"] .stop-stack { margin-top: 2rem; }
