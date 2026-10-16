@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getMilestones, getPhases, getWriting } from "@/lib/content";
 import type { Milestone, Phase, Writing } from "@/lib/content/schema";
+import { Sources, When } from "../when";
 import Corridor from "./corridor";
 
 // Work: a time capsule opened at now. It starts at the newest year and scrolls back through time,
@@ -14,7 +15,6 @@ import Corridor from "./corridor";
 export const metadata: Metadata = { title: "Work" };
 
 const year = (d: string) => new Date(d).getUTCFullYear();
-const span = (w: { date: string; end?: string }) => (w.end && year(w.end) !== year(w.date) ? `${year(w.date)}–${year(w.end)}` : String(year(w.date)));
 // the screenshots a piece of work carries, in its own words' order
 const shots = (html: string) => [...html.matchAll(/<img[^>]*src="([^"]+)"[^>]*>/g)].map((m) => m[1]);
 const phaseOf = (phases: Phase[], y: number) => phases.find((p) => year(p.start) <= y && y <= year(p.end)) ?? phases[phases.length - 1];
@@ -51,29 +51,30 @@ export default async function Work() {
                 <h2 id={`year-${y}-h`} className="stop-year">{y}</h2>
                 {marks.map((m) => (
                   <p key={m.key} className="stop-mark">
-                    {m.label}.{" "}
-                    <span className="stop-source">
-                      {m.sources.map((s, i) => (s.url ? <a key={i} href={s.url}>{s.label}</a> : <span key={i}>{s.label}</span>))}
-                    </span>
+                    {m.label}. <Sources sources={m.sources} className="stop-source" />
                   </p>
                 ))}
                 {work.map((w) =>
                   w.html ? (
                     <details key={w.key} className="stop-work" id={`work-${w.key}`}>
-                      <summary>
-                        <span className="stop-title">{w.title}</span>
-                        {w.org && <span className="stop-org">{w.org}</span>}
-                        <span className="stop-span">{w.approximate ? "c. " : ""}{span(w)}</span>
+                      <summary className="dated">
+                        <When date={w.date} end={w.end} approximate={w.approximate} />
+                        <span className="dated-what">
+                          <span className="stop-title">{w.title}</span>
+                          {w.org && <span className="stop-org">{w.org}</span>}
+                        </span>
                       </summary>
                       <div className="stop-body" dangerouslySetInnerHTML={{ __html: w.html }} />
                       <p className="stop-source">First published at <a href={w.source.url}>{w.source.label}</a></p>
                     </details>
                   ) : (
-                    <p key={w.key} className="stop-work stop-line">
-                      <span className="stop-title">{w.title}</span>
-                      {w.org && <span className="stop-org">{w.org}</span>}
-                      <span className="stop-span">{w.approximate ? "c. " : ""}{span(w)}</span>{" "}
-                      <span className="stop-source"><a href={w.source.url}>{w.source.label}</a></span>
+                    <p key={w.key} className="stop-work stop-line dated">
+                      <When date={w.date} end={w.end} approximate={w.approximate} />
+                      <span className="dated-what">
+                        <span className="stop-title">{w.title}</span>
+                        {w.org && <span className="stop-org">{w.org}</span>}
+                        <Sources sources={[w.source]} className="stop-source" />
+                      </span>
                     </p>
                   ),
                 )}
