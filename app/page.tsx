@@ -1,6 +1,7 @@
 import { getDesigns, getMilestones, getPhases, getUsage, getWriting } from "@/lib/content";
 import Surface from "./surface";
 import Usage from "./usage";
+import { Marks } from "./marks";
 import { Sources, When } from "./when";
 
 // The spine as one typographic surface (David Small's pattern: zoom is navigation, and type stays
@@ -69,12 +70,7 @@ export default async function Home() {
                 <div className="near" id={`near-${p.key}`}>
                   <div className="near-col">
                     <p className="near-web">{p.web}</p>
-                    {marks.map((m) => (
-                      <p key={m.key} className="near-mark dated">
-                        <When date={m.date} approximate={m.approximate} />{" "}
-                        <span className="dated-what">{m.label}. <Sources sources={m.sources} className="near-source" /></span>
-                      </p>
-                    ))}
+                    <Marks marks={marks} className="near-mark" sourceClass="near-source" headClass="near-where" />
                     {sites.map((d) => (
                       <p key={d.key} className="near-site dated">
                         <When date={d.start} />{" "}

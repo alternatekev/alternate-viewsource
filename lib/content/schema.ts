@@ -54,6 +54,8 @@ export const Milestone = z.object({
   approximate: z.boolean().default(false),
   label: z.string(),
   phase: z.enum(PHASE_KEYS),
+  // agents: where the work happened, at Cisco or at home; the phase sets the two apart (Kevin, Oct 16)
+  where: z.enum(["cisco", "home"]).optional(),
   sources: z.array(Source).default([]),
 });
 export type Milestone = z.infer<typeof Milestone>;
