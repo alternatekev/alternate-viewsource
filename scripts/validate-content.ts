@@ -4,7 +4,8 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import matter from "gray-matter";
-import { ChapterMeta, Design, Milestone, UsageDay, Phase, PHASE_KEYS, Writing } from "../lib/content/schema";
+import { REPO_URL } from "../lib/site";
+import { ChapterMeta, Colophon, Design, Milestone, UsageDay, Phase, PHASE_KEYS, Writing } from "../lib/content/schema";
 
 const root = path.join(process.cwd(), "content");
 let problems = 0;
@@ -63,6 +64,24 @@ async function main() {
     for (const m of p.intro.html.matchAll(/href="([^"]+)"/g)) if (!m[1].startsWith("#") || !ids.has(m[1].slice(1))) fail("spine/phases.json", `${p.key} intro links to ${m[1]}, which isn't a piece here`);
   }
 
+  // the colophon: plain words and links, every link into this repo pointing at a file that is here
+  const colophon = Colophon.parse(JSON.parse(await readFile(path.join(root, "colophon.json"), "utf8")));
+  const words = colophon.sections.some((sec) => sec.html);
+  if (colophon.status === "stub" ? words : !words) fail("colophon.json", `status is ${colophon.status} but it ${words ? "has" : "has no"} words`);
+  if (colophon.status !== "stub" && colophon.sources.length === 0) fail("colophon.json", "words need sources");
+  const ckeys = new Set<string>();
+  for (const sec of colophon.sections) {
+    if (ckeys.has(sec.key)) fail("colophon.json", `duplicate section ${sec.key}`);
+    ckeys.add(sec.key);
+    if (/<(?!\/?(p|a|em|code|ul|li)\b)/i.test(sec.html)) fail("colophon.json", `${sec.key} carries markup other than paragraphs, lists, links, emphasis and code`);
+    for (const m of sec.html.matchAll(/href="([^"]+)"/g)) {
+      const href = m[1];
+      if (!href.startsWith("https://")) fail("colophon.json", `${sec.key} links to ${href}, which isn't an https address`);
+      const own = href.match(new RegExp(`^${REPO_URL.replace(/[.]/g, "\\.")}/(?:blob|tree)/main/(.+)$`));
+      if (own && !existsSync(path.join(root, "..", decodeURIComponent(own[1])))) fail("colophon.json", `${sec.key} links to ${own[1]}, which isn't in this repo`);
+    }
+  }
+
   const storyDir = path.join(root, "story");
   const files = (await readdir(storyDir, { recursive: true, withFileTypes: true }))
     .filter((e) => e.isFile() && e.name.endsWith(".mdx") && !e.name.startsWith("_"))
@@ -81,7 +100,7 @@ async function main() {
     }
   }
 
-  console.log(`${phases.length} phases, ${milestones.length} milestones, ${designs.length} designs, ${writing.length} pieces of writing, ${files.length} chapters checked`);
+  console.log(`${phases.length} phases, ${milestones.length} milestones, ${designs.length} designs, ${writing.length} pieces of writing, ${files.length} chapters, the colophon checked`);
   if (problems) {
     console.error(`${problems} problem(s)`);
     process.exit(1);

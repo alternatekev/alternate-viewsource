@@ -1,7 +1,7 @@
 import matter from "gray-matter";
 import { cacheLife, cacheTag } from "next/cache";
 import { contentSource } from "./source";
-import { Chapter, ChapterMeta, Design, UsageDay, Milestone, Phase, PHASE_KEYS, Writing, type PhaseKey } from "./schema";
+import { Chapter, ChapterMeta, Colophon, Design, UsageDay, Milestone, Phase, PHASE_KEYS, Writing, type PhaseKey } from "./schema";
 
 // Readers. In production every reader is cached under the "content" tag and lives until
 // /api/revalidate is hit; in development they read the files on every request so an edit
@@ -41,6 +41,9 @@ const lazyImages = (html: string) =>
 async function readWriting() {
   const rows = [...await readJson("writing/posts.json", (x) => Writing.parse(x)), ...await readJson("writing/work.json", (x) => Writing.parse(x)), ...await readJson("writing/old.json", (x) => Writing.parse(x))];
   return rows.map((w) => ({ ...w, html: lazyImages(w.html) })).sort((a, b) => a.date.localeCompare(b.date));
+}
+async function readColophon() {
+  return Colophon.parse(JSON.parse(await contentSource().read("colophon.json")));
 }
 async function readChapters(): Promise<Chapter[]> {
   const src = contentSource();
@@ -82,6 +85,12 @@ async function cachedWriting() {
   cacheLife("max");
   return readWriting();
 }
+async function cachedColophon() {
+  "use cache";
+  cacheTag("content");
+  cacheLife("max");
+  return readColophon();
+}
 async function cachedChapters() {
   "use cache";
   cacheTag("content");
@@ -104,6 +113,7 @@ export const getDesigns = cachedDesigns;
 export const getChapters = cachedChapters;
 export const getWriting = cachedWriting;
 export const getUsage = cachedUsage;
+export const getColophon = cachedColophon;
 
 export async function getChapter(phase: string, slug: string): Promise<Chapter | undefined> {
   if (!(PHASE_KEYS as readonly string[]).includes(phase)) return undefined;
