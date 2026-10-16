@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { begin } from "@/lib/begin";
+import { isColumn } from "@/lib/column";
 import { createBar } from "@/lib/dock/bar";
 import { draggable } from "@/lib/dock/draggable";
 import { ambienceControls, navLinks } from "@/lib/dock/nav";
@@ -80,9 +81,10 @@ export default function Docks() {
       const home = document.createElement("button");
       home.type = "button"; home.className = "dock-home"; home.setAttribute("aria-label", "Kevin Conboy: go to Hello");
       home.append(cursor.el);
-      navBar.content.append(home, links.el, fx.button);
       const controls = ambienceControls({ animation: setAnimation, reset: resetComposition });
-      fx.panel.append(sound.el, ...controls.els);
+      // on a phone the bar holds the logotype and ambience; the pages go in the popover, above the effects
+      if (isColumn()) { navBar.content.append(home, fx.button); fx.panel.append(links.el, sound.el, ...controls.els); }
+      else { navBar.content.append(home, links.el, fx.button); fx.panel.append(sound.el, ...controls.els); }
       (window as unknown as { dooombient: typeof sound }).dooombient = sound;
 
       // a new location steps the cursor on; a drag that lands where it started does not
