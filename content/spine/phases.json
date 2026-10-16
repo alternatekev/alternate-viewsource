@@ -113,8 +113,8 @@
       "y": 0.15
     },
     "intro": {
-      "status": "stub",
-      "html": ""
+      "status": "draft",
+      "html": "In March my team at Cisco was told it was turning entirely to agentic development, and I chose that moment to start working with Claude. I now run all three of our teams. At Cisco the work is the design system and the people who build with it: opening it to agents, putting agents on a schedule with guardrails, and running three teams with a system that drafts while I decide. At home it's the same way of working on things I care about: <a href=\"#piece-work-racing-rig\">a motorsport information system for my racing rig</a>, tracks built from real roads, an open protocol for how AI should talk to people, and this site."
     }
   }
 ]
