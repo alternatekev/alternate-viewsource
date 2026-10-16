@@ -11,39 +11,6 @@
   "html": "<p>Okay, so I'm sure you've realized there's something going on here. I've got a clue for you: we've redesigned the site. I got a little bored this Sunday while my son was taking a nap, so voila. New Alternate. <a href='mailto:?subject=I Love Your New Site'>Let us know what you think.</a></p>\n\n<p>The links at the top won't work, because well, I wasn't THAT motivated. Give us a little time, and you'll have full-on rockin' site back together in no time (let's be honest: you really didn't use those sections, anyway, did you? I didn't think so).</p>"
  },
  {
-  "key": "old-2000-but-that-s-not-technology",
-  "title": "But That's Not Technology....",
-  "date": "2000-09-25",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2000/09/25/but-thats-not-technology/"
-  },
-  "html": "<p>On a non-technical internet related note: my wife and I are going to have another baby. :&gt; We're pretty stoked, and I'm sure you are too. Don't worry. This isn't turning into some sort of online journal or anything. I just thought I'd share.</p>\n\n<p>Also, the rest of the site is up and running. There will probably be some minor tweaks here and there, so bear with us. The admin tool also has been tweaked, but you don't get to see that.</p>"
- },
- {
-  "key": "old-2000-late-night-at-the-office",
-  "title": "Late Night at the Office",
-  "date": "2000-11-29",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2000/11/29/late-night-at-the-office/"
-  },
-  "html": "<p>I swear, the best work I do is after 9:30 PM. Which isn't that big a deal until you factor in my wife and 2-year old son at home, who haven't seen me in exactly 14 hours. How sick is that? Sometimes the love for design just kicks in and takes control. I'm just lucky that they understand that, and that this situation happens pretty infrequently. I don't know what it is, but the work I've done in the past 4 days has surpassed in quality the work I've done all year. Weird.</p>"
- },
- {
-  "key": "old-2001-home-sweet-home",
-  "title": "Home Sweet Home",
-  "date": "2001-02-01",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2001/02/01/home-sweet-home/"
-  },
-  "html": "<p>Moving into a new place is both the worst and best thing ever. It's a new place, so you're stoked, but you had to move 2 (heavy) couches up 3 flights of stairs. So it's a give and take. But I'm here. I'm in. No more actually going to a place of employment... it'll be 10 feet from my bed. What does this mean to you, the beloved reader? More posts. So rejoice in Kevin's new Wash Park residence. Rejoice.</p>"
- },
- {
   "key": "old-2001-mayfirst",
   "title": "mayFIRST",
   "date": "2001-04-17",
@@ -220,39 +187,6 @@
   "html": "<a href=\"http://daringfireball.net/2003/07/grab_html_script_for_bbedit_redux.html\" target=\"_new\">John Gruber</a> has posted a \"Grab URL\" script for BBEdit, handy when working in BBEdit and you'd like to grab an existing page's code. His script, however, requires you to enter in your own URL by hand or by copy/paste. I thought it'd be neat if it auto-magically grabbed Safari's top-most URL instead. This could easily be written for Camino, I'm sure. Anyhoo, if you want it, <a href=\"files/grabsafariurl.sit\">get it here</a> and drop it in your /Applications/BBEdit/BBEdit Support/Scripts folder. It'll show up in the \"Scripts\" menu un BBEdit, strangely enough. <br />\n<br />\nNow, this does a little bit of checking to see if Safari is actually running. If it's not running, it just gives you the empty text field as before. This will only work correctly if Safari is somewhere (anywhere) within your /Applications directory. It was the quickest way I could think of to do it. I gotta say, I like AppleScript's string search capability much more than the traditional Regular Expression baloney you have to wade through in PHP or JavaScript, even when you're just doing a simple search.\n<br /><br />\nThe UPDATED source is below:\n<br />\n\n<br />\n<pre>\n-- originally written by John Gruber\n-- at daringfireball.net to just be an\n-- empty text field\n-- edited by kevin conboy at alternate.org\n--to automatically take the top-most URL in safari\n-- DOES NOT WORK WITH SAFARI'S TABS\n-- I'm sure someone can get it to work with\n-- GUI Scripting beta, though\n\ntell application \"System Events\"\n\tset proclist to creator type of every process\n\tif proclist contains \"sfri\" then\n\t\ttell application \"Safari\"\n\t\t\tset safari_url to URL of document 1\n\t\tend tell\n\telse\n\t\tset safari_url to \"\"\n\tend if\nend tell\n\n\ntell application \"BBEdit\"\n\tset my_result to display dialog ¬\n\t\t\"URL:\" default answer safari_url ¬\n\t\tbuttons {\"Cancel\", \"With Headers\", \"Grab Source\"}¬\ndefault button 3\n\tset my_url to the text returned of my_result\n\n\tif button returned of my_result is \"With Headers\" then\n\t\tset my_text to do shell script (\"curl -i \" &amp; my_url)\n\telse\n\t\tset my_text to do shell script (\"curl \" &amp; my_url)\n\tend if\n\n\tmake new text window with properties {contents:my_text,¬\nname:my_url}\n\tselect insertion point before character 1 of text window 1\nend tell\n</pre>"
  },
  {
-  "key": "old-2003-my-eventful-night",
-  "title": "My eventful night",
-  "date": "2003-09-15",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/09/15/my-eventful-night/"
-  },
-  "html": "<p>I'm only home very quickly between hospital trips right now, but since a lot of my close friends read Alternate, I thought I'd post a quick note about my night last night.</p>\n\n<p>At around 4pm, my son began throwing up and acting sick. We took care of him and tried to make him comfortable. Around midnight, he couldn't keep fluids down and couldn't control his breathing. By 2AM his skin started turning gray and his lips blue and he still was not calming down.</p>\n\n<p>My wife took him to the hospital and reported that his blood-sugar levels were in the 450 range. Normal for a boy his age is 80-150. I arrived around 3:30AM. He was quickly diagnosed with Diabetes and insulin was administered. They couldn't get it into a vein as he was too dehydrated so they had to give it to him in a bone in his leg.</p>\n\n<p>He is currently at Children's Hospital in Denver, his glucose is almost normal and his color and condition have greatly improved. He will be fine, but he'll be in the hospital at least until tomorrow, directly after his release, we'll be attending 2 days worth of classes on how to admister insulin and take care of a child with Diabetes.</p>\n\n<p>Your prayers and  thoughts are greatly appreciated.</p>"
- },
- {
-  "key": "old-2003-at-home-now",
-  "title": "At Home Now",
-  "date": "2003-09-16",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/09/16/at-home-now/"
-  },
-  "html": "<p>I'd like to thank all of you who commented (and even those that didn't), and I'm happy to report that all four of us will be at home tonight.</p>\n\n<p>My son was released at 11:30am today and we were instructed to drive directly over the the <a href=\"http://www.uchsc.edu/misc/diabetes/index.html\" target=\"_new\">Barbara Davis Center</a> here in Denver. Today we learned how to take his blood sugar reading and how to admister Insulin shots. He will get 4 readings a day and 2 shots, which will be a mixture of 2 different kinds of Insulin.</p>\n\n<p>He is happy, moving around, and (what I have been told is very lucky considering his condition Sunday night) shows no signs of other permanent damage (vision, kindey, etc).</p>\n\n<p>We had had fears recently about his health, the possibility of Diabetes in particular, but when you're a self-employed person who happens to make more that $34k a year, your insurance options are slim and expensive. My wife had been hoping to get a CNA job this week so that we could get insured so that we could get him tested before he got too sick. Our fear was that if he got diagnosed prior to having insurance coverage, any coverage in the future would include existing condition clauses and refuse to cover his illness. The entire time he was in the hospital, I wondered how much it would cost. I would then remind myself that not taking him would have cost him his life, which puts things into perspective. He's worth every penny and he's a very brave little boy to have gone through the things he went through.</p>\n\n<p>Anyway, just wanted to let you all know that he's safe and sound with us now, minus a few sticks in the finger and pokes in the arm a few times a day. He's very apprehensive about these, as you'd expect a 5-year old to be who just spent 2 days in the hospital and was closer to death than I'd even like to consider.</p>\n\n<p>You'd expect me to be scared and worried about this situation, but for some reason I'm not. The bill will get taken care of somehow, and my son is alive and I look forward to him turning back into the great little kid he was before he started showing signs of the disease we know now he has. Our worry and concern and fear has turned into action, responsibility and knowledge. This feels better than I'd ever known it could.</p>"
- },
- {
-  "key": "old-2003-personal-content-cometh",
-  "title": "Personal Content Cometh",
-  "date": "2003-09-22",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/09/22/personal-content-cometh/"
-  },
-  "html": "<p>At the risk of turning into the annoying weblogger our taglines make fun of, <a href=\"http://www.retinal.nu/weblog\">I've started my own blog.</a> The thing is though, I'm not sure I'm going to keep it. I don't want to take away steam from Alternate, but I also don't feel it's really the place to spout off my most annoying inane personal daily details, which people have actually asked that I do.</p>\n\n<p>My idea is to keep Alternate the same tech-y, witty (right!) place it has been, but to just augment my daily ramblings with another log that looks exactly the same (almost) that tells you what I had for breakfast today.</p>\n\n<p>Thoughts? Care one way or the other? Am I already turning into the average LiveJournal writer simply by bringing it up?</p>"
- },
- {
   "key": "old-2003-reowr",
   "title": "Reowr",
   "date": "2003-09-22",
@@ -284,17 +218,6 @@
    "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/10/04/the-first-time-i-typed-onmouseover-i-was-14/"
   },
   "html": "<p>Did you know that <a href=\"http://www.apple.com/hypercard\">HyperCard is still sold</a> by Apple? HyperCard! Christ. I was trying to explain it to my brother the other day; he'd never even heard of it. How about you? Did you go to a computer/math/science magnet junior high school too? Did you use HyperCard to create interactive games based on *cough*Dragonlance*cough* ? Sigh. Apparently now, HyperCard can use embedded QuickTime movies and can be exported to the web. And can have color. Them's the upgrades. I used this thing like maybe 11 years ago and that's all that's new. It's version 2.4.1. The page on Apple's 2003 website suggests hosting it on WebStar, an OS 9 webserver.</p>\n\n<p>This all comes because <a href=\"http://news.com.com/2008-7351-5085423.html\">John Sculley thinks HyperCard should have been used better by Apple</a>. Gee. Ya don't say. It was great technology for the time, if they'd just given it network ability it may have lasted longer. Yet another thing Apple did right before anyone else. And then figured wasn't that important. Can you say Newton?</p>"
- },
- {
-  "key": "old-2003-slow-and-busy",
-  "title": "Slow and busy",
-  "date": "2003-10-14",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/10/14/slow-and-busy/"
-  },
-  "html": "<p>Yeah so working hard and having not much else happen in the world has kept Alternate pretty slow.</p>\n\n<p>Although, the other day I halfway had lunch with an old boss/friend of mine who <a href=\"http://www.pgeek.com/\">sent me to his site</a> to check out some of his video he'd been taking all around the world since selling his half of the company I used to work for. My favorite is the one on top, Tokyo Trains. It's a little long, but watch it like you were <a href=\"http://www.koyaanisqatsi.com/\" target=\"_new\">watching Koyaanisqatsi</a>, as I'm pretty sure that was the inspirtaion. Very sure, actually. Hopefully, you'll just watch the patterns and the movement instead of wondering why you're watching Japanese people getting on and off of trains.</p>"
  },
  {
   "key": "old-2003-sing-it-2",
@@ -394,17 +317,6 @@
    "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2003/12/17/mighty-little-man/"
   },
   "html": "<p><a href=\"http://www.alternate.org/index.php?postID=939\">As reported over a year ago</a>, Steve Burns, ex-host of the long-running hit kids show <a href=\"http://www.nickjr.com/home/shows/blue/about_blues_clues.jhtml\">Blue's Clues</a>, realized that singing about mail time and talking to animated salt and pepper shakers wasn't really a long-term goal of his, struck out to become a rock 'n roll star. That was in 2002.</p>\n\n<p>His album Songs for Dustmites was recently released, and despite my best efforts to pick it up on the iTMS, I had to actually walk into a Tower Records (shiver) to actually pick up the actual album that contained an actual CD. I know, awkward.</p>\n\n<p>Anyway, it's <a href=\"http://www.steveswebpage.com\">really damn good</a>. Check out the audio samples (in Flash) on that site and you'll most likely agree. Yes, it's Flaming Lips-ish but this is more than likely attributed to Steven Drozd's help on more than a few of the songs, and yes, the ones attributed to him helping are most often the better tracks, but not a single one disappoints.</p>\n\n<p>Does it rock hard? Not really. It's very airy and experimental, but is a joy to listen to.</p>\n\n<p>Meanwhile, in everything's-animated-except-the-host-land, there's a new host for Blue's Clues, and his name's Joe, apparently Steve's brother or something. I watched Steve's farewell episode <span style=\"text-decoration:line-through\">but am a little hazy on exactly what reason was fed to the kids to accept his departure</span> wherein he goes to college and Blue is even given a tour of the dorm. Incedentally, however, it was time for Blue's birthday again recently and Steve even made a phoned-in (literally) appearance.</p>"
- },
- {
-  "key": "old-2004-colorado-rules",
-  "title": "Colorado rules",
-  "date": "2004-01-09",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2004/01/09/colorado-rules/"
-  },
-  "html": "<p><a href=\"http://www.rmpn.org/weblog/archives/permalink/000797.cfm\">Rules the bottom of the list...:</a></p>\n\n<p><blockquote><ul>\n\t<li>--49th in income growth in the country</li>\n\t<li>--50th in immunizations for children</li>\n\t<li>--For the first time since the Great Depression, Colorado is headed toward two straight years of job losses, economists said. (Daily Camera, 11/8/03)</li>\n\t<li>--Nation-leading bankruptcy and foreclosure rates</li>\n\t<li>--48th in high-school graduation rates</li>\n\t<li>--140,000 Coloradans cant find jobs; 650,000 Coloradans cant afford health insurance; and 400,000 Coloradans  more than one quarter of them, children live in poverty.</li>\n\t<li>--Upper education bankrupt by 2010</li>\n\t<li>--$30 billion transportation investment deficit</li>\n\t<li>--46th in the country in special education funding</li>\n\t<li>--One of 6 worst in the country in tobacco cessation efforts</li>\n</ul>\n<br />\n</blockquote></p>"
  },
  {
   "key": "old-2004-playfair",
@@ -869,28 +781,6 @@
   "html": "<p>I agree with every word of this, except my favorite song is from Seacaucus and is called “Pretty OK.” “Hopeless” is a really, really close second though.</p>\n\n<p><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted\">merlin</a>:\n<blockquote><em>Being a love letter to <a href=\"http://wrens.com\"><strong>The Wrens</strong></a> and their 2003 album,  <a href=\"http://www.wrens.com/records/the_meadowlands\"><strong><em>The Meadowlands</em></strong></a>. Composed of an improbable combination of gushing prose, digital audio recordings, live and promotional music videos, a handful of amusing quotations, an anecdote involving the rock band, “Creed,” one grudging acknowledgment of a web property that rhymes with, “witch dork,” plus a  sampling of band photographs, curated from the modest portfolio of your author. Who is a fan.</em></p>\n\n<p><strong>Wrens songs featured in this post:</strong>\n<ol>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#exhausteddemo\">The Wrens - “This Boys is Exhausted” (Demo)</a></li>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#exhausted\">The Wrens - “This Boys is Exhausted” (Album Version)</a></li>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#hopeless\">The Wrens - “Hopeless”</a></li>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#kisses\">The Wrens - “She Sends Kisses”</a></li>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#collection\">The Wrens - “Ex-Girl Collection”</a></li>\n\t<li><a href=\"http://www.kungfugrippe.com/post/411629454/exhausted#sides\">The Wrens - “Everyone Choose Sides”</a></li>\n</ol>\n<a href=\"http://www.kungfugrippe.com/post/411629454/exhausted\">Read More</a></blockquote></p>"
  },
  {
-  "key": "old-2011-pooryorickentertainment-subsidized-time-is-concocted-by",
-  "title": "pooryorickentertainment:\n\nSubsidized Time is concocted by...",
-  "date": "2011-06-06",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2011/06/06/pooryorickentertainmentsubsidized-time-is-concocted-by/"
-  },
-  "html": "<br /><br /><p><a href=\"http://pooryorickentertainment.tumblr.com/post/5818662015\">pooryorickentertainment</a>:</p>\n<blockquote>\n<p>Subsidized Time is concocted by newly-elected president Johnny Gentle as a way to bring America out of a recession. Inspired by the Chinese Zodiac calendar, Subsidized Time is a way to monetize one of the most ubiquitous things around - the date. <br /><br />Each year, one of the products is installed in the Statue of Liberty’s torch hand. In the very first year of Subsidized Time, The Year of the Whopper, a giant cast iron hamburger falls from its position and kills one of the men working to install it.<br /><br /> Each chapter heading is labeled with the year, and the book’s first scene takes place in The Year of Glad. Being that the reader doesn’t understand the chronological designations of these years, and that the book jumps around in time, it makes the comprehension of the plot that much more difficult. <br /><br />Eventually, the reader is handed a handy chart that looks like this:<br /><br />“Chronology of Organization of North American Nations’ Revenue-Enhancing Subsidized Time<sup>TM</sup>”:</p>\n<ol><li>Year of the <a title=\"Whopper\" href=\"http://en.wikipedia.org/wiki/Whopper\">Whopper</a></li>\n<li>Year of the <a title=\"Tucks Pads (page does not exist)\" href=\"http://en.wikipedia.org/w/index.php?title=Tucks_Pads&amp;action=edit&amp;redlink=1\">Tucks</a> Medicated Pad</li>\n<li>Year of the Trial-Size <a title=\"Dove (chocolate)\" href=\"http://en.wikipedia.org/wiki/Dove_(chocolate)\">Dove</a> Bar</li>\n<li>Year of the <a title=\"Perdue Farms\" href=\"http://en.wikipedia.org/wiki/Perdue_Farms\">Perdue</a> Wonderchicken</li>\n<li>Year of the Whisper-Quiet <a title=\"Maytag\" href=\"http://en.wikipedia.org/wiki/Maytag\">Maytag</a> Dishmaster</li>\n<li>Year of the Yushityu 2007  Mimetic-Resolution-Cartridge-View-Motherboard-Easy-To-Install-Upgrade  For Infernatron/InterLace TP Systems For Home, Office Or Mobile [sic]</li>\n<li>Year of Dairy Products from the American Heartland</li>\n<li>Year of the <a title=\"Depend\" href=\"http://en.wikipedia.org/wiki/Depend\">Depend</a> Adult Undergarment</li>\n<li>Year of <a title=\"Glad (company)\" href=\"http://en.wikipedia.org/wiki/Glad_(company)\">Glad<br /><br /></a></li>\n</ol><p>It has been debated which years these might actually correspond  with. One very obvious clue is that in the “Year of the Yushityu 2007   Mimetic…….” the 2007 may actually refer to the year. Other astute  readers have done some calculations based on other references in the  novel and have concluded that The Year of the Depend Adult Undergarment  is actually 2011, but it is never expressly stated in the novel.<br /><br />I find the choice of commercial products to be very interesting. All but two of them are real world brands. They all seem to be long standing traditional American brands, but also brands that are very adult oriented. I can’t help thinking that the Year of the Whopper might have something to do with incontinence plaguing the Year of the Depend Adult Undergarment.  <br /><br />From the design standpoint, I took some liberties with these brands. The brands might exist in the real world some of these particular products do not.  I created the designs for Yushityu (which, when said out loud is apparently just a lowbrow joke) and Dairy Products of the American Heartland.<br /><br />It’s also worth noting that there is a reference to Subsidized Time of <a href=\"http://decemberists.com/\">The Decemberists</a> latest album, The King is Dead. Their “Calamity Song” features the line “…in the year of the Chewable Ambien Tab.” Colin Meloy, their lead singer and songwriter, was a particpant in the <a href=\"http://infinitesummer.org/\">Infinite Summer</a> project of 2010.</p>\n<p>***(It has been pointed out to me that the Trial Size Dove Bar is actually chocolate-covered ice cream, not a bar of Dove soap as I had originally thought. This is truly embarrassing. I have shamed and dishonored my family and the only recourse is to commit seppuku, the ritual self-disembowelment with a sword. Or just fix the damn graphic, whichever is easier. I hope my mistake did not give too many of you the howling fantods.)</p>\n<p class=\"MsoNormal\"><br /><br /></p>\n</blockquote>\n<p>While the hit-to-miss ratio in these designs is pretty positive, I have to beg to differ with the designer on this one. I read The Year of the Trial-Size Dove Bar as being Dove-as-in-the-soap, not Dove-as-in-the-candy.</p>"
- },
- {
-  "key": "old-2011-poor-yorick-entertainment",
-  "title": "Poor Yorick Entertainment",
-  "date": "2011-07-06",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2011/07/06/pooryorickentertainmentdesign-by-chris-ayers-it/"
-  },
-  "html": "<br /><br /><p><a href=\"http://pooryorickentertainment.tumblr.com/post/7311409575\" class=\"tumblr_blog\">pooryorickentertainment</a>:</p>\n\n<blockquote><p><strong>Design by Chris Ayers<br />—————————<br /><br /></strong>It occured to me while creating this poster<strong>, </strong>that the young members of <em>“Le Culte du Prochain Train”</em> (Cult of the Next Train) are not dissimilar to the students at Enfield Tennis Academy. This is the path they have chosen to becoming men and women, and it may destroy or maim them before all is said and done.<br /><br />It is suggested that John “No Relation” Wayne is a mole for the AFR, of which <em>Le Culte du Prochain Train</em> is a sort of training ground. <br /><br />On Dan Schmidt’s “<a href=\"http://dfan.org/jest.txt\">Notes on Infinite Jest</a>” page I found an interesting tidbit about Wayne’s possible connection to “La Culte du Prochain Train”:<br /><br /></p>\n<p><em>Geoffrey Day’s article on Les Assassins des Fautueils Rollents and Le Jeu du Prochain Train which Struck is plagiarizing says (p. 1060) “Far beyond prohibited, not to jump at all is regarded as impossible. To “perdre son coeur [lose one’s heart]” and not jump at all is outside le Jeu’s limit. The possibility simply does not exist. It is unthinkable. Only once, in le Jeu du Prochain Train’s extensive oral history, has a miner’s son not jumped, lost his heart and frozen, remaining on his jut as the round’s train passed. This player later drowned. “Perdre son coeur,” when it is mentioned at all, is known also as “Faire un Bernard Wayne,” in dubious honor of this lone unjumping asbestos miner’s son about whom little beyond his subsequent drowning in the Baskatong Reservoir is known, his name denoting a figure of ridicule and disgust among speakers of the Papineau region vulgate.” So the A.F.R. have some connection to the Wayne family. On p. 262 it is mentioned that Wayne’s father is an asbestos miner. </em></p></blockquote>\n\n<p>I can’t help but love these.</p>"
- },
- {
   "key": "old-2011-because-i-like-doing-lists",
   "title": "Because I like doing lists.",
   "date": "2011-08-30",
@@ -911,27 +801,5 @@
    "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2011/08/30/i-dont-even-know-what-to-call-something-like-this/"
   },
   "html": "<p><ol>\n\t<li>Finish CSS issue X.</li>\n\t<li>Rethink how the entire bit X is a part of works.</li>\n\t<li>Change the entire bit X is a part of.</li>\n\t<li>Introduce new display issue Y separate from issue X.</li>\n\t<li>Dig through framework from top-down in order to figure out issue Y.</li>\n\t<li>This takes a while, like 20 minutes.</li>\n\t<li>Ok so more like 30 minutes.</li>\n\t<li>Realize the issue can be fixed in the CSS file issue X was fixed in.</li>\n\t<li>Also realize that the thing I did to fix issue X put the cursor immediately where I needed to be to fix issue Y.</li>\n\t<li>Take glasses off and place head on desk.</li>\n</ol></p>"
- },
- {
-  "key": "old-2011-post",
-  "title": "This little segment gave me the…",
-  "date": "2011-11-23",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2011/11/23/this-little-segment-gave-me-the-howling-fantods-this/"
-  },
-  "html": "<p><span style=\"text-decoration: line-through\">This little segment gave me the howling fantods this afternoon.</span></p>\n\n<p>Yeah no this isn't the right video but cicadas are aliens from another planet.</p>\n\n<p>Bleah.</p>"
- },
- {
-  "key": "old-2011-the-red-viper-vs-the-mountain-page-1-of-3",
-  "title": "The Red Viper vs. The Mountain page 1 of 3",
-  "date": "2011-11-30",
-  "kind": "post",
-  "source": {
-   "label": "alternate.org",
-   "url": "https://web.archive.org/web/2011/http://alternate.org/blog/2011/11/30/the-red-viper-vs-the-mountain-page-1-of-3/"
-  },
-  "html": "<div class=\"reblog-post\">\n<p class=\"reblog-from\"> <a href=\"http://mccomseycomix.wordpress.com/2011/11/30/the-red-viper-vs-the-mountain/\">Reblogged from SEQUENTIAL KILLUSTRATIONS:</a></p>\n<p>\n</p><p dir='auto'>\nI asked the Game of Thrones community over at reddit.com to vote on what character they would like to see illustrated. The overwhelming response wasn&#8217;t a character but a scene: Prince Oberyn Martell vs. Ser Gregor Clegane.  The Red Viper vs. The Mountain. What I&#8217;ve got here is probably one of three pages I see for this scene. A Storm of Swords, the third novel in  GRRM&#8217;s opus A Song of Ice and Fire is so far my favorite. George has me digging fantasy for the first time. This page is spoiler light, but the next one won&#8217;t be. Stay tuned!\n</p>\n</div>\n<div class=\"reblogger-note\">\n<div class='reblogger-note-content'>\nIt&#8217;s funny how I would have more confidence in a fan-made comic book of this series than one done by a pro comic book company.\n</div>\n</div>\n<br />"
  }
 ]
