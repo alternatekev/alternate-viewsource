@@ -1,8 +1,9 @@
 import { getChapters, getDesigns, getMilestones, getPhases, getUsage, getWriting, publishable } from "@/lib/content";
 import Surface from "./surface";
 import Usage from "./usage";
-import { Marks } from "./marks";
-import { Chapters } from "./chapters";
+import { Marks, toldBy } from "./marks";
+import { Chapters, toldChapters, type PieceTitles } from "./chapters";
+import { Contents } from "./contents";
 import { Sources, When } from "./when";
 
 // The spine as one typographic surface (David Small's pattern: zoom is navigation, and type stays
@@ -23,6 +24,10 @@ const WELCOME = {
 
 export default async function Home() {
   const [phases, milestones, designs, writing, usage, chapters] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting(), getUsage(), getChapters()]);
+  const shown = chapters.filter(publishable);
+  // every piece by id, so a chapter can name what it goes with; and which chapter tells each milestone
+  const titles: PieceTitles = new Map([...writing.filter((w) => w.html).map((w) => [w.key, w.title] as const), ...shown.map((c) => [`chapter-${c.slug}`, c.title] as const)]);
+  const told = toldBy(shown);
   return (
     // the page's one landmark; the beats stay a child of the body, as the surface's styles expect
     <div className="beats" role="main" data-order="newest-first">
@@ -67,11 +72,13 @@ export default async function Home() {
                 {p.intro.html && <p className="phase-intro" data-status={p.intro.status} dangerouslySetInnerHTML={{ __html: p.intro.html }} />}
                 {/* agents: my use of them, a day at a time, part of the phase's description (Kevin, Oct 16) */}
                 {p.key === "agents" && <Usage days={usage} />}
+                {/* what these years hold, named at reading size: the way to choose a piece from the surface */}
+                <Contents phase={p.key} chapters={toldChapters(shown.filter((c) => c.phase === p.key)).flatMap((r) => r.here)} pieces={pieces} />
                 {/* near: everything from these years, in full, as paragraphs set too small to read until you dive in */}
                 <div className="near" id={`near-${p.key}`}>
                   <div className="near-col">
                     <p className="near-web">{p.web}</p>
-                    <Marks marks={marks} className="near-mark" sourceClass="near-source" headClass="near-where" />
+                    <Marks marks={marks} className="near-mark" sourceClass="near-source" headClass="near-where" told={told} />
                     {sites.map((d) => (
                       <p key={d.key} className="near-site dated">
                         <When date={d.start} />{" "}
@@ -91,7 +98,7 @@ export default async function Home() {
                     ))}
                   </div>
                   {/* the chapters, in my words, before the posts: for agents a row at Cisco and a row at home */}
-                  <Chapters chapters={chapters.filter((c) => c.phase === p.key && publishable(c))} />
+                  <Chapters chapters={shown.filter((c) => c.phase === p.key)} titles={titles} milestones={milestones} />
                   {/* the posts, as blocks: a row per year, newest year first, and the year's posts across, newest first */}
                   {years.map((y) => (
                     <div key={y} className="near-row">

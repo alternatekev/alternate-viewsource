@@ -15,7 +15,7 @@ This repository is public on purpose. It is part of the evidence the site presen
 | `lib/air/` | The air: `field.ts` is doooomgaze, loaded after idle on devices that qualify. |
 | `lib/mood.ts` | The mood bus: the one shared state the content writes and the air reads. |
 | `prototypes/` | Dated snapshots of the working sketches: Doooom Shatter GL, doooomgaze (the ambient field) and dooombient (the instrument). |
-| `docs/` | The working plan, the air primitive, the dock model. |
+| `docs/` | The working plan, the air primitive, the dock model, and how links travel (`journeys.md`). |
 | `.claude/skills/` | The rules agents follow when they build here, as skills. |
 
 ## Running it
