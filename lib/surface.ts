@@ -5,7 +5,10 @@
 //
 // Scroll travels between phases. Pressing dives one level in (the phase name, then a milestone or a
 // design); so does a pinch or ctrl + wheel over it, or the one control above the name, which reads
-// "dive in" at the surface. Escape, that control (reading "back" once dived in), or pinching out
+// "dive in" at the surface. The field beside the name takes a press too, from the surface (cohesion
+// branch): pressing a piece's preview goes to that piece, through the field, one level at a time;
+// pressing the field anywhere else goes into the field. A press first brings the beat square to the
+// screen, so what it opens, and the way back out, sit where they belong. Escape, that control (reading "back" once dived in), or pinching out
 // steps back out. Each beat keeps its own depth. The camera eases there over zoom.ms; with reduced
 // motion it is simply there. The control types in and out like every other word. A beat sets in
 // only once it has scrolled into view.
@@ -13,7 +16,8 @@
 import { onBegin } from "@/lib/begin";
 import { columnInView, isColumn } from "@/lib/column";
 import { travelTo } from "@/lib/travel";
-import { onLeave } from "@/lib/route";
+import { EVENT_GO, onLeave, takePending } from "@/lib/route";
+import { begun } from "@/lib/begin";
 import { retype, setIn, setOut, typeOut, unset } from "@/lib/type";
 import { motion } from "@/tokens/motion";
 
@@ -27,13 +31,14 @@ export function surface() {
   const column = isColumn();
   document.documentElement.setAttribute("data-surface", column ? "column" : "zoom");
   const beats = [...document.querySelectorAll<HTMLElement>(".beat")];
+  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, reduced ? 0 : ms));
   // everything the beats listen for goes with the surface: a page kept between visits (Next keeps
   // the last few, hidden) builds a new surface over the same beats when it comes back
   const listening = new AbortController(), { signal } = listening;
 
   const spaces = beats.map((beat) => {
     const space = beat.querySelector<HTMLElement>(".space")!;
-    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined, hint() {}, back: null as HTMLElement | null };
+    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, into: (async () => {}) as (t: HTMLElement) => Promise<void>, depth: () => 0, top: (): HTMLElement | undefined => undefined, hint() {}, back: null as HTMLElement | null };
     const stack: HTMLElement[] = []; // the targets dived into, outermost first
     let run: Animation | null = null;
 
@@ -113,6 +118,11 @@ export function surface() {
       // focus follows the reader in, without scrolling the page
       target.querySelector<HTMLElement>(".dive, a")?.focus({ preventScroll: true });
     }
+    // to a target, one level at a time: into the field first when the target is inside it
+    async function into(target: HTMLElement) {
+      if (field && target !== field && !stack.includes(field)) { dive(field); await wait(Z.ms * 0.9); }
+      if (stack[stack.length - 1] !== target) dive(target);
+    }
     function out() {
       if (!stack.length) return;
       const from = stack.pop()!;
@@ -124,11 +134,25 @@ export function surface() {
     }
 
     beat.addEventListener("click", (e) => {
-      const btn = (e.target as HTMLElement).closest<HTMLElement>("[data-dive]");
-      if (!btn) return;
-      const target = document.getElementById(btn.dataset.dive!);
-      if (target) dive(target);
+      const at = e.target as HTMLElement;
+      if (at.closest("a[href]")) return; // a link is a journey of its own (onLink), never a dive
+      const btn = at.closest<HTMLElement>("[data-dive]");
+      let target = btn ? document.getElementById(btn.dataset.dive!) : null;
+      // at the surface the field is one press (its parts are too small to aim at): the piece under
+      // the pointer, if one is there, otherwise the field itself
+      if (!target && field && !stack.length && at === field) {
+        const under = (el: Element) => { const r = el.getBoundingClientRect(); return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; };
+        target = [...field.querySelectorAll<HTMLElement>(".piece")].find(under) ?? field;
+      }
+      if (!target) return;
+      square();
+      void into(target);
     }, { signal });
+    // a press from the surface first brings the beat square to the screen, eased, if it has drifted
+    function square() {
+      if (stack.length || reduced) return;
+      if (Math.abs(beat.getBoundingClientRect().top) > 1) void travelTo(beat.offsetTop);
+    }
     back.addEventListener("click", () => { if (stack.length) out(); else if (field) dive(field); }, { signal });
     // a pinch (ctrl + wheel to the browser) dives in over a target, or steps out; one level per gesture.
     // Plain scrolling travels the page, except inside a piece being read, where it reads down the piece
@@ -254,7 +278,7 @@ export function surface() {
     }, { passive: false, signal });
     addEventListener("resize", () => { if (stack.length) move(frame(stack[stack.length - 1])); }, { signal });
     settle();
-    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1], hint: settle, back: back as HTMLElement | null };
+    return { beat, space, field, out, dive, into, depth: () => stack.length, top: () => stack[stack.length - 1], hint: settle, back: back as HTMLElement | null };
   });
 
   // Escape steps out of the beat the reader is looking at
@@ -284,13 +308,12 @@ export function surface() {
   // down (or up) the timeline to the phase it lives in, then in through the phase's field to the
   // piece. A link to a phase stops at its name. Links anywhere on the page that point at a phase or
   // a piece (#phase-…, #piece-…, #welcome) take it, and so do the browser's back and forward.
-  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, reduced ? 0 : ms));
-  let journeying = 0;
+  let journeying = 0, gone = false; // a surface taken down mid-journey stops where it is
   async function journey(id: string) {
     const el = id ? document.getElementById(id) : null;
     const to = el && spaces.find((s) => s.beat.contains(el));
     if (!el || !to) return;
-    const run = ++journeying, still = () => run === journeying;
+    const run = ++journeying, still = () => run === journeying && !gone;
     for (const s of spaces) {
       if (s.top() === el) continue;
       const here = inView(s.beat);
@@ -304,10 +327,7 @@ export function surface() {
     arrive(to);
     // stepping out on the way rewrote the address; a link to a phase or to Hello keeps its own
     if (!el.classList.contains("piece") && location.hash.slice(1) !== id) history.replaceState(history.state, "", `#${id}`);
-    if (el.classList.contains("piece") && to.field) {
-      if (to.top() !== to.field && to.top() !== el) { to.dive(to.field); await wait(Z.ms * 0.9); }
-      if (still() && to.top() !== el) to.dive(el);
-    }
+    if (el.classList.contains("piece") && to.field) await to.into(el);
   }
   const inView = (b: HTMLElement) => { const r = b.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight; };
   function arrive(s: (typeof spaces)[number]) {
@@ -331,15 +351,24 @@ export function surface() {
   document.addEventListener("click", onLink);
   const onPop = () => { const id = location.hash.slice(1); if (linkable(id)) void journey(id); };
   addEventListener("popstate", onPop);
-  // the docks ask for a journey when the page opens on a link (lib/begin: the opening trip)
+  // the docks ask for a journey when the page opens on a link, and when a link on this page names a
+  // piece or a phase by its address (/#piece-…); a page arriving from another page takes the thing a
+  // link there named (lib/route.ts), or the address it came back to, and journeys there
   const onGo = (e: Event) => { void journey((e as CustomEvent<string>).detail); };
-  addEventListener("viewsource:go", onGo);
+  addEventListener(EVENT_GO, onGo);
+  // (taken on the next frame, so a surface mounted and unmounted at once, as in development, leaves it)
+  requestAnimationFrame(() => {
+    if (gone) return;
+    const came = takePending() || (begun() ? location.hash.slice(1) : "");
+    if (came && linkable(came)) void journey(came);
+  });
   // going to another page: every phase that has set in types out and withdraws
   const offLeave = onLeave(() => Promise.all(spaces.filter((s) => "arrived" in s.space.dataset).map((s) =>
     Promise.all([typeOut(s.space), ...[...s.space.children].map((part) => setOut(part as HTMLElement))]))));
   return {
     destroy() {
-      offLeave(); off(); seen?.disconnect(); listening.abort(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo);
+      gone = true; ++journeying;
+      offLeave(); off(); seen?.disconnect(); listening.abort(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener(EVENT_GO, onGo);
       // the page is out of sight now; it comes back as it first was, waiting to set in again
       for (const s of spaces) {
         s.back?.remove();

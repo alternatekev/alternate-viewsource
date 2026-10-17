@@ -9,11 +9,16 @@
 //
 // Phones read the years as a column (Kevin, Oct 16): no corridor, each year setting in as it scrolls
 // into view. With reduced motion, the corridor is still there; the field keeps its moods.
+//
+// A link into the page (cohesion branch) names a year (#year-2008) or a piece of work (#work-…):
+// the corridor travels there, eased, from wherever it is, and a piece opens on arrival. A link
+// from another page lands here at now, then takes the same trip, so arriving from the timeline is
+// the dive and then the years passing. Links on this page to the timeline leave through the docks.
 
 import { begun, onBegin } from "@/lib/begin";
 import { columnInView, isColumn } from "@/lib/column";
 import { crossYear, diveProgress, diving, setGather, setShape } from "@/lib/flight";
-import { onLeave } from "@/lib/route";
+import { EVENT_GO, onLeave, takePending } from "@/lib/route";
 import { travelTo } from "@/lib/travel";
 import { leave, setIn, setOut, typeIn, typeOut, unset } from "@/lib/type";
 import { dock } from "@/tokens/dock";
@@ -62,15 +67,55 @@ export function work() {
     closing.add(d);
     void Promise.all(partsOf(d).map((p) => leave(p))).then(() => { d.open = false; closing.delete(d); });
   };
+  const open = (d: HTMLDetailsElement) => { if (d.open) return; d.open = true; partsOf(d).forEach((p) => { setIn(p); void typeIn(p); }); };
   const onSummary = (e: MouseEvent) => {
     const sum = (e.target as HTMLElement).closest("summary");
     const d = sum?.parentElement;
     if (!sum || !(d instanceof HTMLDetailsElement) || !d.closest(".stop")) return;
     e.preventDefault();
-    if (!d.open) { d.open = true; partsOf(d).forEach((p) => { setIn(p); void typeIn(p); }); }
-    else close(d);
+    if (!d.open) open(d); else close(d);
   };
   document.addEventListener("click", onSummary);
+  // a journey to a year or a piece of work on this page: once any dive into the page has landed,
+  // down (or up) the corridor to its year, then the piece opens; the address says where you are
+  let journeying = 0, gone = false; // a page taken down mid-journey stops where it is
+  async function journey(id: string) {
+    const el = document.getElementById(id), stop = el?.closest<HTMLElement>(".work > .stop");
+    if (!el || !stop) return;
+    const run = ++journeying, still = () => run === journeying && !gone;
+    await diving();
+    if (!still()) return;
+    if (column) {
+      const topDock = Math.max(0, ...[...document.querySelectorAll<HTMLElement>(".dock")].map((d) => d.getBoundingClientRect()).filter((r) => r.top < innerHeight / 2).map((r) => r.bottom));
+      await travelTo(stop.offsetTop - topDock - 24);
+    } else await travelTo(stops.indexOf(stop) * yearPx());
+    if (!still()) return;
+    if (el instanceof HTMLDetailsElement) open(el);
+    if (location.hash.slice(1) !== id) history.replaceState(history.state, "", `#${id}`);
+  }
+  const linkable = (id: string) => /^(year-|work-)/.test(id) && !!document.getElementById(id);
+  const onLink = (e: MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[href^="#"]');
+    const id = a?.getAttribute("href")!.slice(1);
+    if (!id || !linkable(id)) return;
+    e.preventDefault();
+    history.pushState(null, "", `#${id}`);
+    void journey(id);
+  };
+  document.addEventListener("click", onLink);
+  const onGo = (e: Event) => { const id = (e as CustomEvent<string>).detail; if (linkable(id)) void journey(id); };
+  addEventListener(EVENT_GO, onGo);
+  const onPop = () => { const id = location.hash.slice(1); if (linkable(id)) void journey(id); };
+  addEventListener("popstate", onPop);
+  // arriving from another page with somewhere to go (lib/route.ts), or coming back to an address
+  // (taken on the next frame, so a page mounted and unmounted at once, as in development, leaves it)
+  requestAnimationFrame(() => {
+    if (gone) return;
+    const came = takePending() || (begun() ? location.hash.slice(1) : "");
+    if (came && linkable(came)) void journey(came);
+  });
+  const offLinks = () => { gone = true; ++journeying; document.removeEventListener("click", onLink); removeEventListener(EVENT_GO, onGo); removeEventListener("popstate", onPop); };
   // the ways out of a piece (Kevin, Oct 16: "I can't get out of it"): Escape closes it, as Escape
   // steps back out on the timeline; reading past its end hands the scroll back to the corridor
   // (globals.css), and leaving its year closes it behind you
@@ -103,7 +148,7 @@ export function work() {
       }, columnInView);
       stops.forEach((s) => seen!.observe(s));
     });
-    return { destroy() { off(); seen?.disconnect(); offLeave(); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle(); } };
+    return { destroy() { off(); seen?.disconnect(); offLeave(); offLinks(); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle(); } };
   }
 
   // the corridor: each year placed in depth by how far it is from the camera
@@ -148,7 +193,7 @@ export function work() {
   return {
     destroy() {
       cancelAnimationFrame(raf); clearTimeout(quiet); timers.forEach(clearTimeout);
-      removeEventListener("scroll", onScroll); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); offLeave();
+      removeEventListener("scroll", onScroll); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); offLeave(); offLinks();
       root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle();
     },
   };

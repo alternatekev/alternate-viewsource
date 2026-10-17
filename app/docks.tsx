@@ -16,7 +16,7 @@ import { typing } from "@/lib/dock/typing";
 import { visualizer } from "@/lib/dock/visualizer";
 import { soundSwitch } from "@/lib/sound/switch";
 import { dive, setShape } from "@/lib/flight";
-import { leavePage } from "@/lib/route";
+import { goHere, leavePage, parseLink, registerGo, setPending } from "@/lib/route";
 import { travelTo } from "@/lib/travel";
 import { dock } from "@/tokens/dock";
 import { motion } from "@/tokens/motion";
@@ -132,17 +132,41 @@ export default function Docks() {
       const travel = (y: number) => (tl ? tl.blocks.travel(y) : void travelTo(y));
       // going to another page: this page's words and the timeline leave, then the next page comes in.
       // Into work it is a dive: the shards stream past, and the art becomes a circle as you pass through
+      // A link can name a thing on the page it goes to (a piece, a year): it is left pending for that
+      // page to journey to once it has come in (lib/route.ts)
       let going = false;
-      async function go(to: string) {
+      async function go(to: string, hash = "") {
         if (going) return;
         going = true;
         const into = to === WORK && location.pathname !== WORK;
         if (into) void dive((t) => { if (t > 0.35) setShape(true); });
         else setShape(false);
+        setPending(hash);
         await Promise.all([leavePage(), to === HOME ? null : timeline(false)]);
         router.push(to);
         going = false;
       }
+      cleanup.push(registerGo((p, h) => void go(p, h)));
+      // links into the site from anywhere on the page: the words of a piece, a milestone, the colophon.
+      // One to another page goes there the way the nav does; one to this page (/work#year-2008 while on
+      // the work page) is the page's own, asked for by id; a plain #id is left to the page entirely
+      const onSiteLink = (e: MouseEvent) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
+        if (!a || navBar.el.contains(a) || a.target === "_blank") return;
+        const href = a.getAttribute("href")!;
+        if (href.startsWith("#")) return;
+        const link = parseLink(href);
+        if (!link) return;
+        e.preventDefault();
+        if (link.path === location.pathname.replace(/\/+$/, "") || (link.path === HOME && location.pathname === HOME)) {
+          if (link.hash) { history.pushState(null, "", `#${link.hash}`); goHere(link.hash); } else travel(0);
+          return;
+        }
+        void go(link.path, link.hash);
+      };
+      document.addEventListener("click", onSiteLink);
+      cleanup.push(() => document.removeEventListener("click", onSiteLink));
       // the nav's link to the page we're already on doesn't reload it: it travels, eased, to the start;
       // a link to any other page goes there without a reload, so begin is never asked for twice
       const onLink = (e: MouseEvent) => {
@@ -163,12 +187,11 @@ export default function Docks() {
       };
 
       const viz = visualizer(navBar, sound);
-      // the page opens where it is, at Hello; opened on a link to a phase or a piece, it journeys
-      // there (lib/surface.ts). The work page opens where it is, at now.
+      // the page opens where it is, at Hello, or at now on the work page; opened on a link to something
+      // on it (a phase, a piece, a year), it journeys there once the docks are in (lib/surface.ts, lib/work.ts)
       const opened = location.hash.slice(1), atHome = location.pathname === HOME;
       void Promise.all([arrive(navBar.el), timeline(atHome)]).then(() => {
-        if (!atHome) return;
-        if (opened && /^(phase-|piece-|welcome$)/.test(opened) && document.getElementById(opened)) dispatchEvent(new CustomEvent("viewsource:go", { detail: opened }));
+        if (opened && document.getElementById(opened)) goHere(opened);
       });
       cleanup.push(() => {
         removeEventListener("dock:drop", onDrop); live.current = null;
