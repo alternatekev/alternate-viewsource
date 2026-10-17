@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { getMilestones, getPhases, getWriting } from "@/lib/content";
+import { getChapters, getMilestones, getPhases, getWriting, publishable } from "@/lib/content";
 import type { Milestone, Phase, Writing } from "@/lib/content/schema";
 import { Sources, When } from "../when";
-import { Marks } from "../marks";
+import { Marks, toldBy } from "../marks";
 import Corridor from "./corridor";
 
 // Work: a time capsule opened at now. It starts at the newest year and scrolls back through time,
@@ -12,6 +12,8 @@ import Corridor from "./corridor";
 // behind it. Without JavaScript this is a document, newest first, every word in reading order; with
 // it, lib/work.ts turns the years into a corridor you travel down, and the field flies with you.
 // Words here are the sourced spine and my old portfolio only; chapters arrive when Kevin dictates them.
+// A milestone a chapter tells links back up to that chapter on the timeline (cohesion branch), so a
+// year here is a way out as well as a way in.
 
 export const metadata: Metadata = { title: "Work" };
 
@@ -23,7 +25,8 @@ const phaseOf = (phases: Phase[], y: number) => phases.find((p) => year(p.start)
 type Year = { y: number; marks: Milestone[]; work: Writing[]; phase: Phase };
 
 export default async function Work() {
-  const [phases, milestones, writing] = await Promise.all([getPhases(), getMilestones(), getWriting()]);
+  const [phases, milestones, writing, chapters] = await Promise.all([getPhases(), getMilestones(), getWriting(), getChapters()]);
+  const told = toldBy(chapters.filter(publishable));
   const work = writing.filter((w) => w.kind === "work");
   const newest = Math.max(...milestones.map((m) => year(m.date)), ...work.map((w) => year(w.date)));
   const oldest = Math.min(...milestones.map((m) => year(m.date)), ...work.map((w) => year(w.date)));
@@ -51,7 +54,7 @@ export default async function Work() {
             <div className="stop-space">
               <div className="stop-head">
                 <h2 id={`year-${y}-h`} className="stop-year">{y}</h2>
-                <Marks marks={marks} className="stop-mark" sourceClass="stop-source" headClass="stop-where" dated={false} />
+                <Marks marks={marks} className="stop-mark" sourceClass="stop-source" headClass="stop-where" dated={false} told={told} toldHref={(slug) => `/#piece-chapter-${slug}`} />
                 {work.map((w) =>
                   w.html ? (
                     <details key={w.key} className="stop-work" id={`work-${w.key}`}>

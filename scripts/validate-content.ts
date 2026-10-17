@@ -88,10 +88,23 @@ async function main() {
   const files = (await readdir(storyDir, { recursive: true, withFileTypes: true }))
     .filter((e) => e.isFile() && e.name.endsWith(".mdx") && !e.name.startsWith("_"))
     .map((e) => path.relative(root, path.join(e.parentPath ?? e.path, e.name)));
+  // every piece on the site, by id without the piece- prefix: the writing by key, the chapters as chapter-<slug>
+  const pieceIds = new Set(writing.map((w) => w.key));
+  for (const file of files) pieceIds.add(`chapter-${path.basename(file, ".mdx")}`);
   for (const file of files) {
     try {
-      const { data } = matter(await readFile(path.join(root, file), "utf8"));
+      const text = await readFile(path.join(root, file), "utf8");
+      const { data, content } = matter(text);
       const meta = ChapterMeta.parse(data);
+      // what the chapter links to is here: its milestones, the pieces it goes with, and every link in
+      // its words into the site (a piece by #piece-…, a year or a piece of work on the work page)
+      for (const k of meta.milestones) if (!keys.has(k)) fail(file, `tells milestone ${k}, which isn't in spine/milestones.json`);
+      for (const r of meta.related) if (!pieceIds.has(r)) fail(file, `goes with ${r}, which isn't a piece here`);
+      if (meta.related.includes(`chapter-${path.basename(file, ".mdx")}`)) fail(file, "goes with itself");
+      for (const m of content.matchAll(/\]\((#[^)\s]+|\/work#[^)\s]+)\)/g)) {
+        const [, href] = m;
+        if (href.startsWith("#piece-") ? !pieceIds.has(href.slice("#piece-".length)) : href.startsWith("#phase-") ? !PHASE_KEYS.includes(href.slice("#phase-".length) as never) : href.startsWith("/work#year-") ? !/^\d{4}$/.test(href.slice("/work#year-".length)) : href.startsWith("/work#work-") ? !wkeys.has(href.slice("/work#work-".length)) : href !== "#welcome") fail(file, `links to ${href}, which isn't on the site`);
+      }
       const dir = file.split(path.sep)[1];
       if (dir !== meta.phase) fail(file, `folder "${dir}" and phase "${meta.phase}" disagree`);
       const p = phases.find((p) => p.key === meta.phase)!;
@@ -100,7 +113,7 @@ async function main() {
       if (meta.phase === "agents" && !meta.where) fail(file, "agents work doesn't say where: cisco or home");
       if (meta.phase !== "agents" && meta.where) fail(file, "says where, which only agents work does");
       // a chapter's pictures are served from public/writing, like a piece's
-      for (const m of (await readFile(path.join(root, file), "utf8")).matchAll(/!\[[^\]]*\]\(([^)\s]+)/g)) {
+      for (const m of text.matchAll(/!\[[^\]]*\]\(([^)\s]+)/g)) {
         if (!m[1].startsWith("/writing/")) fail(file, `shows ${m[1]} from elsewhere`);
         else if (!existsSync(path.join(root, "..", "public", m[1]))) fail(file, `shows ${m[1]}, which isn't in public/`);
       }

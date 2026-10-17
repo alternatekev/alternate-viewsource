@@ -100,6 +100,12 @@ export const ChapterMeta = z.object({
   sources: z.array(Source).default([]),
   // ids under content/objects this chapter places
   objects: z.array(z.string()).default([]),
+  // the milestones this chapter tells (keys in spine/milestones.json): the timeline's notes and the
+  // work page's years link to the chapter from each, and the chapter links to its years on the work page
+  milestones: z.array(z.string().regex(/^[a-z0-9-]+$/)).default([]),
+  // other pieces this one goes with, by id without the piece- prefix (chapter-<slug>, or a writing
+  // key): the chapter ends with links to them, and following one is a journey (lib/surface.ts)
+  related: z.array(z.string().regex(/^[a-z0-9-]+$/)).default([]),
   // set when a recording exists: the audio lives outside the repo, the word timings inside it
   voice: z
     .object({ audio: z.string().url(), alignment: z.string() })

@@ -82,6 +82,16 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .phase-intro { max-width: 34rem; margin: 1.6rem 0 0; font: 400 1.12rem/1.55 var(--face-text); text-wrap: pretty; }
 .phase-intro a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: .2em; }
 .phase-intro a:hover, .phase-intro a:focus-visible { text-decoration-color: currentColor; }
+/* what the phase holds (app/contents.tsx): the pieces named at reading size under the intro, a step
+   quieter, each a link that journeys into it; the blog's posts counted, as one press into the field */
+.phase-contents { max-width: 34rem; margin: 1.4rem 0 0; font: 13px/1.7 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); text-wrap: pretty; }
+.phase-contents a, .beat .dive.phase-contents-posts { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.phase-contents a:hover, .phase-contents a:focus-visible, .phase-contents-posts:hover, .phase-contents-posts:focus-visible { text-decoration-color: currentColor; }
+.beat .dive.phase-contents-posts { display: inline; font: inherit; cursor: pointer; }
+/* where a chapter leads (app/chapters.tsx): the pieces it goes with and its years on the work page, a
+   line in the source's style; and the chapter that tells a milestone, after the milestone's sources */
+.piece-leads, .told, .told a { color: var(--quiet); font-size: .85em; }
+.piece-lead + .piece-lead::before { content: " · "; }
 /* my use of agents, a day at a time (app/usage.tsx): a still strip of bars in the ink, and a line under
    it that a day's words type into */
 .usage { max-width: 34rem; margin: 1.6rem 0 0; }
@@ -146,8 +156,10 @@ html[data-surface="zoom"] .near-col { width: 34rem; }
 html[data-surface="zoom"] .near-row { display: flex; gap: 2.5rem; align-items: flex-start; }
 html[data-surface="zoom"] .near-row-year { flex: none; width: 6rem; margin: 1.6rem 0 0; font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
 html[data-surface="zoom"] .piece { flex: none; width: 34rem; margin: 0; padding: 1.6rem 1.8rem 1.8rem; border: 1px solid var(--rule); }
-/* only the current level takes presses; deeper words are there, just too small to aim at yet */
+/* only the current level takes presses; deeper words are there, just too small to aim at yet. At the
+   surface the field is one press, the whole of it (lib/surface.ts finds the piece under the pointer) */
 html[data-surface="zoom"] .beat .near, html[data-surface="zoom"] .beat .near * { pointer-events: none; }
+html[data-surface="zoom"] .beat[data-depth="0"] .near { pointer-events: auto; cursor: pointer; }
 html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive], html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
 html[data-surface="zoom"] .beat[data-depth="2"] .piece a { pointer-events: auto; }
 .surface-back { position: absolute; left: 8vw; top: 12vh; margin: 0; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); background: none; border: 0; cursor: pointer; }
