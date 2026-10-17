@@ -90,6 +90,11 @@ article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left
 .usage-base { stroke: var(--rule); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .usage figcaption { margin-top: .7rem; font: 13px/1.5 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); font-variant-numeric: tabular-nums; text-wrap: pretty; }
 .usage-read { color: var(--ink); }
+/* one recording's telemetry (app/telemetry.tsx): speed as a line in the ink over a base, the pedals as bars under it */
+.telemetry-strip { display: block; height: 96px; shape-rendering: crispEdges; }
+.telemetry-speed { fill: none; stroke: var(--ink); stroke-width: 1; vector-effect: non-scaling-stroke; shape-rendering: geometricPrecision; }
+.telemetry-throttle { fill: var(--rule); }
+.telemetry-brake { fill: var(--accent); }
 .far-years, .near-year { font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
 .near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
 .near p, .piece-body li { text-wrap: pretty; }

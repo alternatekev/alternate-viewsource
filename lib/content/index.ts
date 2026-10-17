@@ -107,6 +107,20 @@ async function cachedUsage() {
   return readUsage();
 }
 
+
+// An object's rows (content/objects/<id>/rows.json): the numbers a chart draws, read like the rest.
+async function readObjectRows(id: string): Promise<unknown> {
+  if (!/^[a-z0-9-]+$/.test(id)) throw new Error(`object id ${id}`);
+  return JSON.parse(await contentSource().read(`objects/${id}/rows.json`)) as unknown;
+}
+async function cachedObjectRows(id: string) {
+  "use cache";
+  cacheTag("content");
+  cacheLife("max");
+  return readObjectRows(id);
+}
+
+export const getObjectRows = cachedObjectRows;
 export const getPhases = cachedPhases;
 export const getMilestones = cachedMilestones;
 export const getDesigns = cachedDesigns;

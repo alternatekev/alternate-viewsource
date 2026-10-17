@@ -38,10 +38,14 @@ I've raced in simulators for years, on a rig in my house with a direct-drive whe
 
 **Taking the cloud out.** By September the platform had a database with 23 tables, 83 API routes, accounts, sync, a Chrome extension and a six-repository release train. Then the racing service shipped its own track map, fuel calculator and incident tracker, and changed how outside apps sign in. I wrote the decision down with its three reasons and, on September 16, imported the whole thing into one repository with its history and started removing. What stayed: the calculations with their tests, the HUD, the recording, the local telemetry files that already carried GPS-grade positions. What went: everything that assumed an audience. "One user, one rig. No accounts, no sync, no distribution, no audience."
 
+<Telemetry />
+
 ![Racing Desk running on the rig: whether to race now, composure, the hours that work, previous races and a lap chart.](/writing/racing-rig/2026-10-16-racing-desk-desk.jpg)
 
 <Inhabit>
 The numbers are the evidence, so here they are. Two shifts most days, 10 to 1 and 4 to 11; the 10pm hour has more commits than the 2pm hour. Saturday is the busiest day. 451 working sessions; inside a session the median gap between commits is 1.1 minutes. The best sustained hour was 26 commits. 185 commits carry the model's name as author; most of the rest were typed by it and committed under mine, which is how I think about it.
+
+<Cadence />
 
 From the narrative we kept at the time: the model does the work that on a real team gets distributed across an engineer, a tech lead and a project manager; I do the work that gets distributed across a designer, a PM and the staff engineer who decides what to ship next. And the line I'd put on the wall: the working agreement matters more than the tooling.
 

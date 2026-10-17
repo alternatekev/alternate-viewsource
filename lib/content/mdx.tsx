@@ -1,6 +1,8 @@
 import { evaluate } from "@mdx-js/mdx";
 import type { ReactNode } from "react";
 import * as runtime from "react/jsx-runtime";
+import Cadence from "@/app/cadence";
+import Telemetry from "@/app/telemetry";
 
 // Tier markers an author can use inside a chapter. Every tier renders into the HTML, so the
 // transcript is complete for search engines and screen readers; how much a device *shows*
@@ -12,7 +14,8 @@ function Inhabit({ children }: { children: ReactNode }) {
   return <section data-tier="inhabit">{children}</section>;
 }
 
-const components = { Glance, Inhabit };
+// Charts a chapter can place: drawn on the server from an object's rows, read without a script.
+const components = { Glance, Inhabit, Cadence, Telemetry };
 
 export async function renderChapterBody(source: string) {
   const { default: Body } = await evaluate(source, {
