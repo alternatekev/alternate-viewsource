@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getColophon, getDesigns } from "@/lib/content";
 import { When } from "../when";
+import Reading from "./reading";
 
 // The colophon (Kevin, Oct 16): two things. View source, this site's own making, in my words; and
 // every design of alternate.org since 2000, newest first, each with its stack and its archived
@@ -44,6 +45,7 @@ export default async function Colophon() {
           </div>
         </div>
       </section>
+      <Reading />
     </div>
   );
 }

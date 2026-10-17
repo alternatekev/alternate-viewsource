@@ -11,10 +11,10 @@
 // only once it has scrolled into view.
 
 import { onBegin } from "@/lib/begin";
-import { isColumn } from "@/lib/column";
+import { columnInView, isColumn } from "@/lib/column";
 import { travelTo } from "@/lib/travel";
 import { onLeave } from "@/lib/route";
-import { retype, setIn, setOut, typeOut } from "@/lib/type";
+import { retype, setIn, setOut, typeOut, unset } from "@/lib/type";
 import { motion } from "@/tokens/motion";
 
 type Cam = { x: number; y: number; k: number };
@@ -27,10 +27,13 @@ export function surface() {
   const column = isColumn();
   document.documentElement.setAttribute("data-surface", column ? "column" : "zoom");
   const beats = [...document.querySelectorAll<HTMLElement>(".beat")];
+  // everything the beats listen for goes with the surface: a page kept between visits (Next keeps
+  // the last few, hidden) builds a new surface over the same beats when it comes back
+  const listening = new AbortController(), { signal } = listening;
 
   const spaces = beats.map((beat) => {
     const space = beat.querySelector<HTMLElement>(".space")!;
-    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined, hint() {} };
+    if (column) return { beat, space, field: null, out() {}, dive: (() => {}) as (t: HTMLElement) => void, depth: () => 0, top: (): HTMLElement | undefined => undefined, hint() {}, back: null as HTMLElement | null };
     const stack: HTMLElement[] = []; // the targets dived into, outermost first
     let run: Animation | null = null;
 
@@ -125,8 +128,8 @@ export function surface() {
       if (!btn) return;
       const target = document.getElementById(btn.dataset.dive!);
       if (target) dive(target);
-    });
-    back.addEventListener("click", () => { if (stack.length) out(); else if (field) dive(field); });
+    }, { signal });
+    back.addEventListener("click", () => { if (stack.length) out(); else if (field) dive(field); }, { signal });
     // a pinch (ctrl + wheel to the browser) dives in over a target, or steps out; one level per gesture.
     // Plain scrolling travels the page, except inside a piece being read, where it reads down the piece
     // until its end, and then travels on
@@ -160,8 +163,8 @@ export function surface() {
       const b = beat.getBoundingClientRect();
       lean = { x: toward(e.clientX - b.left, b.width), y: 0 };
       if ((lean.x || lean.y) && !slide) { last = performance.now(); slide = requestAnimationFrame(glide); }
-    });
-    beat.addEventListener("pointerleave", () => { lean = { x: 0, y: 0 }; });
+    }, { signal });
+    beat.addEventListener("pointerleave", () => { lean = { x: 0, y: 0 }; }, { signal });
     // touch: the same three gestures, by finger. One finger dived in drags through what's open and, at
     // its end, carries on down the page, with the glide a native scroll has when let go. Two fingers
     // spreading dive in one level over what's between them; pinching together steps back out.
@@ -192,7 +195,7 @@ export function surface() {
       fingers.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (fingers.size === 1) { dragged = false; pinched = false; }
       if (fingers.size === 2) pinch0 = spread();
-    });
+    }, { signal });
     beat.addEventListener("pointermove", (e) => {
       const was = e.pointerType === "touch" && fingers.get(e.pointerId);
       if (!was) return;
@@ -219,7 +222,7 @@ export function surface() {
       const t = performance.now(), dt = Math.max(1, t - lastMove); lastMove = t;
       flingV = { x: flingV.x * 0.6 + (dx / dt) * 0.4, y: flingV.y * 0.6 + (dy / dt) * 0.4 };
       drag(dx, dy);
-    });
+    }, { signal });
     const lift = (e: PointerEvent) => {
       if (!fingers.delete(e.pointerId)) return;
       if (fingers.size) return;
@@ -227,10 +230,10 @@ export function surface() {
       // let go mid-drag: it glides on; held still before letting go: it stays
       if (dragged && !pinched && !reduced && performance.now() - lastMove < 80) glideOn();
     };
-    beat.addEventListener("pointerup", lift);
-    beat.addEventListener("pointercancel", lift);
+    beat.addEventListener("pointerup", lift, { signal });
+    beat.addEventListener("pointercancel", lift, { signal });
     // a drag or a pinch is not a press: the click it would end in doesn't dive or follow a link
-    beat.addEventListener("click", (e) => { if (dragged) { e.preventDefault(); e.stopImmediatePropagation(); dragged = false; } }, true);
+    beat.addEventListener("click", (e) => { if (dragged) { e.preventDefault(); e.stopImmediatePropagation(); dragged = false; } }, { capture: true, signal });
     let quiet = 0;
     beat.addEventListener("wheel", (e) => {
       if (!e.ctrlKey) {
@@ -248,10 +251,10 @@ export function surface() {
         ?? space.querySelector<HTMLElement>(stack.length ? `#${stack[stack.length - 1].id} [data-dive]` : "[data-dive]");
       const target = btn && document.getElementById(btn.dataset.dive!);
       if (target) dive(target);
-    }, { passive: false });
-    addEventListener("resize", () => { if (stack.length) move(frame(stack[stack.length - 1])); });
+    }, { passive: false, signal });
+    addEventListener("resize", () => { if (stack.length) move(frame(stack[stack.length - 1])); }, { signal });
     settle();
-    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1], hint: settle };
+    return { beat, space, field, out, dive, depth: () => stack.length, top: () => stack[stack.length - 1], hint: settle, back: back as HTMLElement | null };
   });
 
   // Escape steps out of the beat the reader is looking at
@@ -273,7 +276,7 @@ export function surface() {
         const s = spaces.find((x) => x.beat === e.target);
         if (s) arrive(s);
       }
-    }, column ? { rootMargin: "0px 0px -20% 0px" } : { threshold: 0.5 }); // a column is taller than the screen: it sets in as its top comes into view
+    }, column ? columnInView : { threshold: 0.5 }); // a column is taller than the screen: it sets in as its top comes into view
     spaces.forEach((s) => seen!.observe(s.beat));
   });
 
@@ -334,5 +337,16 @@ export function surface() {
   // going to another page: every phase that has set in types out and withdraws
   const offLeave = onLeave(() => Promise.all(spaces.filter((s) => "arrived" in s.space.dataset).map((s) =>
     Promise.all([typeOut(s.space), ...[...s.space.children].map((part) => setOut(part as HTMLElement))]))));
-  return { destroy() { offLeave(); off(); seen?.disconnect(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo); } };
+  return {
+    destroy() {
+      offLeave(); off(); seen?.disconnect(); listening.abort(); removeEventListener("keydown", onKey); document.removeEventListener("click", onLink); removeEventListener("popstate", onPop); removeEventListener("viewsource:go", onGo);
+      // the page is out of sight now; it comes back as it first was, waiting to set in again
+      for (const s of spaces) {
+        s.back?.remove();
+        s.space.style.transform = ""; delete s.space.dataset.arrived;
+        delete s.beat.dataset.depth; s.beat.removeAttribute("data-pan");
+        unset(s.space);
+      }
+    },
+  };
 }

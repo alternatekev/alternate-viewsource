@@ -32,7 +32,7 @@ export default async function Work() {
     years.push({ y, marks: milestones.filter((m) => year(m.date) === y), work: work.filter((w) => year(w.date) === y), phase: phaseOf(phases, y) });
   }
   return (
-    <div className="stops" data-order="newest-first">
+    <div className="stops work" data-order="newest-first">
       <h1 className="visually-hidden">Work</h1>
       {years.map(({ y, marks, work, phase }) => {
         const mood = { "data-valence": phase.mood.valence, "data-arousal": phase.mood.arousal, "data-x": phase.mood.x, "data-y": phase.mood.y };

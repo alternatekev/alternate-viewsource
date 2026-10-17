@@ -254,7 +254,7 @@ html[data-surface="column"] .dock-ambience { margin-inline-start: auto; }
 .stop-body figure { margin: 1rem 0; }
 .stop-stack { display: none; }
 
-html[data-work] .stop-space:not([data-arrived]) { visibility: hidden; }
+html[data-work] .stop-space:not([data-arrived]), html[data-colophon] .stop-space:not([data-arrived]) { visibility: hidden; }
 html[data-work] .stop-shot:not([data-set]) { visibility: hidden; }
 html[data-work] .stop-stack { display: block; position: relative; aspect-ratio: 16 / 11; min-width: 0; }
 /* a piece open: its year scrolls inside itself, and the stack stays in view beside the words */
