@@ -11,11 +11,11 @@
 // into view. With reduced motion, the corridor is still there; the field keeps its moods.
 
 import { begun, onBegin } from "@/lib/begin";
-import { isColumn } from "@/lib/column";
+import { columnInView, isColumn } from "@/lib/column";
 import { crossYear, diveProgress, diving, setGather, setShape } from "@/lib/flight";
 import { onLeave } from "@/lib/route";
 import { travelTo } from "@/lib/travel";
-import { leave, setIn, setOut, typeIn, typeOut } from "@/lib/type";
+import { leave, setIn, setOut, typeIn, typeOut, unset } from "@/lib/type";
 import { dock } from "@/tokens/dock";
 import { motion } from "@/tokens/motion";
 
@@ -29,7 +29,8 @@ export function work() {
   root.setAttribute("data-work", column ? "column" : "corridor");
   setShape(true);
 
-  const stops = [...document.querySelectorAll<HTMLElement>(".stop")];
+  // this page's years only: the colophon's sections are stops too, and Next may be keeping it, hidden
+  const stops = [...document.querySelectorAll<HTMLElement>(".work > .stop")];
   // the quiet years are hidden in the document (app/work/page.tsx); the corridor is where they show, as distance
   if (!column) for (const s of stops) if (s.classList.contains("quiet")) s.hidden = false;
   const spaces = stops.map((s) => s.querySelector<HTMLElement>(".stop-space")!);
@@ -71,16 +72,26 @@ export function work() {
     await Promise.all([...arrived].map((i) => Promise.all([typeOut(spaces[i]), ...[...spaces[i].querySelectorAll<HTMLElement>("[data-set]")].map((el) => setOut(el))])));
   });
 
+  // gone from sight (Next keeps the page, hidden, for a later visit): the years go back to how they
+  // first were, so coming back they set in again
+  function unsettle() {
+    for (const sp of spaces) {
+      unset(sp); delete sp.dataset.arrived; sp.removeAttribute("data-here");
+      for (const k of ["visibility", "opacity", "transform", "z-index"]) sp.style.removeProperty(k);
+    }
+    for (const s of stops) if (s.classList.contains("quiet")) s.hidden = true;
+  }
+
   if (column) {
     // phones: a column, each year setting in as its top comes into view
     let seen: IntersectionObserver | null = null;
     const off = onBegin(() => {
       seen = new IntersectionObserver((entries) => {
         for (const e of entries) if (e.isIntersecting && ready()) { seen!.unobserve(e.target); arrive(stops.indexOf(e.target as HTMLElement)); }
-      }, { rootMargin: "0px 0px -20% 0px" });
+      }, columnInView);
       stops.forEach((s) => seen!.observe(s));
     });
-    return { destroy() { off(); seen?.disconnect(); offLeave(); document.removeEventListener("click", onSummary); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); } };
+    return { destroy() { off(); seen?.disconnect(); offLeave(); document.removeEventListener("click", onSummary); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle(); } };
   }
 
   // the corridor: each year placed in depth by how far it is from the camera
@@ -126,7 +137,7 @@ export function work() {
     destroy() {
       cancelAnimationFrame(raf); clearTimeout(quiet); timers.forEach(clearTimeout);
       removeEventListener("scroll", onScroll); document.removeEventListener("click", onSummary); offLeave();
-      root.removeAttribute("data-work"); setShape(false); setGather(0);
+      root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle();
     },
   };
 }

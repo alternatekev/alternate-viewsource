@@ -144,17 +144,18 @@ export default function Docks() {
         going = false;
       }
       // the nav's link to the page we're already on doesn't reload it: it travels, eased, to the start;
-      // a link to another page goes there without a reload
+      // a link to any other page goes there without a reload, so begin is never asked for twice
       const onLink = (e: MouseEvent) => {
         const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[href]");
         if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         const to = a.getAttribute("href")!;
         if (a.getAttribute("aria-current") === "page") { e.preventDefault(); travel(0); return; }
-        if (to === HOME || to === WORK) { e.preventDefault(); void go(to); }
+        if (to.startsWith("/")) { e.preventDefault(); void go(to); }
       };
       links.el.addEventListener("click", onLink);
       home.addEventListener("click", () => {
-        if (document.querySelector(".beat.welcome")) travel(0); else void go(HOME);
+        // Hello may still be in the document on another page (Next keeps recent pages, hidden): ask where we are
+        if (location.pathname === HOME) travel(0); else void go(HOME);
       });
       live.current = {
         timeline,

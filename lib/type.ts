@@ -166,3 +166,10 @@ export async function setOut(el: HTMLElement, pace = 1) {
 export function arrive(el: HTMLElement, pace = 1) { setIn(el, pace); return typeIn(el, pace); }
 /** a whole piece leaving: its words erase and its box withdraws */
 export function leave(el: HTMLElement, pace = 1) { return Promise.all([typeOut(el, pace), setOut(el, pace)]); }
+
+/** a piece put back as it was before it ever came in: every word whole, every box unset, at once.
+ *  Only for a page out of sight, kept hidden between visits, so it can come in again by the one transition */
+export function unset(root: HTMLElement) {
+  for (const t of texts(root)) { supersede(t); reveal(t); }
+  for (const el of [root, ...root.querySelectorAll<HTMLElement>("[data-set]")]) { delete el.dataset.set; el.style.removeProperty("--type-pace"); }
+}
