@@ -55,16 +55,28 @@ export function work() {
   const ready = () => begun() && (!diving() || diveProgress() > 0.72);
 
   // opening a piece types its words in; closing it types them out, then it closes
+  const partsOf = (d: HTMLDetailsElement) => [...d.children].filter((c): c is HTMLElement => c.tagName !== "SUMMARY" && c instanceof HTMLElement);
+  const closing = new WeakSet<HTMLDetailsElement>();
+  const close = (d: HTMLDetailsElement) => {
+    if (!d.open || closing.has(d)) return;
+    closing.add(d);
+    void Promise.all(partsOf(d).map((p) => leave(p))).then(() => { d.open = false; closing.delete(d); });
+  };
   const onSummary = (e: MouseEvent) => {
     const sum = (e.target as HTMLElement).closest("summary");
     const d = sum?.parentElement;
     if (!sum || !(d instanceof HTMLDetailsElement) || !d.closest(".stop")) return;
     e.preventDefault();
-    const parts = [...d.children].filter((c): c is HTMLElement => c !== sum && c instanceof HTMLElement);
-    if (!d.open) { d.open = true; parts.forEach((p) => { setIn(p); void typeIn(p); }); }
-    else void Promise.all(parts.map((p) => leave(p))).then(() => { d.open = false; });
+    if (!d.open) { d.open = true; partsOf(d).forEach((p) => { setIn(p); void typeIn(p); }); }
+    else close(d);
   };
   document.addEventListener("click", onSummary);
+  // the ways out of a piece (Kevin, Oct 16: "I can't get out of it"): Escape closes it, as Escape
+  // steps back out on the timeline; reading past its end hands the scroll back to the corridor
+  // (globals.css), and leaving its year closes it behind you
+  const openIn = (el: ParentNode) => [...el.querySelectorAll<HTMLDetailsElement>(".stop details[open]")];
+  const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") openIn(document).forEach(close); };
+  document.addEventListener("keydown", onKey);
 
   // leaving the page: every year that has come in types out and withdraws
   const offLeave = onLeave(async () => {
@@ -91,7 +103,7 @@ export function work() {
       }, columnInView);
       stops.forEach((s) => seen!.observe(s));
     });
-    return { destroy() { off(); seen?.disconnect(); offLeave(); document.removeEventListener("click", onSummary); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle(); } };
+    return { destroy() { off(); seen?.disconnect(); offLeave(); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); timers.forEach(clearTimeout); root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle(); } };
   }
 
   // the corridor: each year placed in depth by how far it is from the camera
@@ -116,7 +128,7 @@ export function work() {
       sp.toggleAttribute("data-here", Math.abs(rel) < 0.35);
     }
     const y = Math.round(cam);
-    if (y !== lastYear) { crossYear(y - lastYear); lastYear = y; }
+    if (y !== lastYear) { const left = spaces[clamp(lastYear, 0, n - 1)]; if (left) openIn(left).forEach(close); crossYear(y - lastYear); lastYear = y; }
     setGather(smooth(n - 2.2, n - 1, cam));
     raf = requestAnimationFrame(frame);
   }
@@ -136,7 +148,7 @@ export function work() {
   return {
     destroy() {
       cancelAnimationFrame(raf); clearTimeout(quiet); timers.forEach(clearTimeout);
-      removeEventListener("scroll", onScroll); document.removeEventListener("click", onSummary); offLeave();
+      removeEventListener("scroll", onScroll); document.removeEventListener("click", onSummary); document.removeEventListener("keydown", onKey); offLeave();
       root.removeAttribute("data-work"); setShape(false); setGather(0); unsettle();
     },
   };

@@ -267,7 +267,7 @@ html[data-work="corridor"] .stop-space:has(details[open]) .stop-stack { align-se
 html[data-work="corridor"] .stop { height: 100vh; height: 100dvh; padding: 0; }
 html[data-work="corridor"] .stop.quiet { display: block; }
 html[data-work="corridor"] .stop-space {
-  position: fixed; left: 50%; top: 50%; width: min(1040px, 84vw); max-height: 80vh; overflow: auto; overscroll-behavior: contain;
+  position: fixed; left: 50%; top: 50%; width: min(1040px, 84vw); max-height: 80vh; overflow: auto; /* reading past a piece's end hands the scroll back to the corridor, so there is always a way out */
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3rem; align-items: center;
   transform: translate(-50%, -50%); will-change: transform, opacity; pointer-events: none; scrollbar-width: none; }
 html[data-work="corridor"] .stop-space[data-here] { pointer-events: auto; }
