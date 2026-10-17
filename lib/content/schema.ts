@@ -54,6 +54,9 @@ export const Milestone = z.object({
   approximate: z.boolean().default(false),
   label: z.string(),
   phase: z.enum(PHASE_KEYS),
+  // true when a milestone sits in its phase by what the work was about, not by its date: my Cisco
+  // design-system years run past the Design systems phase, and belong in it (Kevin, Oct 16)
+  byTheme: z.boolean().optional(),
   // agents: where the work happened, at Cisco or at home; the phase sets the two apart (Kevin, Oct 16)
   where: z.enum(["cisco", "home"]).optional(),
   sources: z.array(Source).default([]),
