@@ -1,7 +1,8 @@
-import { getDesigns, getMilestones, getPhases, getUsage, getWriting } from "@/lib/content";
+import { getChapters, getDesigns, getMilestones, getPhases, getUsage, getWriting, publishable } from "@/lib/content";
 import Surface from "./surface";
 import Usage from "./usage";
 import { Marks } from "./marks";
+import { Chapters } from "./chapters";
 import { Sources, When } from "./when";
 
 // The spine as one typographic surface (David Small's pattern: zoom is navigation, and type stays
@@ -9,7 +10,7 @@ import { Sources, When } from "./when";
 // beside it: what the web was then, its milestones and the site's designs from those years. Close,
 // smaller still beside each one: its sources. Scroll travels between phases; pressing dives in
 // (lib/surface.ts). Without JavaScript this is simply a document, every word in reading order.
-// Words here are the sourced spine only; chapters arrive when Kevin dictates them.
+// Words here are the sourced spine and the chapters that have words; a stub chapter stays off until it does.
 // Newest first (Kevin, Oct 16): Hello at the top, then agents, scrolling down through time to dial-up.
 // Inside each phase every list runs newest first too.
 const year = (d: string) => new Date(d).getUTCFullYear();
@@ -21,7 +22,7 @@ const WELCOME = {
 };
 
 export default async function Home() {
-  const [phases, milestones, designs, writing, usage] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting(), getUsage()]);
+  const [phases, milestones, designs, writing, usage, chapters] = await Promise.all([getPhases(), getMilestones(), getDesigns(), getWriting(), getUsage(), getChapters()]);
   return (
     // the page's one landmark; the beats stay a child of the body, as the surface's styles expect
     <div className="beats" role="main" data-order="newest-first">
@@ -89,6 +90,8 @@ export default async function Home() {
                       </p>
                     ))}
                   </div>
+                  {/* the chapters, in my words, before the posts: for agents a row at Cisco and a row at home */}
+                  <Chapters chapters={chapters.filter((c) => c.phase === p.key && publishable(c))} />
                   {/* the posts, as blocks: a row per year, newest year first, and the year's posts across, newest first */}
                   {years.map((y) => (
                     <div key={y} className="near-row">

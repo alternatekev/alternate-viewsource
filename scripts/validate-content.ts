@@ -97,6 +97,13 @@ async function main() {
       const p = phases.find((p) => p.key === meta.phase)!;
       if (meta.start < p.start || meta.start > p.end) fail(file, `start ${meta.start} is outside ${p.key}`);
       if (meta.status !== "stub" && meta.sources.length === 0) fail(file, "a chapter with words needs sources");
+      if (meta.phase === "agents" && !meta.where) fail(file, "agents work doesn't say where: cisco or home");
+      if (meta.phase !== "agents" && meta.where) fail(file, "says where, which only agents work does");
+      // a chapter's pictures are served from public/writing, like a piece's
+      for (const m of (await readFile(path.join(root, file), "utf8")).matchAll(/!\[[^\]]*\]\(([^)\s]+)/g)) {
+        if (!m[1].startsWith("/writing/")) fail(file, `shows ${m[1]} from elsewhere`);
+        else if (!existsSync(path.join(root, "..", "public", m[1]))) fail(file, `shows ${m[1]}, which isn't in public/`);
+      }
     } catch (e) {
       fail(file, e instanceof Error ? e.message : String(e));
     }

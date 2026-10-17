@@ -1,0 +1,33 @@
+---
+title: the argument is the source of truth
+phase: agents
+where: cisco
+order: 70
+start: 2026-09-29
+summary: In September 2026 I built an outline-to-slides system with agents for my talks. The argument lives in one text file; decks from live HTML to Keynote are composed from it, in my visual style and Merlin Mann's pacing.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: built September 29 – October 8, 2026; the first talk made with it is about the design system's teams
+objects: []
+---
+
+<Glance>
+Slides are where talks go to die. On September 29, 2026 I built a pair of skills with an agent: an outliner that keeps one Markdown file per talk, premise to arc to beats to sequence, and a slide builder that composes a live HTML deck from it and exports to PDF, PowerPoint or Keynote. The first talk through it is about my three teams, and the metaphor is a superconductor.
+</Glance>
+
+I give a release talk every month to a couple hundred engineers, and a longer one when the teams need a story. The way I'd made decks for twenty years was the way everyone does: open the slide app, make a title, lose the argument by slide nine.
+
+The fix was to stop editing slides. The outliner keeps one text file per talk. Premise first: the one sentence the talk exists to make true. Then the arc, then the beats, each with a stable id so a slide can point at it forever, then the sequence. A small live board lets me reorder and rewrite inline, and gather images with their credits. When the argument changes, I change the file. The deck follows.
+
+The slide builder reads that file and composes a deck. Its instructions are my rules, written down: one idea per slide, the second line is the loud one, real photographs and real interfaces, never decorative illustration, no gradients, mostly empty slides, Merlin Mann's pacing. It exports to live HTML first, because the browser is where I design, and to PDF, PowerPoint and Keynote because the room doesn't care where I design.
+
+<Inhabit>
+The talk in progress as I write this is about the design system's teams, and the metaphor is a superconductor: resistance drops to zero below a critical temperature, and current flows without loss. The premise underneath it is the one I've been giving since 2001, when I built a web page in five kilobytes: performance is experience. Speed is not a feature of the thing. It's what the thing feels like.
+
+Why agents made this possible: nobody writes their own presentation software. It's a solved problem with a thousand products and all of them start from the slide. Describing the system I actually wanted, where the slide is a derived artifact, took a weekend with an agent, because the agent could write the board, the exporters and the Keynote adapter while I argued about the beats. (The Keynote adapter is still arguing back.)
+
+What I learned: the tool you build for yourself encodes what you believe. This one believes the argument comes first and the pictures come second, which is also what I was taught about designing in the browser: build the real thing, then look. Different decade, same lesson, now a skill file.
+</Inhabit>

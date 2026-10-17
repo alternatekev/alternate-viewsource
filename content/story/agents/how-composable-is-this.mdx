@@ -1,0 +1,39 @@
+---
+title: "how composable is this?"
+phase: agents
+where: cisco
+order: 30
+start: 2026-04-01
+summary: In April 2026 I built a support bot for the design system — an app in our own components that answers designers' questions from the same MCP the agents read, and says how sure it is.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: built April 1–9, 2026; usage numbers are not public
+objects: []
+---
+
+<Glance>
+Designers ask the same three questions: how composable is this component, can product developers customize it, can I change the icon. On April 1, 2026 I started a bot that answers them from our docs over MCP and says how confident it is. By April 6 it was an app in our own components; by April 9 it took screenshots.
+</Glance>
+
+The support rotation on a design-system team is a person. Each week one engineer takes the channel and answers "can the stepper footer be composed?" fourteen times. It's necessary and it's a tax, and in February I'd already had an agent match hundreds of open support tickets against years of closed ones to suggest which were long since answered.
+
+So on April 1 I asked for a chatbot. The first version was a command-line thing. The second, a day later, was the ask I actually meant: "an app! an app that uses our components to implement chat features, while connecting our MCP." Separate repo, our React library for the interface, a small server behind it. I seeded it with real questions from the support channel and tuned the tone for designers, who want a verdict, not a lecture.
+
+The answer format is the product. Verdict. Short answer. Customizable today. Not changeable today. Confidence. The bot's first validated answers were honest ones: the stepper footer, partially supported; a banner threshold, not supported because it's hard-coded; a page title, partly. A support engineer would have said the same, after reading the source. The bot reads the source.
+
+<Inhabit>
+Decisions I'd make again. It runs on the agent CLI the user is already signed into, not an API key, so there's nothing to leak. It takes screenshots, because designers point at things. Long answers run in the background and the app polls, because the corporate proxy times out before a careful answer finishes. And when I found it quietly borrowing the sign-in from another tool on the machine, I isolated it, because a support bot that can read your chat is not a support bot.
+
+The same engine got two siblings: one that watches our meeting rooms and drafts answers for a human to approve, edit or skip, and one for chat. Approve, edit or skip is the right loop for a bot that speaks for a team. It never posts on its own.
+
+In May the bot moved into the token platform as its Ask tab, where you select a component on the page and ask about that one. Which is where it belonged all along.
+
+What agents made possible: the rotation was always going to be a person, because building a support product for one internal library is not a thing anyone funds. It took eight days, nights included, and the first time it answered a real question correctly I wrote "this is food" in the log. I stand by that.
+
+Not measured yet: how many questions it answers a week, and whether the rotation got lighter. The goal I wrote down was a faster answer for the person asking. I'll report when I know.
+</Inhabit>

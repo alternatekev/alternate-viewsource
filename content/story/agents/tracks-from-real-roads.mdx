@@ -1,0 +1,49 @@
+---
+title: a track only counts once I've driven it
+phase: agents
+where: home
+order: 110
+start: 2026-06-05
+summary: From June 2026 I built a pipeline that turns OpenStreetMap roads and USGS elevation into tracks I can drive in Assetto Corsa, rebuilt its hard part three times, and wrote the rule that fixed it — the seat is the only ground truth.
+status: draft
+clearance: own
+mood: { valence: 0.5, arousal: 0.8, x: 0.2, y: -0.1 }
+sources:
+  - label: k10-colorado on GitHub
+    url: https://github.com/k10-motorsports/k10-colorado
+  - label: k10-san-diego on GitHub
+    url: https://github.com/k10-motorsports/k10-san-diego
+  - label: The compiled record (content/objects/sim-racing-record)
+    note: dates, versions and ledger entries from the repositories, read 2026-10-16
+objects:
+  - sim-racing-tracks
+  - sim-racing-video
+---
+
+<Glance>
+On June 5, 2026 I started a pipeline that turns real roads into racetracks: OpenStreetMap for the centerline, USGS 3DEP for the elevation, headless Blender for the mesh, Assetto Corsa to drive it. Fifteen tracks since, from a street loop in Commerce City to the Lake Murray loop in San Diego. The engine was rebuilt three times. The fourth version has a rule: no drive-test, no claim.
+</Glance>
+
+The first principle in the README, written the first night: "the screenshot is a selection aid, not data." I'd marked up an aerial of a street loop in Commerce City, Colorado and I wanted to drive it. The aerial tells you which roads. The data tells you where they are.
+
+![Sand Creek Raceway, the first input to the pipeline: a marked-up aerial of a street loop in Commerce City.](/writing/racing-rig/2026-06-05-sand-creek-selection-aid.jpg)
+
+**The pipeline.** Roads from OpenStreetMap. Elevation from the USGS at one-meter resolution. Convert to local meters with true north, lay a road ribbon and a grass heightfield, build the mesh in Blender with nobody at the keyboard, export the game's format, install, drive, record the AI lines. Four skills on day one: GPS extraction, elevation, lighting, track modding. Eleven by August, including one that audits the mesh and one that drives the test.
+
+**Nine hours.** On July 1 the Lake Murray loop went from version 0.1.2 at 11:20 in the morning to 0.9.2 at 8:45 at night. Connectors at 4:27, 4:45, 4:55. 454 real building footprints at 5:31. Palms and water at 5:36. At 7:28pm, a reset to the bare loop, because the crossings weren't drivable. Jackson Drive at 7:51. "No more walls at crossings" at 8:45. I have never iterated on anything that fast with another person, and I've worked with very fast people.
+
+![Lake Murray, the August build: real road and elevation, sketch-quality scenery.](/writing/racing-rig/2026-08-09-lake-murray-august.jpg)
+
+**Three rebuilds.** The first engine was real, and never verified a track in the game. The second proved the one-shot approach dead a second time. The third added a fleet: a registry, written laws, tiers of done, gates that had to go green before a track shipped. The gates went green and the junctions were still undrivable. The fourth, in August, is the synthesis, and it fits on a napkin: the engine drafts; hands author, in Blender, on layers the engine never regenerates; gates judge, with no bypass flags; and I drive. "The seat is the only ground truth. No drive-test report, no claim."
+
+<Inhabit>
+The ledger is the part I'd show anyone who manages engineers. Every complaint I make from the seat becomes an entry, with my words kept verbatim as the symptom. Evidence has to be measured before anyone writes a diagnosis. The verification is decided before the fix. Fixes go to the engine so they reach all fifteen tracks, not the one I was driving. And an entry closes only by a drive. Entry 0001: "the sidewalks on Sand Creek are insane." Entry 0050, October 12: "the small steps are a problem at jackson/navajo and arrow signs are only placed for one direction of driving." The cause was one road triangle, a third of a square meter, at a 901 percent slope. Closed October 15, from the seat: "that corner feels right now."
+
+The laws come with their receipts. Each one is written "with the failure that bought it," which is the only way I've found to make a rule stick, with people or with models.
+
+Some tracks I didn't build. Four rally stages in western Colorado aren't in the pipeline because their county roads aren't in OpenStreetMap, and "there is no honest geometry to build from yet." Two others are, as gravel and as fantasy tarmac. A side road: a driving game in Unreal that starts on a real street in 1978 San Diego and dissolves into procedural worlds, the car as the brush and the telemetry as the paint. Milestone zero compiled in a day. It's waiting.
+
+Why agents made this possible: this pipeline spans GIS, photogrammetry-adjacent elevation work, Blender's Python API, a game engine's binary format and a Windows install step. Nobody learns all of that for a hobby. The agent did the parts I'll never be good at. But the failure mode of agents is the whole lesson of the three rebuilds: confident, green, and undrivable. Which is exactly why the seat is the ground truth. The model can write the gate. It can't feel the curb.
+
+October 11, as a coda: three layouts of Lake Murray from dry run at 4:44am to installed at 7:41, then "what about lariat" at 10:39, and a second track's new version installed by 6:26pm. The commit messages quote me. I like that the record keeps my voice in it, typos and all.
+</Inhabit>

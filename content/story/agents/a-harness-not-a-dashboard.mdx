@@ -1,0 +1,41 @@
+---
+title: a harness, not a dashboard
+phase: agents
+where: cisco
+order: 50
+start: 2026-04-24
+summary: From April 2026 I built the system I run three teams with — it reads the work where it happens, says how fresh and how sure every answer is, and drafts while I decide. In August it stopped being a dashboard and became a harness.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: private, local software used by one person; descriptions are by function, no names or numbers from inside the teams
+objects: []
+---
+
+<Glance>
+On April 24, 2026 an agent rendered a management desktop app into Figma from a sentence. By May it read our meetings, chat, email, tickets and repositories into one place. On August 26 I wrote "it's feeling more like i interact with this system through you more as a harness than a dashboard," and that became the architecture.
+</Glance>
+
+In the spring of 2026 I went from running one team to running three, and the hours didn't change. A manager's job is mostly knowing: who said they'd do what, what moved since Tuesday, which of the fourteen things on fire matters to the person who's about to ask. I'd been keeping that in a sticky note and a very good memory, and the memory was full.
+
+So I built the thing I needed, for one user. It started as a sentence to a design skill, "a managerial desktop application that helps manage commitments, stakeholders, meetings, and deliverables," which an agent rendered as real components onto a Figma canvas. Then it became an app, in our own design system, because I never ever want anything else. (That sentence is also a skill now.)
+
+**It reads where the work happens.** Meeting transcripts and summaries. The chat. Email. Tickets across three boards. Repositories, issues, pull requests, releases. The feature-flag service. A directory, so names become people and people become teams. And my Obsidian vault, which is the durable store: everything it learns that's worth keeping becomes a note I can read without it.
+
+**It says how fresh and how sure.** Every answer carries when its sources were last read and how confident it is. Cached advice older than 36 hours is marked stale and left out. Missing evidence is never "nothing happened." Those three rules came from being burned by a dashboard that said green.
+
+**It drafts while I decide.** A priority inbox ranked by who is asking and what they're waiting for. "i've been out for two weeks, what did i miss?" answered as a page, with the merges, the new tickets and the resolutions counted. A question like "what's going on with the CDN" answered as an evidence-backed report I can save as a PDF. Weekly progress on the quarter's goals that separates what was recorded as done from what the evidence supports. Proposed epics from the goals, which I edit before they're created, after I caught it rolling five into one.
+
+<Inhabit>
+The first thing I asked it to do to itself was a security and privacy audit. It found unauthenticated endpoints and over-broad scopes in its own code, and I fed its findings back to it as review comments. That's a working relationship.
+
+The pivot came on August 26. I'd built a dashboard, a Mac app, a native Swift version of the Mac app, and was asking "we have technically 3 clients, mac native, web, and electron. what's the smartest way forward with one UI?" The answer was that the UI wasn't the point. I was talking to the system through the agent anyway. So the architecture flipped: a core with typed operations; a command-line tool that answers in a second without starting a server; the dashboard optional, for scanning. The agent is the interface. The dashboard is for when I want to look.
+
+Why agents made this possible: nobody builds a product for one manager. There's no budget line for "a system that knows what I know." Built with agents, on nights, it's the most useful software I have, and it's taught me more about how my teams actually work than any report I've been handed.
+
+What I learned, in the agent's words from a skill it wrote about mine: "Warm, direct, candid, and relationship-first." I'd rather it drafted in my voice than in its own. It does, now. I still read every word before it leaves.
+
+What's not here, on purpose: anything about the people. The system holds their work. This page holds mine.
+</Inhabit>

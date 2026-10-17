@@ -91,6 +91,8 @@ export const ChapterMeta = z.object({
   status: z.enum(["stub", "draft", "told"]).default("stub"),
   // own: Kevin's to publish · review: needs an external review before it is public · cleared: reviewed
   clearance: z.enum(["own", "review", "cleared"]).default("own"),
+  // agents: where the work happened, at Cisco or at home, as for a milestone (Kevin, Oct 16)
+  where: z.enum(["cisco", "home"]).optional(),
   mood: Mood,
   sources: z.array(Source).default([]),
   // ids under content/objects this chapter places

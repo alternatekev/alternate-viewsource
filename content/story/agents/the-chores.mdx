@@ -1,0 +1,39 @@
+---
+title: the chores
+phase: agents
+where: cisco
+order: 20
+start: 2026-02-17
+summary: The first things I handed to agents at Cisco were chores nobody would staff — monthly release notes, keeping two issue trackers in sync by hand, a stuck merge train — each done once with an agent, then written down as a skill.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: dates and counts are from my own session history, February to May 2026
+objects: []
+---
+
+<Glance>
+The first ask, on February 17, 2026, was a slide and the release notes for version 44. By May an agent had audited about a hundred outside bug reports against our tracker in one pass, drafted 39 tickets and cross-linked every one. Each chore became a skill: a file that says how we do it, so the next run is the same.
+</Glance>
+
+Nobody transforms by starting with the important work. You start with the thing you resent doing on the last Friday of every month.
+
+**Release notes.** Our library ships monthly, and every release gets a five-minute talk and a page of notes. I'd written them by hand since version 40. On February 17 I asked an agent for the slide and the notes for version 44 from the tag range, and it did a passable job. By March 20 the script that did it was a skill in the repo. Along the way I made it use the agent CLI I was already signed into instead of an API key (one fewer secret), cut the script from 731 lines to 477 so a reviewer could read it, and merged the prompt and the skill into one file so there was one place the instructions lived. A reviewer asked for a Git class. I pushed back, through the agent, and I was right. (I'm told.)
+
+**Two trackers, by hand.** We take bug reports from outside teams in one system and track our work in another, and for years a person kept them in sync. In March I described the problem in two sentences and asked for a skill that audits one against the other, drafts a ticket for anything unmapped with the reporter's steps kept verbatim, and leaves the reporter a comment saying where their bug went and which version fixes it. Dry-run by default; nothing touches a live system until I've read the plan. The first live pass on March 30 made five tickets. The full pass on May 5 audited about a hundred open reports, posted follow-ups on the ones already fixed, drafted 39 tickets and cross-linked all 39, and left three for a human because they were unclear. An afternoon, instead of a quarter of someone's attention forever.
+
+**A merge train.** On the evening of April 13 we had approved work stuck behind flaky jobs. By midnight there was an agent that watches the queue, retries only the failed job rather than the whole pipeline, puts the branch back on the train, and asks before it rebases. It ran against the wrong project the first time. (It did ask.)
+
+<Inhabit>
+There were smaller ones. A writer for merge-request descriptions that matches our template. A migration skill that converts our old table component to the new one with before-and-after examples. Nine tickets taken from a description to a first pull request with two human gates, every one labeled as AI-assisted so we could count them later.
+
+The pattern was the same each time. A chore has a shape: inputs, a process someone carries in their head, an output. Describe the shape once. Run it with the agent while you watch. Correct it. Then make the corrections a skill, which is a document that outlives the session. The team added their own: guardrails for implementation, a code-review skill, a scanner for breaking changes. By September there were sixty branches in the library with the agent's prefix on them, and most of them weren't mine.
+
+Why agents made this possible, not just faster: none of these chores would have been built as software. A sync script for two trackers is a two-week project that loses to every feature, every quarter. Described to an agent, it's an afternoon, and you find out by Friday whether it was worth having. That changes which problems you're willing to solve.
+
+What I learned: dry-run first, local sign-in instead of keys, a log of every run. Not because the agent is dangerous, but because I am, at 11pm, with a merge train.
+</Inhabit>
