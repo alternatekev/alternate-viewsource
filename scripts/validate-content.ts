@@ -31,7 +31,7 @@ async function main() {
     if (keys.has(m.key)) fail("spine/milestones.json", `duplicate key ${m.key}`);
     keys.add(m.key);
     const p = phases.find((p) => p.key === m.phase)!;
-    if (m.date < p.start || m.date > p.end) fail("spine/milestones.json", `${m.key} (${m.date}) is outside ${p.key} (${p.start}–${p.end})`);
+    if (!m.byTheme && (m.date < p.start || m.date > p.end)) fail("spine/milestones.json", `${m.key} (${m.date}) is outside ${p.key} (${p.start}–${p.end})`);
     if (m.sources.length === 0) fail("spine/milestones.json", `${m.key} has no source`);
     if (m.phase === "agents" && !m.where) fail("spine/milestones.json", `${m.key} is agents work but doesn't say where: cisco or home`);
     if (m.phase !== "agents" && m.where) fail("spine/milestones.json", `${m.key} says where, which only agents work does`);
