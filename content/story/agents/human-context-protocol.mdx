@@ -1,0 +1,37 @@
+---
+title: the other direction from MCP
+phase: agents
+where: home
+order: 140
+start: 2026-04-27
+summary: In April 2026 I drafted the Human Context Protocol with Claude — an open standard for how AI tools should talk to people, designed around human constraints instead of AI capabilities. MCP is how AI talks to tools. This is the reverse.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: human-context-protocol on GitHub
+    url: https://github.com/alternatekev/human-context-protocol
+objects: []
+---
+
+<Glance>
+"v0.1 — co-designed by Kevin and Claude, April 2026. Open for argument." The Human Context Protocol is a runtime contract for what an AI system may, must and must not tell a person, and a design spec that coding assistants apply while they build, so the behavior ships even when no AI runs in the product.
+</Glance>
+
+By the end of April I had a racing coach that talked while I drove, a management system that could ping me about fourteen things, and a phone that already did. Every tool I'd built with agents, and every one I'd bought, had the same bad habit: it pushed its uncertainty onto me as a notification and called it helpful.
+
+The Model Context Protocol had just made it easy for AI to talk to tools. Nobody had written down how AI should talk to humans. So Claude and I did, over a weekend, and put it in a public repository with the word "argument" in the first line on purpose.
+
+**The problem, as the README puts it.** AI-to-human communication runs on interruptive notifications, buttons that hand the AI's indecision to the user, engagement metrics, and per-app settings that don't know about each other. A tool can't tell what matters to this person right now.
+
+**The shape.** A profile: what a person has declared and what the system has inferred about their salience signals, attention modes, how to aggregate, which stakes go to which channel, what to suppress, and the values that override the rest. Profiles cascade, personal over project over product. Emissions, of exactly three kinds: statements, requests and updates. Each with an acknowledgment cost: silent, pending or blocking. And a resolution step that decides whether, when and how a thing reaches a person, and can explain the decision afterward.
+
+**The teeth.** Conformance lists required patterns, forbidden anti-patterns, among them engagement-as-metric and fake urgency, reference implementations and tests. The three principles are short enough to remember: calibrated, actionable, respectful.
+
+<Inhabit>
+I put it next to the racing rig and the management system on this page because that spring I was on both ends: building the things that interrupt, and being the person interrupted. A coach that comments while you drive at 150 miles an hour is the hardest case I know for "respectful," and it's a good test to hold a spec against.
+
+Why agents made this possible: writing a protocol is a long argument with yourself, and the argument is better with a counterparty that has read every notification system ever shipped and holds none of them dear. It's version 0.1, and it says "open for argument" in the first line because it was written as one.
+
+What I learned, which I've believed since the personal data project in 2008: software should talk to people on human terms, and people should own what it knows about them. In 2008 that meant privacy up front. In 2026 it means an AI that knows when to be quiet. Same principle, louder room.
+</Inhabit>

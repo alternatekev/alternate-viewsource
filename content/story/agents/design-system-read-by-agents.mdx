@@ -1,0 +1,39 @@
+---
+title: a design system agents can read
+phase: agents
+where: cisco
+order: 10
+start: 2026-03-01
+summary: In March 2026 I opened the design system behind Cisco's network administration products to coding agents, as a manifest of 59 components and 1,207 tokens served over MCP, with a one-click setup for designers.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: counts are from the manifest my tooling generated in May 2026; adoption numbers are not public
+objects: []
+---
+
+<Glance>
+In March 2026 my team was told it was turning entirely to agentic development. The first thing I did was make the design system readable by the agents: component docs over MCP, then a generated manifest of 59 components, 1,207 tokens, 734 token usages, 1,004 class names and 547 props, with a one-click setup so a designer could install it next to Figma's.
+</Glance>
+
+A design system is a vocabulary. For six years ours lived in a React library, a Storybook, a Figma file and the heads of the people who built it. Developers learned it by reading the source and asking in the team channel. That worked, slowly, for people. It doesn't work at all for a coding agent, which will cheerfully invent a component that looks right and doesn't exist.
+
+I know, because it did. The first time I had an agent build a sample app with our library, I spent a morning typing variations of the same sentence: "we are only using our components." "we can't just make stuff up." (And one with more italics than I'm proud of.) By lunch the corrections were a skill file, and the afternoon went better than the morning. That's the whole method, really. Teach it once, write the lesson down, and the next agent starts where the last one left off.
+
+**The docs, first.** The team had scaffolded a small MCP server over the winter that served our component documentation to whatever agent asked. In March I moved those docs into the library proper, gave them a section in Storybook called AI Integration, and announced it at the monthly release talk to a couple hundred engineers. We recommended pairing it with Figma's MCP, so a designer's file and our code could be read by the same agent in the same session.
+
+**The manifest, in a day.** Docs are what we wrote down. The manifest is what's true. In May I had an agent read every installed package and generate a single file describing the system as built: every component, every token, where each token is used, every class name, every prop and which class it toggles. Then we served that as an MCP of its own, with tools to list, search and trace a token to the components that use it. Nobody was ever going to write that file by hand. It was out of date the day it was finished, so it regenerates.
+
+**The setup, for designers.** The last mile was a double-click. A small installer that finds your editor's config, backs it up, adds our server and Figma's, and prints a playbook in plain words. Designers were the point: the people most likely to want an agent that speaks the system, and least likely to edit a JSON file to get one.
+
+<Inhabit>
+What changed because the agent could read the system: it stopped inventing. It used our tokens instead of writing CSS. It could answer "which components use this spacing token?" in a second, which is a question I used to answer with grep and a cup of coffee. And it made a second order of tools possible, which the rest of this section is about: a support bot that answers designers from the same docs, a token platform that previews a change across every component, and a styles-only build for the teams that use our look but not our React.
+
+What I learned: the hard part of an AI transformation isn't the model. It's making your own house legible. Everything we'd left implicit, in Slack threads and in people, had to become a file an agent could read. That's not new work. It's the documentation debt we'd been carrying for six years, suddenly with a reason to pay it.
+
+What isn't measured yet: how many teams build with the manifest, and what it saved them. The design system is public at magnetic.cisco.com; the numbers aren't, yet.
+</Inhabit>

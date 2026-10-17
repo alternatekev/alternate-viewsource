@@ -1,0 +1,39 @@
+---
+title: view source, again
+phase: agents
+where: home
+order: 150
+start: 2026-10-13
+summary: This site was planned in a day, prototyped in a morning and built in about 46 hours of repository time with agents, in a public repository that is itself the evidence, rules and graveyard included. I art-directed every step.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: alternate-viewsource on GitHub
+    url: https://github.com/alternatekev/alternate-viewsource
+  - label: The house rules every agent follows here
+    url: https://github.com/alternatekev/alternate-viewsource/blob/main/CLAUDE.md
+objects: []
+---
+
+<Glance>
+October 13, 2026: a day of research into my own 26 years online. October 14, morning: three prototypes, one HTML file each, no libraries. October 14, 12:11pm: the first commit. October 16, 10:28am: a cohesive site, 22 commits, five pull requests, about 18,300 lines. Every non-merge commit is co-authored by Claude. Every design decision was mine.
+</Glance>
+
+I learned to build for the web in 1998 by clicking View Source and reading how other people did it. This site is the sixteenth design of alternate.org since January 2000, and the first I've built with agents, so the repository is public. Read how it was done. That's the point of the name.
+
+**How we worked.** I direct, Claude builds. It proposes and sketches; it does not choose colors, moods, type, layout or behavior. Open choices come back as questions, rendered so I can look at them instead of reading hex values. The phase that produced most of this was a live browser window with hot reload: I watch, I say what to change, it changes. I told it to think of itself as a young me in 1999, eager and smart and less experienced, and that turned out to be exactly the right amount of deference.
+
+**Several chats at once.** Research, color, the docks, the instrument and the design system each ran in their own conversation, handing off through written documents so the next one started where the last stopped. Prototype first, port second: every piece of the ambient layer began as one file with no dependencies, then moved into the repository onto the token system, so the port started exactly where the sketch left off.
+
+**Rules as files.** The house rules live in a file every agent reads before it touches anything: nothing private, nothing about anyone but me, every claim sourced, first person always, one transition, nothing changes at once, it must not look like an AI designed it. The motion rules are a skill. The validators turn the rules into build failures, which is the only kind of rule an agent respects at 2am.
+
+<Inhabit>
+The graveyard is on the colophon, and it's honest: a CMS that became files in Git, "not React" that became Next.js as a host, four dock slots that became anywhere on the edge that became top or bottom. Each of those was a decision I made after seeing the thing, not before. That's the part of designing in the browser I was taught early, and the part agents make cheap. Seeing the thing costs a few minutes now. So you see more things.
+
+The usage strip under the Agents heading counts how many replies Claude Code gave me, a day at a time, across everything on this page: 9,984 replies over 56 days between July and October. It's not a count of output. The output is the rest of this page.
+
+Why agents made this possible: I've redesigned this site fifteen times and most of them took a season. This one took a long weekend and a work week of evenings, and it has a WebGL field, an instrument that composes a new piece each visit, a content model validated at build, a colophon that annotates its own source, and a security header set I'd put in front of a bank. I did not write most of those lines. I decided every one of them.
+
+What I learned: the medium changed again, the way it did in 1998, 2005, 2007 and 2013, and the move is the same as it's always been. Learn it by building something real in it. Leave the source open.
+</Inhabit>

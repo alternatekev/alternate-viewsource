@@ -1,0 +1,41 @@
+---
+title: agents on a schedule, with guardrails
+phase: agents
+where: cisco
+order: 60
+start: 2026-08-27
+summary: Two agents have run unattended at Cisco since September 2026, a rollout page every weekday and a draft of my Monday leadership update, both read-only, dry-run unless I say otherwise, and told never to turn activity into completion.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: built August 27–September 8, 2026; the page and the drafts are internal
+objects: []
+---
+
+<Glance>
+On August 27, 2026 I asked how a rollout-tracking page should even work: "is it a script i run locally that updates confluence? do you run it for me here?" Two days later it was a repository with 20-some tests publishing to an operating page. Since September 1 it has run every weekday. Since September 8 a second agent drafts my Monday update to leadership from the week's evidence, with 65 tests behind it.
+</Glance>
+
+The first agents I trusted to run while I wasn't watching were the two with the least to gain by lying.
+
+**The rollout page.** My modernization team moves the existing product onto the new design system page by page, behind feature flags. Someone had asked, months earlier, for a way to see how far along each page was. Nobody had built it. On August 27 I asked an agent how I'd even architect it, and by the next evening there was a small service that reads the flags, works out each page's stage from what production is actually serving, and publishes a table to the page the team already reads.
+
+The design decision that mattered: a flag being on is not the same as a page being done. The agent's first draft said it was. A reviewer on the team caught it within a day, and the stage logic was rewritten to follow the team's own definitions of work-in-progress, alpha, beta and generally available. The page also de-emphasizes who flipped which flag, because a rollout dashboard is not a leaderboard.
+
+On August 31: "i want a schedule job for you to run this script, prompting me on fixing any issues you run into. i won't remember to do it and i'd prefer a log of it here." And: "any changes should be logged into obsidian." So it runs every weekday morning, verifies the page updated, writes a line to my vault only when something materially changed, and asks me before it touches credentials or code. It missed a run on September 3. The next day it recommended moving its own schedule into CI so it couldn't miss again. I took the advice.
+
+**The Monday draft.** Every Monday evening my three tech leads post their week. On September 8 I asked for a tool that could "more or less write this for me, on monday evenings, so none of this is surprise to me." It assembles an evidence packet from the week — the activity journal, the repositories, my notes, read-only views of chat, meetings, email and tickets — and writes a draft in our order, plus notes only I see that map every bullet to the evidence that supports it, with team mapping and fact strength scored separately.
+
+One rule in its instructions is the whole point: "Do not pad thin sections, turn activity into completion, or infer that no work happened from missing evidence." A linked ticket is not a shipped feature. A quiet week is not an idle one.
+
+<Inhabit>
+Why schedule them at all? Because the chores from February were the chores I remembered to run. These are the ones I wouldn't. A dashboard refreshed by hand is refreshed when someone's anxious. A weekly update written at 9pm Monday is written from memory. Both are worse than a dull, honest agent that reads everything, every time, and tells me what it couldn't read.
+
+The guardrails are boring, which is how you know they're guardrails. Read-only tokens kept in CI secrets, never in the repo. Dry-run by default; the live mode is a flag I set. Every run logged where I'll see it. The agent asks before it changes anything about itself. And the editorial contract, which is the one I'd keep if I could only keep one: evidence, not inference; coverage, not confidence; say what you couldn't see.
+
+What I learned: put an agent on a schedule only for work where you'd rather have a complete, dull answer than a clever one. Then read the dull answer. Every week.
+
+Not measured yet: whether leadership reads the page, and whether my Monday draft is better than the one I'd have written. I think so. I'll know when someone tells me something I didn't already know on a Tuesday.
+</Inhabit>
