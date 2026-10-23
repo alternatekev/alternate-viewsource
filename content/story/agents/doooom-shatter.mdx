@@ -1,0 +1,37 @@
+---
+title: the 1995 filter
+phase: agents
+where: home
+order: 130
+start: 2026-09-23
+summary: In September 2026 I rebuilt KPT ShatterBox, the Illustrator filter I used as a designer in the late nineties, for Illustrator 2026, with a CLI and an MCP server so agents can shatter artwork. It became my liveries and this site's field.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: doooom-shatter on GitHub
+    url: https://github.com/alternatekev/doooom-shatter
+  - label: firsthand
+    note: ShatterBox shipped in MetaCreations' KPT Vector Effects for Illustrator in the mid-nineties; my memory of using it is my own
+milestones: [doooom-shatter]
+related: [chapter-liveries, chapter-this-site]
+objects: []
+---
+
+<Glance>
+KPT Vector Effects had a filter called ShatterBox that broke vector art into shards. I used it in 1998 and missed it for twenty-five years. Between September 23 and 28, 2026 I rebuilt it for Illustrator 2026 with an agent: ExtendScript, physics scatter, non-destructive re-shatter, gradient and opacity fills, a headless command line, and an MCP server so an agent can shatter artwork without me.
+</Glance>
+
+Some tools you never stop missing. Vector Effects was a set of Illustrator plugins from the Kai Krause era, when software came in a box with a mood. ShatterBox took a shape and broke it into pieces, like a window, and in 1998 I put shattered type on everything I could. The plugin died with its company and the Illustrator SDK moved on. I thought about it roughly once a year for a quarter century.
+
+In September I rebuilt it. The repo is called Doooom Shatter. The agent read the modern scripting guide so I didn't have to, and we chose ExtendScript delivery: a script you run from Illustrator's own menu rather than a compiled plugin Adobe has to bless. Then the modern parts. Explode the shards with a physics scatter. Keep the shatter non-destructive so you can re-shatter without starting over. Give the shards gradient and opacity fills, because 2026 has transparency and 1995 didn't.
+
+Then the part that's new in kind, not degree: a headless CLI and an MCP server. An agent can now say "shatter this artwork, this many pieces, this much scatter" and get the file back. The filter became a tool other software can use.
+
+<Inhabit>
+It paid off twice within a month. The shards went onto my race cars as liveries, placed by agents through the same scripting. And when I started this site in October, three single-file prototypes in one morning began from the shatter: a version of it running in a vertex shader, then the ambient field steered by how you read, then the instrument that plays under it. The field behind these words is ShatterBox's grandchild.
+
+Nobody rebuilds a dead plugin from a defunct company for a hobby. The scripting API is deep, and the person who wants it is a designer who hasn't written a line against that API in a long time. With an agent it was a weekend, and the MCP server, which would have been a project of its own, was an afternoon.
+
+The tools I loved in the late nineties aren't gone. They're a description away. Which raises the question of what else I've been missing for twenty-five years, and I have a list.
+</Inhabit>

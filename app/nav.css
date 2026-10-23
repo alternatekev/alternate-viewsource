@@ -1,0 +1,15 @@
+/* the server's nav (app/site-nav.tsx): the pages and the phases, two rows of plain links set as the
+   docks set theirs, the pixel label in the quieter ink. It is how you get around without JavaScript;
+   with it the docks are the nav, and this steps aside the moment they mount (html[data-docked]) */
+.site-nav { padding: 16px 8vw 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+.site-nav-list { display: flex; flex-wrap: wrap; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.site-nav-list + .site-nav-list { margin-top: 12px; }
+.site-nav a { color: var(--quiet); text-decoration: none; }
+.site-nav a:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* a finger's target: each link 44 px, the rows touching */
+@media (pointer: coarse) {
+  .site-nav-list { row-gap: 0; }
+  .site-nav-list + .site-nav-list { margin-top: 0; }
+  .site-nav a { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; }
+}
+html[data-docked] .site-nav { display: none; }

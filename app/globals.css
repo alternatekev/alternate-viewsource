@@ -1,0 +1,450 @@
+/* The glance tier's whole stylesheet. Inlined by Next at build; stays small on purpose.
+   Type is a system stack until Kevin picks the face; the phase accents are placeholders
+   sampled from the archive (#6699CC from 2001, #FE1300 from 2005) and are his call. */
+/* Colors come from tokens/color.ts, inlined as custom properties in <head>. One dark world,
+   as every prototype assumes; a light tier is Kevin's call. */
+:root {
+  color-scheme: dark;
+  --measure: 62ch;
+  --face-pixel: "argent-pixel-cf", ui-sans-serif, system-ui, sans-serif;
+  --face-display: "le-monde-livre-classic-byol", ui-serif, Georgia, serif;
+  --face-text: "le-monde-livre-classic-byol", ui-serif, Georgia, serif;
+  --face-numeral: "trade-gothic-next-condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif; /* the charts' numerals: lining figures, the HUD's condensed face (Kevin, Oct 18) */
+  --scrim-edge: min(48px, 8vw); /* how far a scrim reaches past its words, fading: the reading column's 48px, never past a beat's own margin */
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+html { background: var(--paper); }
+/* with JavaScript the page is unseen until the docks have mounted and set it up (the gate on home, the
+   docks and the page setting in elsewhere), so the plain document never flashes first, and its words wait
+   to set in (below); data-js is set by a few bytes in <head> (app/layout.tsx). Without JavaScript nothing
+   sets it and the document is all there */
+html[data-js]:not([data-docked]) body { visibility: hidden; }
+/* if the docks never mount (a script failed to load), the plain document shows after 8 s rather than never:
+   the body and every part still waiting to set in. It's a switch, not motion, so reduced motion keeps it
+   (hence !important against the reduced-motion reset); once the docks mount it no longer matches */
+html[data-js]:not([data-docked]) :is(body, .space:not([data-arrived]), .stop-space:not([data-arrived])) { animation: js-failsafe 0s 8s forwards !important; }
+@keyframes js-failsafe { to { visibility: visible; } }
+body {
+  margin: 0;
+  color: var(--ink);
+  font: 17px/1.55 ui-serif, Georgia, "Times New Roman", serif;
+  font-feature-settings: "kern", "liga", "onum";
+}
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: .15em; }
+main { position: relative; max-width: var(--measure); margin: 0 auto; padding: clamp(24px, 6vh, 64px) 16px 20vh; }
+/* the reading column stays calm: a scrim between the field and the words, soft at its edges,
+   dense enough that text keeps its contrast over anything the field does (checked at build) */
+main::before {
+  content: ""; position: absolute; inset: 0 -48px; z-index: -1; pointer-events: none;
+  background: var(--scrim);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+}
+/* the field: fixed behind everything, never takes a pointer, fades in once it is running */
+.air { position: fixed; left: 0; top: 0; width: 100%; height: 100%; height: 100lvh; z-index: -2; pointer-events: none; opacity: 0; transition-property: opacity; transition-timing-function: ease-in-out; }
+.air[data-on] { opacity: 1; }
+h1, h2, h3 { font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); margin: 0 0 .5rem; }
+h2 { font-size: clamp(20px, 3.2vw, 26px); margin: 2.2rem 0 .6rem; }
+h3 { font-size: 1.05rem; margin: 1.6rem 0 .4rem; }
+p { margin: 0 0 1rem; text-wrap: pretty; } /* no orphans, anywhere */
+li, figcaption, blockquote { text-wrap: pretty; }
+small, .quiet { color: var(--quiet); }
+.kicker { font: 500 13px/1.3 ui-sans-serif, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: var(--quiet); margin: 0 0 .4rem; }
+.lede { font-size: 1.15em; max-width: 46ch; }
+
+/* the spine, glance tier: five phases as a list the eye can scan in two minutes */
+.spine { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.spine > li { padding: 1rem 0 1.1rem; border-bottom: 1px solid var(--rule); }
+.phase-head { display: flex; align-items: baseline; gap: .75rem; flex-wrap: wrap; }
+.phase-head h2 { margin: 0; }
+.phase-head .years { font-family: ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--quiet); }
+.phase-web { margin: .35rem 0 .6rem; color: var(--quiet); }
+.marks { list-style: none; margin: 0; padding: 0; display: grid; gap: .25rem; }
+.marks li { display: grid; grid-template-columns: 4.5ch 1fr; gap: .75rem; align-items: baseline; }
+.marks .year { font-family: ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: var(--quiet); }
+.chapters { list-style: none; margin: .75rem 0 0; padding: 0; display: grid; gap: .4rem; }
+.chapters a { font-family: ui-sans-serif, system-ui, sans-serif; font-weight: 600; }
+.chapters .summary { display: block; color: var(--quiet); }
+.status { font: 500 11px/1 ui-sans-serif, system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--quiet); border: 1px solid var(--rule); border-radius: 3px; padding: .2em .4em; margin-left: .4em; vertical-align: middle; }
+
+/* chapter pages */
+article header { margin-bottom: 2rem; }
+article .meta { color: var(--quiet); font-family: ui-sans-serif, system-ui, sans-serif; font-size: .9rem; }
+article [data-tier="inhabit"] { border-left: 2px solid var(--rule); padding-left: 1rem; color: var(--quiet); }
+.sources { font-size: .92rem; color: var(--quiet); }
+.sources ol { padding-left: 1.2em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* the surface: five beats, one per phase, a viewport tall each. Without JavaScript it is a plain
+   document; with it (html[data-surface="zoom"]) each beat is a space you dive into (lib/surface.ts). On a
+   phone (html[data-surface="column"]) there is no zoom: the document is the experience, read by scrolling */
+.beat { position: relative; min-height: 100vh; min-height: 100dvh; padding: 15vh 8vw; overflow-x: clip; } /* nothing in a beat widens a phone's page (a chart's hidden table can't be narrower than its words) */
+.beat .dive { all: unset; cursor: pointer; display: block; }
+.beat .dive:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 6px; }
+/* the subhead: the same serif as the header, a size down, in the quieter ink */
+.subhead { margin: 2rem 0 0; max-width: 56ch; text-wrap: balance; font: 400 clamp(18px, min(3vw, 3.4vh), 40px)/1.25 var(--face-text); color: var(--quiet); } /* the vh term keeps all of Hello inside one screen: its beat clips at the viewport's edge */
+.welcome-source { margin: 1.5rem 0 0; font: 13px/1 var(--face-pixel); }
+.welcome-source a { color: var(--quiet); }
+.far h2 { margin: 0; font: 400 clamp(56px, 11vw, 160px)/0.9 var(--face-display); letter-spacing: -.01em; }
+.phase-intro { max-width: 34rem; margin: 1.6rem 0 0; font: 400 1.12rem/1.55 var(--face-text); text-wrap: pretty; }
+.phase-intro a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.phase-intro a:hover, .phase-intro a:focus-visible { text-decoration-color: currentColor; }
+/* the Hello and each phase's intro, over the field, sit on the reading column's scrim (--scrim, the token
+   the build checks for contrast; e2e, Oct 18), soft at its edges as the column's is, and as the work page's
+   words are, so it is a haze and not a card. Each scrim lies inside the box that sets in, so it arrives with
+   its words by the one transition: the Hello's in its own padding, an intro's in its phase's (.far reaches
+   out by the scrim's edge and a negative margin takes it back, so nothing moves) */
+html[data-surface] .subhead { position: relative; z-index: 0; max-width: calc(36ch + 2 * var(--scrim-edge)); padding: var(--scrim-edge);
+  margin: calc(2rem - var(--scrim-edge)) calc(-1 * var(--scrim-edge)) calc(-1 * var(--scrim-edge)); }
+html[data-surface] .far { position: relative; z-index: 1; padding-inline: var(--scrim-edge); margin-inline: calc(-1 * var(--scrim-edge)); }
+/* a scrim's haze never passes over a name: the Hello stays above the subhead's, a phase's name above its intro's */
+html[data-surface] .far > .dive { position: relative; z-index: 1; }
+html[data-surface] .beat[data-key] .far { padding-block-end: var(--scrim-edge); margin-block-end: calc(-1 * var(--scrim-edge)); }
+html[data-surface] .phase-intro { position: relative; z-index: 0; }
+html[data-surface] .subhead::before, html[data-surface] .phase-intro::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--scrim);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--scrim-edge), #000 calc(100% - var(--scrim-edge)), transparent), linear-gradient(180deg, transparent, #000 var(--scrim-edge), #000 calc(100% - var(--scrim-edge)), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 var(--scrim-edge), #000 calc(100% - var(--scrim-edge)), transparent), linear-gradient(180deg, transparent, #000 var(--scrim-edge), #000 calc(100% - var(--scrim-edge)), transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+html[data-surface] .phase-intro::before { inset: calc(-1 * var(--scrim-edge)); }
+/* what the phase holds (app/contents.tsx): the pieces named at reading size under the intro, a step
+   quieter, each a link that journeys into it; the blog's posts counted, as one press into the field */
+.phase-contents { max-width: 34rem; margin: 1.4rem 0 0; font: 13px/1.7 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); text-wrap: pretty; }
+.phase-contents a, .beat .dive.phase-contents-posts { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.phase-contents a:hover, .phase-contents a:focus-visible, .phase-contents-posts:hover, .phase-contents-posts:focus-visible { text-decoration-color: currentColor; }
+.beat .dive.phase-contents-posts { display: inline; font: inherit; cursor: pointer; }
+/* where a chapter leads (app/chapters.tsx): the pieces it goes with and its years on the work page, a
+   line in the source's style; and the chapter that tells a milestone, after the milestone's sources */
+.piece-leads, .told, .told a { color: var(--quiet); }
+.piece-leads, .told { font-size: .85em; } /* a link is the size of its line (e2e, Oct 18: set on both, it compounded to 10.8 px) */
+.piece-lead + .piece-lead::before { content: " · "; }
+/* the charts (app/chart.tsx, tokens/chart.ts): every chart on the site is drawn the way the racing
+   HUD draws its own. A figure of tiled cards on the dark ground: a row of stat tiles, each a small
+   quiet label over a large numeral in the pixel face, then one wide card with the drawing, the two
+   words at the ends of its baseline, and the caption joined under it. Data ink only: no gridlines,
+   no axis boxes, no legend; a hairline baseline; bars thin and flat with gaps, mint for the series
+   and coral for the exception; green for a delta that went the right way, red for one that didn't;
+   yellow for the value a chart leads with. Every value is a --chart-* custom property. Nothing moves. */
+.chart, .usage { max-width: 34rem; margin: 1.6rem 0 0; }
+.chart-panel { background: var(--chart-panel); border: var(--chart-hairline-w) solid var(--chart-panel-border); border-radius: var(--chart-radius); padding: var(--chart-pad); min-width: 0; }
+.chart-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(7rem, 100%), 1fr)); gap: var(--chart-gutter); margin: 0 0 var(--chart-gutter); }
+.chart-stats[data-n="3"], .chart-stats[data-n="6"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 40rem) { .chart-stats[data-n="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chart-stat { display: flex; flex-direction: column; gap: .35rem; }
+.chart-stat .chart-numeral { margin-top: auto; } /* the numerals of a row sit on one line however their labels wrap */
+/* numerals are tabular and lining, as on an instrument: Trade Gothic Next Condensed from the kit (Kevin, Oct 18);
+   the labels stay in the pixel face */
+.chart-numeral, .chart-ends, .build-days, .lineage-when { font-feature-settings: "kern", "tnum"; }
+.chart-label { font: var(--chart-label-size)/1.2 var(--chart-face-label); letter-spacing: var(--chart-label-spacing); text-transform: uppercase; color: var(--chart-label); text-wrap: balance; overflow-wrap: normal; }
+.chart-numeral { font: var(--chart-numeral-size)/1 var(--chart-face-numeral); letter-spacing: var(--chart-numeral-spacing); color: var(--chart-numeral); font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.chart-numeral[data-tone="headline"] { color: var(--chart-headline); }
+.chart-numeral[data-tone="better"] { color: var(--chart-better); }
+.chart-numeral[data-tone="worse"] { color: var(--chart-worse); }
+.chart-numeral[data-tone="exception"] { color: var(--chart-exception); }
+.chart-unit { margin-left: .3em; font-size: var(--chart-label-size); letter-spacing: var(--chart-label-spacing); color: var(--chart-label); }
+/* the wide card and the caption are one card: the caption joins under the drawing, so the line that
+   retypes as you read the strip stays with the strip */
+.chart-main { border-bottom: 0; border-radius: var(--chart-radius) var(--chart-radius) 0 0; }
+.chart figcaption { margin: 0; border-top: 0; border-radius: 0 0 var(--chart-radius) var(--chart-radius); padding-top: 0;
+  font: 13px/1.5 var(--chart-face-label); letter-spacing: .02em; color: var(--quiet); font-variant-numeric: tabular-nums; text-wrap: pretty; }
+.chart .usage-read { color: var(--ink); }
+.chart-ends { display: flex; justify-content: space-between; gap: 1rem; margin: .3rem 0 0; font: var(--chart-ends-size)/1.4 var(--chart-face-label); letter-spacing: var(--chart-label-spacing); color: var(--chart-label); font-variant-numeric: tabular-nums; }
+/* the drawings: a strip of bars on a hairline (usage, cadence, build-cadence), a line over bars
+   (telemetry), a tick and a hairline per row (lineage). Strokes never scale with the strip. */
+.chart-strip { display: block; width: 100%; height: var(--chart-strip); shape-rendering: crispEdges; }
+.chart-strip--tall { height: var(--chart-strip-tall); }
+.chart-bar { fill: var(--chart-series); }
+.chart-bar--exception { fill: var(--chart-exception); }
+.chart-hairline { stroke: var(--chart-hairline); stroke-width: var(--chart-hairline-w); vector-effect: non-scaling-stroke; }
+.chart-line { fill: none; stroke: var(--chart-numeral); stroke-width: var(--chart-hairline-w); vector-effect: non-scaling-stroke; shape-rendering: geometricPrecision; }
+.chart-tick { stroke: var(--chart-series); stroke-width: var(--chart-hairline-w); vector-effect: non-scaling-stroke; }
+.chart-tick--end { stroke: var(--chart-numeral); }
+/* a strip you can read a day at a time (lib/usage.ts): it takes focus and a pointer, and stays still */
+.usage-days { cursor: crosshair; touch-action: pan-y; }
+.usage-days:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 6px; }
+/* this repository's commits by hour (app/build-cadence.tsx): a day's total under each day's strip */
+.build-days { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; margin: .3rem 0 0; padding: 0; list-style: none; gap: 2px;
+  font: var(--chart-ends-size)/1.4 var(--chart-face-label); letter-spacing: var(--chart-label-spacing); color: var(--chart-label); font-variant-numeric: tabular-nums; }
+.build-days li { min-width: 0; }
+.build-days-when, .build-days-n { white-space: nowrap; } /* the date stays whole; where a day is too narrow its count drops under it, as on a phone */
+.build-days-n { color: var(--chart-numeral); }
+@media (max-width: 40rem) { .build-days-n { display: block; } } /* on a phone the day's count sits under its date */
+/* what this site borrowed (app/lineage.tsx): a table of hairline rows, each the words at either end
+   of a line on a time axis, the dates as numerals */
+.lineage-rows, .lineage-axis-in { margin: 0; padding: 0; list-style: none; }
+.lineage-row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.3fr); gap: 0 .8rem; align-items: center; margin: 0; padding: .55rem 0;
+  border-top: var(--chart-hairline-w) solid var(--chart-hairline); font: 13px/1.5 var(--chart-face-label); letter-spacing: .02em; color: var(--quiet); text-wrap: pretty; }
+.lineage-row:first-child { border-top: 0; padding-top: 0; }
+.lineage-when { color: var(--chart-numeral); font-variant-numeric: tabular-nums; }
+.lineage-line { display: block; height: 8px; shape-rendering: crispEdges; }
+.lineage-axis { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.3fr); gap: 0 .8rem; margin-top: .2rem; }
+.lineage-axis .chart-ends { grid-column: 2; margin: 0; padding-top: .3rem; border-top: var(--chart-hairline-w) solid var(--chart-hairline); }
+@media (max-width: 40rem) {
+  .lineage-row, .lineage-axis { grid-template-columns: minmax(0, 1fr); }
+  .lineage-line { grid-row: 2; margin: .3rem 0; }
+  .lineage-axis .chart-ends { grid-column: 1; }
+}
+.far-years, .near-year { font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
+.near { max-width: 40rem; margin-top: 2rem; font-family: var(--face-pixel); letter-spacing: .02em; } /* what you zoom into is set in the pixel face */
+.near p, .piece-body li { text-wrap: pretty; }
+.near-mark, .near-site, .near-work { margin: 0 0 .8rem; }
+/* agents work, set apart under where it happened (app/marks.tsx): the small pixel label, a step quieter */
+.near-where, .stop-where { margin: 1.6rem 0 .8rem; font: 13px/1.5 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); text-wrap: balance; }
+.piece-org { display: block; color: var(--quiet); font-size: .85em; }
+.near-source, .near-source a, .piece-source { color: var(--quiet); }
+.near-source, .piece-source { font-size: .85em; } /* its links the size of their line, as .told's */
+.near-source > * + *::before { content: " · "; }
+.piece { margin: 3rem 0 0; }
+/* dates, one way everywhere (app/when.tsx): a point is a short tick and its date; a span is a hairline
+   from its first year down to its last, as tall as its line, the last year a step quieter. A dated
+   line is a gutter for the date and the words beside it. */
+.dated { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: 0 1rem; align-items: start; }
+.dated-what { min-width: 0; }
+.when { position: relative; display: flex; flex-direction: column; justify-content: space-between; align-self: stretch;
+  padding-left: 10px; font: 13px/1.5 var(--face-pixel); letter-spacing: .02em; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.when::before { content: ""; position: absolute; left: 0; top: .75em; width: 6px; height: 1px; background: var(--ink); }
+.when-span::before { width: 1px; height: auto; bottom: .75em; background: var(--quiet); }
+.when-span::after { content: ""; position: absolute; left: 0; bottom: .75em; width: 6px; height: 1px; background: var(--quiet); }
+.when-span > .when-t:first-child::before { content: ""; position: absolute; left: 0; top: .75em; width: 6px; height: 1px; background: var(--quiet); }
+.when-span > .when-t:last-child { color: var(--quiet); }
+.when-c { color: var(--quiet); }
+.when-to { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* above a piece's title there is no line to run down, so a span reads across, its dash shown */
+.piece .when { display: inline-flex; flex-direction: row; }
+.piece .when-span::before, .piece .when-span::after { display: none; }
+.piece .when-to { position: static; width: auto; height: auto; clip-path: none; color: var(--quiet); }
+.piece h3 { margin: .3rem 0 1rem; font: 400 1.6rem/1.15 var(--face-display); letter-spacing: 0; }
+.piece-body, .near { overflow-wrap: anywhere; } /* a long address breaks instead of widening a phone's page */
+.piece-body pre { max-width: 100%; overflow-x: auto; } /* code keeps its lines and scrolls sideways on its own */
+.piece-body img { display: block; max-width: 100%; height: auto; margin: 1rem 0; }
+.piece-body figure { margin: 1rem 0; }
+.piece-body figcaption { color: var(--quiet); font-size: .85em; }
+.piece-body blockquote { margin: 1rem 0; padding-left: 1rem; border-left: 1px solid var(--rule); color: var(--quiet); }
+
+/* a beat is at least a screen tall and grows with its words, which keep clear of the docks above and
+   below them (--dock-clear: the docks' inset, thickness and gap, set as they mount; e2e, Oct 18: a beat a
+   fixed screen tall cut the Hello off on short screens). The page scrolls; a pinch is the surface's */
+html[data-surface="zoom"] .beat { padding: 0 0 var(--dock-clear, 0px); overflow: hidden; touch-action: pan-y; }
+html[data-surface="column"] .beat { padding-block: max(15vh, var(--dock-clear, 0px)); }
+html[data-surface="zoom"] .beat[data-pan] { touch-action: none; } /* dived in, a finger moves through what's open */
+/* a beat is unseen until it scrolls into view after begin; then each part sets in as a box (no typing).
+   With JavaScript (html[data-js]) that holds from the first paint, before the surface has mounted: the page
+   and the docks hydrate apart, and the plain document must not show around the gate in between */
+html[data-surface] .space:not([data-arrived]), html[data-js] .space:not([data-arrived]) { visibility: hidden; }
+/* and its pictures wait for it: until the phase sets in they take no box, so a lazy picture the zoom draws
+   small inside the screen isn't fetched for a phase nobody has reached; once it sets in they load as any
+   lazy picture does, and a phase opens only once it has set in (lib/surface.ts). A phone's column, and the
+   page without JavaScript, load them lazily as they come near (lib/content/images.ts) */
+html[data-surface="zoom"] .space:not([data-arrived]) img { display: none; }
+/* the space is as wide as its words (the near beside them is out of the flow) and in the flow, so the beat
+   grows with it; the camera moves it by transform, which leaves the flow alone */
+html[data-surface="zoom"] .space { position: relative; width: fit-content; margin: max(22vh, var(--dock-clear, 0px)) 0 0 8vw; transform-origin: 0 0; }
+html[data-surface="zoom"] .far { position: relative; }
+/* near sits beside the far title, set small: the era's notes first, then the posts as blocks, a row per
+   year (time runs down, the year's posts run across); you dive into a post to read it */
+html[data-surface="zoom"] .near { position: absolute; left: calc(100% - var(--scrim-edge)); top: 0; max-width: none; width: max-content; margin: 0 0 0 4rem;
+  display: flex; flex-direction: column; gap: 4rem;
+  transform: scale(var(--zoom-near)); transform-origin: 0 0; }
+html[data-surface="zoom"] .near-col { width: 34rem; }
+html[data-surface="zoom"] .near-row { display: flex; gap: 2.5rem; align-items: flex-start; }
+html[data-surface="zoom"] .near-row-year { flex: none; width: 6rem; margin: 1.6rem 0 0; font: 13px/1 var(--face-pixel); color: var(--quiet); font-variant-numeric: tabular-nums; }
+html[data-surface="zoom"] .piece { flex: none; width: 34rem; margin: 0; padding: 1.6rem 1.8rem 1.8rem; border: 1px solid var(--rule); }
+/* only the current level takes presses; deeper words are there, just too small to aim at yet. At the
+   surface the field is one press, the whole of it (lib/surface.ts finds the piece under the pointer) */
+html[data-surface="zoom"] .beat .near, html[data-surface="zoom"] .beat .near * { pointer-events: none; }
+html[data-surface="zoom"] .beat[data-depth="0"] .near { pointer-events: auto; cursor: pointer; }
+html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive], html[data-surface="zoom"] .beat[data-depth="1"] .near [data-dive] * { pointer-events: auto; cursor: pointer; }
+html[data-surface="zoom"] .beat[data-depth="2"] .piece a { pointer-events: auto; }
+.surface-back { position: absolute; left: 8vw; top: max(12vh, var(--dock-clear, 0px)); margin: 0; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--quiet); background: none; border: 0; cursor: pointer; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* type in, type out (lib/type.ts): a box sets in left to right in steps at typing speed and
+   withdraws the same way at erasing speed; its words type and erase on their own */
+@keyframes set-in { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
+@keyframes set-out { from { clip-path: inset(0); } to { clip-path: inset(0 100% 0 0); } }
+[data-set="in"] { animation: set-in calc(var(--type-char) * var(--type-steps) * var(--type-pace, 1)) steps(var(--type-steps), jump-start) backwards; }
+[data-set="out"] { animation: set-out calc(var(--type-erase) * var(--type-steps) * var(--type-pace, 1)) steps(var(--type-steps), jump-end) forwards; pointer-events: none; }
+/* the letters a word hasn't typed yet: there, holding its shape, unseen (lib/type.ts) */
+::highlight(untyped) { color: transparent; }
+.type-ghost { visibility: hidden; }
+/* colors change at typing speed: the current timeline block, a switch turning off, a hovered link */
+.dock-block, .dock-option, .dock-links a, .dock-ambience { transition: color calc(var(--type-char) * var(--type-steps)) steps(var(--type-steps)); }
+/* docks: wireframe for now. Every value comes from tokens/dock.ts as a custom property. */
+.dock { position: fixed; left: 0; top: 0; z-index: 10; box-sizing: border-box; border: var(--dock-border) solid var(--dock-line); display: flex; overflow: hidden; } /* what doesn't fit stays inside the bar, never widens the page */
+.dock[data-edge="right"], .dock[data-edge="left"] { flex-direction: column; }
+.dock-content { flex: 1; min-width: 0; min-height: 0; display: flex; align-items: center; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+/* on a side edge the contents run along the bar */
+.dock[data-edge="right"] .dock-content, .dock[data-edge="left"] .dock-content { writing-mode: vertical-rl; }
+.dock[data-lifted] { opacity: var(--dock-lifted); }
+.dock-grip { flex: none; width: var(--dock-grip-hit); height: 100%; margin: 0; padding: 0; border: 0; background: transparent; cursor: grab; touch-action: none;
+  background-image: repeating-linear-gradient(90deg, var(--dock-grip) 0 var(--dock-grip-line), transparent var(--dock-grip-line) var(--dock-grip-step));
+  background-size: var(--dock-grip-w) var(--dock-grip-h); background-repeat: no-repeat; background-position: center; }
+.dock[data-edge="right"] .dock-grip, .dock[data-edge="left"] .dock-grip { width: 100%; height: var(--dock-grip-hit);
+  background-image: repeating-linear-gradient(0deg, var(--dock-grip) 0 var(--dock-grip-line), transparent var(--dock-grip-line) var(--dock-grip-step));
+  background-size: var(--dock-grip-h) var(--dock-grip-w); }
+.dock[data-lifted] .dock-grip { cursor: grabbing; }
+.dock-grip:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-home { all: unset; flex: none; display: flex; align-self: stretch; align-items: center; cursor: pointer; }
+.dock-home:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-type { flex: none; display: grid; padding-inline-end: 16px; white-space: nowrap; color: var(--quiet); user-select: none; }
+.dock-type > * { grid-area: 1 / 1; justify-self: start; }
+.dock-type-sizer { visibility: hidden; }
+.dock-type-text[data-italic] { font-style: italic; }
+.dock-type-text::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
+.dock-type[data-still] .dock-type-text::after, .dock-type-sizer::after { animation: none; }
+@keyframes dock-caret { 50% { opacity: 0; } }
+/* the nav: the pages centered between the cursor and ambience, which sits at the far end */
+.dock-links { display: flex; gap: 16px; margin: 0 auto; margin-inline: auto; padding: 0; list-style: none; }
+.dock-links a, .dock-ambience { color: var(--quiet); text-decoration: none; }
+.dock-links a[aria-current="page"] { color: var(--ink); }
+.dock-ambience { margin: 0; padding: 0 12px; height: 100%; font: inherit; letter-spacing: inherit; background: none; border: 0; cursor: pointer; }
+.dock-links a:focus-visible, .dock-ambience:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* on a phone the pages sit in the ambience popover, a list above the effects, and ambience (the menu) takes
+   the bar's far end, right after the logotype, on every page */
+.dock-home + .dock-ambience { margin-inline-start: auto; }
+.dock-popover .dock-links { display: grid; gap: 12px; margin: 0 0 24px; justify-items: start; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+.dock-popover { margin: 0; inset: auto; position: fixed; min-inline-size: 240px; padding: 16px; color: var(--ink); border: var(--dock-border) solid var(--dock-line); }
+/* the bars and the popover are frosted glass: what passes beneath is blurred past reading, the field
+   glows through. They set in with their box, so the glass arrives with them (tokens/dock.ts glass) */
+.dock, .dock-popover { background: var(--dock-glass); -webkit-backdrop-filter: var(--dock-glass-filter); backdrop-filter: var(--dock-glass-filter); }
+/* no backdrop-filter, or a reader who asks for less transparency: the reading column's scrim instead */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .dock, .dock-popover { background: var(--scrim); } }
+@media (prefers-reduced-transparency: reduce) { .dock, .dock-popover { background: var(--scrim); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+.dock-option { display: block; margin: 0 0 12px; padding: 0; font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: 0; cursor: pointer; text-align: start; }
+.dock-option:last-child { margin-bottom: 0; }
+.dock-option[aria-pressed="false"], .dock-option:disabled { color: var(--quiet); }
+.dock-option:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* the timeline: a block per phase, sized by its years, and a marker where the reader is */
+.dock-timeline { position: relative; flex: 1; display: flex; align-self: stretch; }
+.dock-block { flex: 1 1 0; min-width: 0; min-height: 0; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 10px; overflow: hidden; white-space: nowrap;
+  font: inherit; letter-spacing: inherit; color: var(--quiet); background: none; border: 0; border-inline-start: var(--dock-border) solid var(--dock-line); cursor: pointer; text-align: start; }
+.dock-block:first-child { border-inline-start: 0; }
+/* hello's block is a word, not a span of years: it keeps its whole word on the narrowest timeline */
+.dock-block[aria-label="hello"] { flex-basis: auto; flex-shrink: 0; min-width: max-content; }
+.dock-block[aria-current] { color: var(--ink); }
+.dock-block-year { flex: none; font-variant-numeric: tabular-nums; }
+/* a name wider than its block (a phone's timeline gives a phase its share of the years) shows what fits and
+   ends in an ellipsis, never a letter cut in half */
+.dock-block-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.dock-block-name[data-typing]::after { content: ""; display: inline-block; inline-size: 1px; block-size: 1.1em; margin-inline-start: 2px; vertical-align: -.15em; background: currentColor; animation: dock-caret var(--dock-caret-blink) steps(1) infinite; }
+.dock-block:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: -4px; }
+.dock-marker { position: absolute; inset-block: 8px; inline-size: 1px; background: var(--ink); mix-blend-mode: difference; pointer-events: none; }
+/* the label under the open highlight reads black: difference blending turns the light text dark */
+/* the visualizer: two strips of canvas beside the nav */
+.dock-visualizer { position: fixed; left: 0; top: 0; z-index: 10; pointer-events: none; }
+/* begin: the only thing on the page until it is pressed */
+/* before begin: the logotype typing, begin under it, centered */
+.intro { position: fixed; left: 50%; top: 50%; z-index: 20; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: stretch; gap: 16px; font: 13px/1 var(--face-pixel); letter-spacing: .02em; }
+.intro .dock-type { padding: 0; justify-items: center; }
+.intro .dock-type > * { justify-self: center; }
+/* begin is as wide as the logo and sits over it, so the logo can fall behind it */
+.intro .begin { position: relative; z-index: 1; background: var(--paper); }
+.begin { margin: 0; padding: 12px 20px;
+  font: 13px/1 var(--face-pixel); letter-spacing: .02em; color: var(--ink); background: none; border: var(--dock-border) solid var(--dock-line); cursor: pointer; }
+.begin:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+/* the line that drops out from under begin: set at its place beneath the button, out of the intro's
+   flow so nothing above it moves; the drop (app/docks.tsx) animates transform, so it is centered by
+   translate, which the animation leaves alone */
+.intro .begin-loud { position: absolute; top: calc(100% + 16px); left: 50%; translate: -50% 0; margin: 0; inline-size: max-content; max-inline-size: calc(100vw - 32px); text-align: center; text-wrap: balance; pointer-events: none; }
+.dock-ghost { position: fixed; left: 0; top: 0; z-index: 9; box-sizing: border-box; border: var(--dock-border) dashed var(--dock-ghost); pointer-events: none; opacity: 0; transition: opacity var(--dock-ghost-fade); }
+.dock-ghost[data-on="1"] { opacity: 1; }
+
+/* work: the years, newest first. Without JavaScript a plain document of the years that have work;
+   with it (html[data-work="corridor"]) each year is a screen of scrolling and its words sit fixed in
+   the middle of the view, placed in depth by lib/work.ts, so scrolling travels down a corridor through
+   time. On a phone (html[data-work="column"]) the years are a column read by scrolling. */
+.stop { position: relative; padding: 12vh 8vw; }
+.stop.quiet { display: none; }
+.stop-year { margin: 0 0 1.4rem; font: 400 clamp(56px, 11vw, 160px)/0.9 var(--face-display); letter-spacing: -.01em; font-variant-numeric: lining-nums; }
+.stop-head { min-width: 0; max-width: 36rem; font-family: var(--face-pixel); letter-spacing: .02em; font-size: 15px; }
+.stop-mark { margin: 0 0 1rem; text-wrap: pretty; }
+.stop-work { margin: 0 0 .9rem; }
+.stop-work summary { cursor: pointer; list-style: none; }
+.stop-work summary::-webkit-details-marker { display: none; }
+.stop-work summary:focus-visible { outline: var(--dock-border) solid var(--dock-focus); outline-offset: 4px; }
+.stop-title { font: 400 1.5rem/1.15 var(--face-display); letter-spacing: 0; }
+.stop-org, .stop-span { display: block; color: var(--quiet); font-size: .85em; }
+.stop-line .stop-title { display: block; }
+.stop-source, .stop-source a { color: var(--quiet); }
+.stop-source { font-size: .85em; } /* its links the size of their line, as .told's (they compounded to 10.8 px too) */
+.stop-source > * + *::before { content: " · "; }
+.stop-body { margin: 1rem 0 0; font: 400 1rem/1.55 var(--face-text); letter-spacing: 0; overflow-wrap: anywhere; }
+.stop-body img { display: block; max-width: 100%; height: auto; margin: 1rem 0; }
+.stop-body figure { margin: 1rem 0; }
+.stop-stack { display: none; }
+
+html[data-work] .stop-space:not([data-arrived]), html[data-colophon] .stop-space:not([data-arrived]), html[data-js] .stop-space:not([data-arrived]) { visibility: hidden; }
+html[data-work] .stop-shot:not([data-set]) { visibility: hidden; }
+html[data-work] .stop-stack { display: block; position: relative; aspect-ratio: 16 / 11; min-width: 0; }
+/* a piece open: the words travel up as they are read, and the stack stays in view beside them (--read, set by lib/work.ts) */
+html[data-work="corridor"] .stop-space:has(details[open]) .stop-stack { align-self: start; transform: translateY(var(--read, 0px)); }
+/* the screenshots stacked into the space behind the year: each a step further back, smaller, offset */
+.stop-shot { position: absolute; left: 0; top: 0; width: 78%; aspect-ratio: 16 / 10; object-fit: cover; object-position: top left;
+  border: var(--dock-border) solid var(--dock-line); background: var(--paper);
+  transform: translate(calc(var(--i) * 8%), calc(var(--i) * 7%)) scale(calc(1 - var(--i) * .07)); transform-origin: 0 0; z-index: calc(10 - var(--i)); }
+
+html[data-work="corridor"] .stop { height: 100vh; height: 100dvh; padding: 0; }
+html[data-work="corridor"] .stop.quiet { display: block; }
+html[data-work="corridor"] .stop-space {
+  position: fixed; left: 50%; top: 50%; width: min(1040px, 84vw); /* a piece open runs its full length; the window reads it, and lib/work.ts gives its year that much scroll */
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3rem; align-items: center;
+  transform: translate(-50%, -50%); will-change: transform, opacity; pointer-events: none; }
+html[data-work="corridor"] .stop-space[data-here] { pointer-events: auto; }
+html[data-work="corridor"] .stop.quiet .stop-space { display: block; text-align: center; overflow: visible; }
+.stop-quiet { font: 400 clamp(42px, 7vw, 96px)/1 var(--face-display); color: var(--quiet); }
+html[data-work="column"] .stop-stack { margin-top: 2rem; }
+
+/* work page and colophon (Oct 16) */
+/* words over the field: a soft scrim behind a year's words and behind a quiet year's number
+   (docs/audit.md, finding 6), paper at 78% over a blur, fading out at its edges so it is a haze
+   and not a card. The scrim lives in the box's own padding, inside the one transition's clip, and
+   the negative margin keeps the words exactly where they were. */
+.stop-head, .stop-quiet { position: relative; z-index: 0; padding: 1.25rem 1.5rem; margin: -1.25rem -1.5rem; }
+.stop-head { max-width: calc(36rem + 3rem); }
+.stop-quiet { display: inline-block; }
+.stop-head::before, .stop-quiet::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: color-mix(in oklab, var(--paper) 78%, transparent);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent), linear-gradient(180deg, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent), linear-gradient(180deg, transparent, #000 1.25rem, #000 calc(100% - 1.25rem), transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect;
+}
+/* the corridor's box grows by the scrim's margins so its scroll edge doesn't clip them; the words stay put */
+html[data-work="corridor"] .stop-space { width: calc(min(1040px, 84vw) + 3rem); padding: 1.25rem 1.5rem; }
+html[data-work="corridor"] { overflow-anchor: none; } /* the corridor moves the scroll itself when a year gives its length back */
+
+/* the colophon: the work page's column, read straight down. Its headings are set like a piece's title. */
+.colophon .stop { padding-bottom: 4vh; }
+.colophon .stop + .stop { padding-top: 4vh; }
+.colophon h2 { margin: 0 0 1rem; font: 400 1.5rem/1.15 var(--face-display); letter-spacing: 0; }
+.colophon .stop-body { margin: 0 0 2.4rem; }
+.colophon .stop-body a { color: inherit; text-decoration-color: var(--rule); text-underline-offset: .2em; }
+.colophon .stop-work { text-wrap: pretty; }
+
+/* a finger's targets (e2e, Oct 18): 44 px where the neighbors leave room, by padding that a negative margin
+   takes back, so nothing moves or changes at rest. Where the neighbors sit closer than that (the popover's
+   list, a phase's contents) a target fills the room up to them and never reaches into theirs; a bigger
+   target there needs more room, which is a look (docs/audit.md). Last, so it wins over each control's rule */
+@media (pointer: coarse) {
+  /* the nav's pages, across the bar: 44 tall inside its 56, and out to half the 16 px between them */
+  .dock .dock-links a { padding: calc((44px - 1em) / 2) 8px; margin: 0 -8px; }
+  /* the popover's pages and controls: down to half the 12 px between them */
+  .dock-popover .dock-links a { padding-block: 5px; } /* each link's box meets the next (25 px pitch) without overlapping it: WCAG 2.5.8's 24 px minimum; 44 px needs a visible change, Kevin's call */
+  .dock-option { padding-block: 6px; margin-block: -6px 6px; }
+  .dock-option:last-child { margin-bottom: -6px; }
+  /* the grip: its 40 px, and 4 more over the start of what follows it, its lines where they were */
+  .dock-grip { position: relative; z-index: 1; width: 44px; margin-inline-end: calc(var(--dock-grip-hit) - 44px); background-position: calc((var(--dock-grip-hit) - var(--dock-grip-w)) / 2) center; }
+  /* the way in and back out of a phase, and a chapter that tells a milestone: alone on their lines */
+  .surface-back { padding-block: calc((44px - 1em) / 2); margin-block: calc((1em - 44px) / 2); }
+  .told a { padding-block: calc((44px - 1em) / 2); }
+  /* a phase's contents, a list set as a line of text: each the height of its line */
+  .phase-contents a, .beat .dive.phase-contents-posts { padding-block: calc((1lh - 1em) / 2); }
+}

@@ -1,0 +1,52 @@
+---
+title: the arc
+phase: agents
+where: home
+order: 125
+start: 2026-03-05
+end: 2026-09-16
+summary: I went all the way around the AI tool-building cycle inside my racing hobby in seven months — mine, then a product, then watching others show theirs, then honed in private, then back to one machine. The entry fee dropped. The arc didn't.
+status: draft
+clearance: own
+mood: { valence: 0.5, arousal: 0.8, x: 0.2, y: -0.1 }
+sources:
+  - label: k10-motorsports on GitHub
+    url: https://github.com/k10-motorsports
+    note: the line "Broadcast-grade tools for sim racing. We build Pro Drive." is from the organization's profile README of April 27, 2026
+  - label: "Why I'm a designer, part 4: ego and empathy (2015)"
+    url: https://web.archive.org/web/2016/https://alternatekev.me/2015/08/06/why-im-a-designer-part-4-ego-and-empathy/
+  - label: The compiled record (content/objects/sim-racing-record)
+    note: dates, counts and the local-first plan's three reasons, from the repositories, read 2026-10-16
+milestones: [local-first]
+related: [chapter-sim-racing, chapter-out-into-the-open]
+objects:
+  - sim-racing-cadence
+---
+
+<Glance>
+March 5: a plugin for one rig. April 27: "Broadcast-grade tools for sim racing. We build Pro Drive." A product, apparently, with a domain, four platforms, accounts and a Chrome extension. Then I watched other people show theirs. Then I kept building mine for a long time in private. September 16: "One user, one rig. No accounts, no sync, no distribution, no audience." It's the best version.
+</Glance>
+
+I got AI. I could make any tool. So I made one.
+
+It was good, and that was the problem. By the end of April I had a telemetry plugin, an overlay, native apps on four platforms, a database with 23 tables, 83 API routes, sign-in, sync, a Chrome extension, a six-repository release train, a marketing site and a domain. I wrote an org README that said "Broadcast-grade tools for sim racing. We build Pro Drive." We. I was a software product company. Also, apparently, its designer, its engineering manager and its marketing department, which is a lot of hats for a guy whose actual job is running three teams and whose actual hobby is driving McLarens on weeknights.
+
+I never posted it. I watched other people post theirs, in the same forums I read every day: the overlay, the dashboard, built in a weekend with the same tools, shared with the same pride I'd felt writing "we." The replies were "AI slop," and "how is this different from X," and the downvote. I'd like to tell you they were wrong. They were partly right. From a screenshot you can't tell that an overlay polls the car thirty times a second, or that the race recording carries a telemetry sidecar. You can tell that a stranger has posted a screenshot. The internet has a lot of those now, and the ones built by a chat window in an afternoon look, in a screenshot, exactly like mine. I knew that about mine before anyone could tell me. So I didn't post. I went back inside.
+
+<Inhabit>
+I kept building it, for me, for a long time. That's the part nobody posts about. The ledger with more than fifty entries in my own words. The track engine rebuilt three times before a junction was drivable. 451 working sessions. A rule, bought the hard way, that the seat is the only ground truth. Software development turned out to be hard, which I knew, and which the first month had let me forget.
+
+<Cadence />
+
+And then, in September, I took the audience out. The racing service shipped its own track map and fuel calculator, and closed the sign-in that outside apps depended on. A cloud hub that depends on someone else's login is built on sand. On September 16 I imported everything into one repository with its history and started removing. What stayed: the calculations with their tests, the HUD, the recording, the local telemetry files. What went: everything that assumed an audience. One user. One rig.
+
+Here's what I think the arc is, for anyone bringing these tools into their work, because I've now watched it from the inside and I don't think I'm special:
+
+You'll make software for yourself, and it'll be good, because the tool is good and you know what you need. You'll show it to people, who won't care, and some of whom will be unkind, and some of whom will be right. You'll keep making it in private, and somewhere in there you'll rediscover that building software is hard, and that making something first for yourself, and really using it, is how the best stuff has always gotten made. The people who already knew that will come out the other side faster and better than they went in.
+
+I wrote most of this in 2015, before any of these tools existed, under the heading Ego and Empathy. The ego says I can make something better than what exists. The empathy is actually using it, and paying attention to what works, and listening when you launch it. The arc above is what happens when the first one gets cheap and the second one doesn't.
+
+Which is also why the teams chapter runs the same arc on purpose. Private, then shown at all-hands, then shaped in a 1:1, then shared, then discoverable. Stage four still happens. It happens in a conversation with me instead of on Reddit, and the thing that comes out of it goes in the repo instead of the bin.
+
+The dismantling is the part I'm proudest of. It was the right call and it was mine.
+</Inhabit>

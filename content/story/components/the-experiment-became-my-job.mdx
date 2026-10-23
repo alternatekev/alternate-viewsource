@@ -1,0 +1,51 @@
+---
+title: the experiment became my job
+phase: components
+order: 10
+start: 2014-09-01
+end: 2025-09-01
+summary: Three design systems in eleven years, Calypso at WordPress.com, a component library at CA, and Magnetic at Cisco, which started as an experiment with four contractors and became the library behind Cisco's network administration products.
+status: draft
+clearance: own
+mood: { valence: 0.4, arousal: 0.35, x: -0.25, y: -0.2 }
+sources:
+  - label: WordPress.com case study, alternate.org (2016)
+    url: https://alternate.org/visual/automattic
+  - label: Project Catchfly case study, alternate.org (2016)
+    url: https://alternate.org/visual/ca-computer-associates
+  - label: Beleaf Design System case study, alternate.org (2016)
+    url: https://alternate.org/visual/community-funded
+  - label: Web and Rockets (2015)
+    url: https://web.archive.org/web/2016/https://alternatekev.me/2015/11/29/web-and-rockets/
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: my own account
+milestones: [calypso, catchfly, magnetic, dashboard-type, our-own-select, charts, storybook, spacing-tokens, second-theme, em-design-system]
+related: [chapter-design-system-read-by-agents, work-cisco-magnetic, work-automattic, work-ca-computer-associates, work-community-funded]
+objects: []
+---
+
+<Glance>
+September 2014: a workshop for four designers to bring Calypso, WordPress.com's React interface, into one design language, a year and a half before React dropped the zero from its version number. 2016: a component library at CA that designers screenshotted and sent to developers as the final design. Fall 2020: one of four contractors hired by Cisco Meraki to try one React design system for the Dashboard. 2025: the only one of the four still on it, and its engineering manager.
+</Glance>
+
+Calypso was WordPress.com taken apart and put back together as an API and a JavaScript app, in Node and React, when React was still a number that started with zero. We'd historically eschewed email at Automattic and worked through P2 and IRC, and we shipped fast, through Subversion, straight to production. Calypso moved the design and development conversation onto Slack and GitHub and put peer review on top of every pull request. The product got more cohesive, for us in the code and for users in the experience. It still had inconsistencies, because a year and a half at breakneck speed will do that.
+
+So in September 2014 I organized a workshop for four designers: look at every page, find the parts that differed from the rest of the app, and recommend how to bring it into a more pure Atomic Design model, with functional components at the heart of the design language. Six lengthy internal posts came out of it. Some recommendations other teams implemented. Some the wider group decided against. And there was a third group that everybody agreed on, so I did them: re-engineered those screens on core Calypso components, got the design and the code reviewed, and shipped them. Stats got simpler. Settings got cleaner. Connect, disconnect, remove, delete and disable started looking like the same decision everywhere. When Automattic released Calypso's source in November 2015, after the better part of two years, I couldn't be prouder. (My father builds the Atlas V. I build the thing that gets your site into orbit. Less tension-inducing.)
+
+CA was the opposite shape: a startup inside a very large company, Project Catchfly, trying to modernize a Jira-like product they'd just bought. Within two days I'd outlined the problem the team was trying to solve and shown them the first real mockup of their app. I took Material UI and bent it to our needs, which was also my first TypeScript. When the business needed projections a year and a half out faster than I could code them, I rebuilt the component system as assets in Sketch. When the project was cancelled nine months in, I pivoted in a week to a custom component library rendering a Kanban board, which the designers screenshotted and sent to their developers as the final design. The library was the design. That's the whole idea, and it's been the whole idea since 1999.
+
+Community Funded came to me with one need: version one had gotten them where they were and was now the thing holding them back. Could I steer version two, and could I help build it? React and Next.js were my suggestions, and three years later, in the first quarter of 2020, we launched to live clients. Design sprints that included customers, success managers, board members and executives. Prototypes in Next.js with real animation and real components, as the bridge between a sketch and production. Users who'd needed extensive training for version one found they didn't need any for version two.
+
+Then, in the fall of 2020, Cisco Meraki hired four contractors to try an experiment: one React design system for the Meraki Dashboard, built in the open inside the company, that product teams would choose over rolling their own. I was one of the four. I'm the only one still on it; the experiment became my job. It's called Magnetic. It's the component library, the tokens and themes, the charts (heat maps included; I have a thing about heat maps), the accessibility work and the release train behind Cisco's network administration products. It ships monthly. For a few years I gave the release talk to a couple hundred engineers.
+
+<Inhabit>
+The work in between is the work. 2021: the Dashboard's fonts, and the first design tokens. 2022: a proposal to replace the third-party Select we'd started with by our own, with an API built for how our products use it; and charting, heat maps included. 2023: an overhaul of the Storybook where teams see and try every component, and a talk on visual flow to the developers building with the system. 2024: a series teaching React to designers and developers who didn't think they were React people. 2025: a spacing audit that turned one-off values into spacing tokens across the library, a second theme so the library could carry Cisco's company-wide design language, and the engineering-manager job for the thing I'd built since the first commit. 2026: the other two teams, the one that modernizes the existing Dashboard with it and the one that owns the JavaScript platform underneath. Three teams, one output: the experience of managing a Cisco network. The tools that run the thing, as opposed to the ones people meet in.
+
+What three design systems taught me is in the 2024 series. I was teaching React to designers, people who didn't think they were React people. Two years later those same people prototype in React with agents, in the real components, and send the running thing instead of a picture of it. The system was never the library. It was getting everyone to build in the same material, and the material finally let them.
+
+In March 2026 we turned entirely to agentic development, and the design system was the first thing I opened to coding agents, so they'd read it and use it the way our developers do. That's the next chapter.
+
+What's not measured, still: time saved per team, and how many teams extend the library on their own. I'm working on both.
+</Inhabit>

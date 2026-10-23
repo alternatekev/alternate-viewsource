@@ -1,0 +1,59 @@
+---
+title: the racing rig
+phase: agents
+where: home
+order: 100
+start: 2026-03-05
+summary: a telemetry platform, native apps on four platforms and a livery pipeline, built for one racing rig with coding agents in seven months, then brought back onto one machine on purpose.
+status: draft
+clearance: own
+mood: { valence: 0.5, arousal: 0.8, x: 0.2, y: -0.1 }
+sources:
+  - label: k10-motorsports on GitHub
+    url: https://github.com/k10-motorsports
+  - label: The compiled record (content/objects/sim-racing-record)
+    note: dates and counts from the git history of 29 repositories, read 2026-10-16
+milestones: [prodrive, four-platforms, seven-repos, local-first]
+related: [chapter-tracks-from-real-roads, chapter-liveries, work-racing-rig]
+objects:
+  - sim-racing-record
+  - sim-racing-cadence
+  - sim-racing-screens
+  - sim-racing-hud
+  - sim-racing-telemetry
+  - sim-racing-video
+---
+
+<Glance>
+On March 5, 2026 at 11:49pm I committed "initial non-working version" of a plugin that reads my race car's telemetry. Seven months later: 29 repositories, 2,259 commits on 128 days, 374 pull requests, four native apps, one person and one model. In September I took the cloud back out of it, on purpose.
+</Glance>
+
+I've raced in simulators for years, on a rig in my house with a direct-drive wheel and pedals that cost more than my first car. In December 2025 a screenshot of my desk shows the game's stock display and a READY card on the second monitor. Nothing of mine on screen. Ten weeks later, there was.
+
+![The first documented frame of the dashboard, March 13: an AI car-response message, fuel, tyres, a pedal histogram, ratings, gear and speed.](/writing/racing-rig/2026-03-13-prodrive-dashboard.png)
+
+The first commit was a C# plugin for SimHub, the telemetry host most sim racers already run. By March 13 it drew a dashboard. By March 30 the overlay was its own program, transparent and click-through over the game, polling the plugin thirty times a second. On March 31 and April 1, 183 commits in two days: a Tufte-minimal redesign of the HUD. By May the plugin produced a hundred properties and thirty-odd commentary triggers; the overlay recorded races as video with a telemetry sidecar; a web service read my history and told me whether tonight was a good night to race. The lights in the room followed the flags.
+
+From April 23 to 26 I added native apps for iOS, macOS, Windows and Apple TV. The Apple TV one signs in with a six-character code because a television can't open a browser. On April 25 the one repository became seven, and on April 26 every app read the same calculations from one API, so every screen shows the same numbers. 266 commits in two days. On the busiest day one session touched nine repositories in 164 minutes.
+
+**The working agreement.** A folder of instructions mounted into every repository, so an agent working in any one of them knows the rest. A worktree for every delegated task. Three or four options with one marked recommended (after I'd picked the recommended one thirty times in a row, the asking stopped). "The diff is the recap." And a rule bought the hard way on April 26, when I said a feature was "gone from the web app entirely" and the agent dutifully deleted it from three repositories, when the real cause was five missing file extensions and a swallowed error: for anything that changes whether a feature exists, ask one sentence first.
+
+**Taking the cloud out.** By September the platform had a database with 23 tables, 83 API routes, accounts, sync, a Chrome extension and a six-repository release train. Then the racing service shipped its own track map, fuel calculator and incident tracker, and changed how outside apps sign in. I wrote the decision down with its three reasons and, on September 16, imported the whole thing into one repository with its history and started removing. What stayed: the calculations with their tests, the HUD, the recording, the local telemetry files that already carried GPS-grade positions. What went: everything that assumed an audience. "One user, one rig. No accounts, no sync, no distribution, no audience."
+
+<Telemetry />
+
+![Racing Desk running on the rig: whether to race now, composure, the hours that work, previous races and a lap chart.](/writing/racing-rig/2026-10-16-racing-desk-desk.jpg)
+
+<Inhabit>
+From the narrative we kept at the time: the model does the work that on a real team gets distributed across an engineer, a tech lead and a project manager; I do the work that gets distributed across a designer, a PM and the staff engineer who decides what to ship next. The line I'd put on the wall: the working agreement matters more than the tooling.
+
+I'm one person with a day job and a hobby. A telemetry plugin, an Electron overlay, a Next.js service, Swift, WinUI, a tvOS sign-in flow and an ffmpeg race editor are seven specialties. I know two of them well. The agent knows the other five well enough that I can direct, review and drive. What I bring is twenty-eight years of knowing what the screen should say, and the seat.
+
+Build it, scale it, then be willing to take it apart on evidence.
+
+The numbers are the evidence, so here they are. Two shifts most days, 10 to 1 and 4 to 11; the 10pm hour has more commits than the 2pm hour. Saturday is the busiest day. 451 working sessions; inside a session the median gap between commits is 1.1 minutes. The best sustained hour was 26 commits. 185 commits carry the model's name as author; most of the rest were typed by it and committed under mine, which is how I think about it.
+
+<Cadence />
+
+The tracks and the liveries have their own chapters, because they turned into their own disciplines.
+</Inhabit>

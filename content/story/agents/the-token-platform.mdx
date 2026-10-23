@@ -1,0 +1,40 @@
+---
+title: would it be faster if the managers built it?
+phase: agents
+where: cisco
+order: 40
+start: 2026-03-11
+summary: In March 2026 I asked an agent whether engineering managers should build our design-token platform themselves instead of speccing it for engineers. By May there was a working prototype, built almost entirely with agents.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: my own account
+related: [chapter-design-system-read-by-agents]
+objects: []
+---
+
+<Glance>
+In March 2026 I asked an agent to envision a token platform in three parts and one more question: "would it be more efficient to have the engineering managers build this almost entirely with AI than to spec out and assign the work to engineers?" May answered it. A desktop app, a manifest of every token in use, a three-stage release flow, in a month of near-constant conversation.
+</Glance>
+
+Design tokens are the agreement between design and code: this blue, this spacing, this radius, named once and used everywhere. Changing one across a company-wide design language took us weeks, through Figma, a spreadsheet, a pull request and a release. The ask from above was to make it days.
+
+I wrote the plan with an agent in a week in March: a place to author tokens with roles and approval, a place to version them, a way to deliver them. Then, in May, instead of writing tickets, I built it.
+
+You can't preview a token change unless something uses the token. So the first thing was a sample app that exercises every component in the library, race-control themed, so every token has somewhere to show up. (That was the morning the agent learned not to make things up, told in the design-system chapter.)
+
+**The authoring app.** Within days there was a desktop app with our left sidebar and an agent inside it in two modes: Build, to work on the tool itself, and Tune, to author the tokens downstream teams use. Pick a token, see the preview change. Light and dark edited as a pair. By the end of the week it had a styles-only build for teams that use our look but not our React, and the manifest MCP from the design-system chapter, because the tool that edits tokens should know where every token is used.
+
+**Three stages.** Author, with the confidence that comes from seeing it. Validate, diff and open a pull request, with the feedback going back to the author. Approve, record provenance, cut a versioned release. The first name for the whole thing would have drawn a letter from a motorsport governing body, so it got a calmer one.
+
+<Inhabit>
+A month of near-constant conversation, a good share of it typed from inside the app to the agent living in it. By June it was ported into the team's repository as packages, and the engineers who would have been assigned the tickets reviewed a running thing instead of a document. In the autumn planning it's still the carryover: the prototype exists, the production loop doesn't. We started large because we didn't know what we didn't know; now we know, and the goals are concrete.
+
+So: was it more efficient? Partly yes. A manager got a working thing in a month, and the team argued about the thing instead of a document. That's real. Partly no, and this is the part worth saying out loud. The agent's speed didn't resolve a single question about who owns the token contract, which consumers assume what, or how a release is allowed to break. Those were still meetings. The plan says so, in a section I'm glad I wrote before I was tempted to skip it.
+
+An agent lets a manager build the argument instead of describing it. It does not let a manager skip the part of the job that is deciding. A token change traveling the whole loop in production, measured: that's the quarter I'm in.
+</Inhabit>

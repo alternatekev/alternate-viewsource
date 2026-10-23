@@ -1,0 +1,40 @@
+---
+title: the chores
+phase: agents
+where: cisco
+order: 20
+start: 2026-02-17
+summary: The first things I handed to agents at Cisco were chores — monthly release notes, keeping two issue trackers in sync by hand, a stuck merge train — each done once with an agent, then written down as a skill.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: my own account
+related: [chapter-agents-on-a-schedule]
+objects: []
+---
+
+<Glance>
+The first ask, in February 2026, was a slide and the month's release notes. By May an agent was auditing every outside bug report against our tracker in one pass, drafting the missing tickets and cross-linking them. Each chore became a skill: a file that says how we do it, so the next run is the same.
+</Glance>
+
+I didn't start with anything important. I started with the thing I resented doing on the last Friday of every month.
+
+Our library ships monthly. Every release gets a five-minute talk and a page of notes, and I'd written the notes by hand for a long time (which is a lot of Fridays). In February I asked an agent for the slide and the notes, and it did a passable job. Within a month it was a skill in the repo, and along the way it got smaller instead of bigger: it signs in the way I already do instead of carrying a secret of its own, it lost a third of its length so a reviewer could actually read it, and its instructions live in one place. A reviewer did read it, which was the point of cutting it.
+
+The second one had been a person's job for years. We take bug reports from outside teams in one system and track our work in another, and somebody kept the two in sync by hand. In March I described that in two sentences and asked for a skill that audits one against the other, drafts a ticket for anything unmapped with the reporter's steps kept word for word, and leaves the reporter a comment saying where their bug went and which version fixes it. Dry-run by default. Nothing touches a live system until I've read the plan. The first live pass made a handful of tickets. The full pass, in May, audited every open report, posted follow-ups on the ones already fixed, drafted and cross-linked the rest, and left a few alone because they were unclear and a person should look. An afternoon, for something that used to cost a quarter of someone's attention, forever.
+
+The third was a Monday night in April. We had approved work stuck behind flaky jobs, and by midnight there was an agent that watches the merge queue, retries only the job that failed instead of the whole pipeline, puts the branch back on the train, and asks before it rebases. It ran against the wrong project the first time. It did ask.
+
+<Inhabit>
+There were smaller ones after that: a writer for merge-request descriptions that follows our template, a migration skill that converts an old component to its replacement with before-and-after examples, a handful of tickets taken from a description to a first pull request with two human gates in between, every one labeled as AI-assisted so we could count them later.
+
+The pattern was the same every time. A chore has a shape: some inputs, a process somebody carries in their head, an output. Describe the shape. Run it with the agent while you watch. Correct it. Then make the corrections a skill, which is just a document that outlives the session. The part I was hoping for happened without me: the team added their own. Guardrails for implementation, a code-review skill, a scanner for breaking changes.
+
+None of these would have been built as software. A sync script for two trackers is a two-week project that loses to every feature, every quarter, and it should. Described to an agent it's an afternoon, and you know by Friday whether it was worth having. That changes which problems you're willing to solve.
+
+The rules I kept: dry-run first, the sign-in I already have instead of a key, a log of every run. Not because the agent is dangerous. Because I am, at 11pm, with a merge train.
+</Inhabit>

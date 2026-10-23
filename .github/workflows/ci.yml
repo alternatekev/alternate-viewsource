@@ -1,0 +1,103 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Vercel reports each deployment here; a successful preview runs the budgets against it
+  deployment_status:
+permissions:
+  contents: read
+jobs:
+  check-and-build:
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  # the end-to-end suite (docs/testing.md) against the built app: the whole matrix in Chromium and the
+  # phones in WebKit, in four parts at once (software GL makes the whole of it close to an hour on one
+  # machine). The throttled phone's budgets run against the Vercel preview instead (below)
+  e2e:
+    needs: check-and-build
+    if: github.event_name != 'deployment_status'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run build
+      - run: npx playwright test --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 1
+
+  # the four parts' results as one HTML report, uploaded as the artifact `playwright-report`
+  e2e-report:
+    needs: e2e
+    if: ${{ !cancelled() && github.event_name != 'deployment_status' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+      - run: npx playwright merge-reports --reporter html ./all-blob-reports
+      - uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # the budgets against the deployment itself: its served bytes (weighed at brotli 11, the wire size
+  # reported beside them), its pictures and scripts, and the throttled phone's LCP.
+  # Vercel's deployment protection is passed with the automation bypass secret (docs/testing.md)
+  preview-budgets:
+    if: github.event_name == 'deployment_status' && github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test tests/e2e/budgets.spec.ts --reporter=list,html
+        env:
+          E2E_BASE_URL: ${{ github.event.deployment_status.environment_url || github.event.deployment_status.target_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-preview
+          path: playwright-report/
+          retention-days: 14

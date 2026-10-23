@@ -1,0 +1,86 @@
+[
+  {
+    "key": "shatterbox",
+    "origin": "1995",
+    "approximate": false,
+    "what": "KPT Vector Effects ShatterBox, the Illustrator filter I used in 1998",
+    "used": "1998",
+    "via": { "date": "2026-09", "what": "Doooom Shatter" },
+    "reused": "2026-10",
+    "became": "the field"
+  },
+  {
+    "key": "pedals",
+    "origin": null,
+    "approximate": true,
+    "what": "My pedalboard: an MXR Carbon Copy, a Walrus Audio Fathom, a Hologram Electronics Infinite Jets",
+    "reused": "2026-10-14",
+    "became": "dooombient, the instrument",
+    "note": "When I bought each pedal isn't recorded; they're the ones on my board."
+  },
+  {
+    "key": "tangerine-dream",
+    "origin": "2020",
+    "approximate": false,
+    "what": "Tangerine Dream, an investigation into docking a toolbar on top of the content",
+    "reused": "2026-10",
+    "became": "the docks"
+  },
+  {
+    "key": "talmud-project",
+    "origin": "2000-10",
+    "approximate": false,
+    "what": "David Small's Talmud Project, seen at a Pratt Institute event in SoHo",
+    "reused": "2026-10-15",
+    "became": "the surface: zoom as navigation"
+  },
+  {
+    "key": "the5k",
+    "origin": "2001",
+    "approximate": false,
+    "what": "the5k, the contest for pages under five kilobytes",
+    "reused": "2026-10",
+    "became": "the 14 KB budget for the first round trip"
+  },
+  {
+    "key": "typekit",
+    "origin": "2010",
+    "approximate": true,
+    "what": "A Typekit account",
+    "reused": "2026-10",
+    "became": "the type, from my Adobe Fonts kit"
+  },
+  {
+    "key": "essays",
+    "origin": "2015",
+    "approximate": false,
+    "what": "The 2015 essays and the 2016 case studies",
+    "reused": "2026-10",
+    "became": "the chapters of the earlier phases"
+  },
+  {
+    "key": "designs",
+    "origin": "2000-01",
+    "approximate": false,
+    "what": "Fifteen earlier designs of alternate.org, since January 2000",
+    "reused": "2026-10",
+    "became": "the colophon's archive"
+  },
+  {
+    "key": "hud",
+    "origin": "2026-03",
+    "approximate": false,
+    "what": "The racing rig's HUD",
+    "reused": "2026-10",
+    "became": "the charts' style"
+  },
+  {
+    "key": "heatmap",
+    "origin": "2006",
+    "approximate": false,
+    "what": "A calendar drawn as a heatmap, which I pitched in 2006",
+    "reused": "2026-10",
+    "became": "the usage strip",
+    "note": "My account: there is no source for the 2006 pitch yet. The form is the one GitHub's contribution graph later made familiar."
+  }
+]

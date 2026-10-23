@@ -1,0 +1,36 @@
+---
+title: "how composable is this?"
+phase: agents
+where: cisco
+order: 30
+start: 2026-04-01
+summary: In April 2026 I built a support bot for the design system — an app in our own components that answers designers' questions from the same MCP the agents read, and says how sure it is.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: Magnetic, Cisco's design system
+    url: https://magnetic.cisco.com/
+  - label: firsthand
+    note: my own account
+related: [chapter-design-system-read-by-agents]
+objects: []
+---
+
+<Glance>
+Designers ask the same three questions: how composable is this component, can product developers customize it, can I change the icon. In April 2026 I started a bot that answers them from our docs over MCP and says how confident it is. Within a week it was an app in our own components, and it took screenshots.
+</Glance>
+
+The support rotation on a design-system team is a person. Each week one engineer takes the channel and answers the same composability question a dozen times, politely, between their own tickets. It's necessary and it's a tax.
+
+So I asked for a chatbot. The first version was a command-line thing. The second, a day later, was the ask I actually meant: an app, in our own components, talking to our MCP. Our React library for the interface, a small server behind it, seeded with real questions from the channel and tuned for designers, who want a verdict, not a lecture.
+
+The answer format is the product. Verdict. Short answer. Customizable today. Not changeable today. Confidence. Its first validated answers were honest ones: partially supported; not supported, because it's hard-coded. A support engineer would have said the same, after reading the source. The bot reads the source.
+
+<Inhabit>
+It runs on the agent CLI the user is already signed into, not an API key. It takes screenshots, because designers point at things. And when I found it quietly borrowing the sign-in from another tool on the machine, I isolated it, because a support bot that can read your chat is not a support bot.
+
+In May it moved into the token platform as its Ask tab, where you select a component on the page and ask about that one. Which is where it belonged all along.
+
+A week or so, nights included. The first time it answered a real question correctly I wrote "this is food" in the log. Whether the rotation got lighter, I'll report when I know.
+</Inhabit>

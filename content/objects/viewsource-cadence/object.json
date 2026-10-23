@@ -1,0 +1,30 @@
+{
+  "kind": "chart",
+  "title": "Commits to this repository by hour, October 14–18, 2026",
+  "date": "2026-10-18",
+  "phase": "agents",
+  "file": "rows.json",
+  "caption": "Every commit to this repository since the first one on October 14 at 12:11, by hour of the day, Denver time. 73 commits, 17 pull requests, 22,150 lines added and 1,439 removed, in 12 sittings over 93 hours. The busiest hour was 3 pm on October 16: 19 commits.",
+  "method": "git log of alternatekev/alternate-viewsource, main plus the branch these words were written on, read October 18 at 09:50; author dates bucketed by hour of the day in America/Denver; merge commits counted as commits; lines counted from the non-merge commits; sittings are runs of commits less than 45 minutes apart, as for the racing rig; sessions counted from the Claude-Session trailer on the commits that carry one.",
+  "totals": {
+    "commits": 73,
+    "pull_requests_merged": 17,
+    "merge_commits": 18,
+    "lines_added": 22150,
+    "lines_removed": 1439,
+    "co_authored": 56,
+    "agent_sessions": 8,
+    "hours": 93.5,
+    "sittings": 12,
+    "active_days": 5,
+    "median_gap_minutes": 2.0,
+    "busiest_hour": "2026-10-16T15",
+    "busiest_hour_commits": 19
+  },
+  "sources": [
+    {
+      "label": "firsthand",
+      "note": "my own account"
+    }
+  ]
+}

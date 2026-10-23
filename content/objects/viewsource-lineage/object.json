@@ -1,0 +1,30 @@
+{
+  "kind": "chart",
+  "title": "What this site borrowed, and from when",
+  "date": "2026-10-18",
+  "phase": "agents",
+  "file": "rows.json",
+  "caption": "Ten things this site is made from, each with the year it came from and what it became here in October 2026. The oldest is a plugin from 1995. The newest is seven months old.",
+  "method": "One row per thing borrowed: origin is the year (or year and month) it came from, null when I don't know it; via is a step between, where there was one; reused is when it landed in this repository; became is what it is here. A note marks what is my account only.",
+  "columns": [
+    "key",
+    "origin",
+    "approximate",
+    "what",
+    "used",
+    "via",
+    "reused",
+    "became",
+    "note"
+  ],
+  "sources": [
+    {
+      "label": "doooom-shatter on GitHub",
+      "url": "https://github.com/alternatekev/doooom-shatter"
+    },
+    {
+      "label": "The rest is my account",
+      "note": "firsthand"
+    }
+  ]
+}

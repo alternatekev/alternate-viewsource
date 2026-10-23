@@ -1,0 +1,401 @@
+[
+  {
+    "key": "work-cisco-magnetic",
+    "title": "Magnetic, the design system behind Cisco's network administration products",
+    "date": "2020-11-25",
+    "approximate": true,
+    "kind": "work",
+    "org": "Cisco Meraki",
+    "source": {
+      "label": "magnetic.cisco.com",
+      "url": "https://magnetic.cisco.com/"
+    },
+    "html": "<p>In the fall of 2020 Cisco Meraki hired four contractors to try an experiment: one React design system for the Meraki Dashboard, built in the open inside the company, that product teams would choose over rolling their own. I was one of the four. I'm the only one of the four still on it; the experiment became my job.</p>\n\n<p>It's called Magnetic. It's the component library, the design tokens and themes, the charts, the accessibility work and the release train behind Cisco's network administration products. It ships monthly. For a few years I gave the release talk to a couple hundred engineers.</p>\n\n<p>The work in between is the work: a 2022 proposal to replace the third-party Select we'd started with, a 2023 Storybook project, a 2024 series teaching React to people who didn't think they were React people, spacing-token audits, a second theme for Cisco's company-wide design language, and the long tail of a library that a lot of teams depend on and nobody wants to be surprised by.</p>\n\n<p>In 2025 I became the engineering manager for Magnetic. In 2026 I took on the other two teams under the same umbrella: the one that modernizes the existing Dashboard with it, and the one that owns the JavaScript platform underneath. Three teams, one output: the experience of managing a Cisco network. The tools that run the thing, as opposed to the ones people meet in.</p>\n\n<p>In March 2026 we turned entirely to agentic development, and the design system became the first thing I opened to coding agents, so they read it and use it the way our developers do. That story continues in <a href=\"#phase-agents\">Agents</a>.</p>\n\n<p>What's not measured yet, honestly: time saved per team, and how many teams extend the library on their own. I'm working on both.</p>"
+  },
+  {
+    "key": "work-racing-rig",
+    "title": "The racing rig, built with agents",
+    "date": "2026-03-05",
+    "end": "2026-10-15",
+    "kind": "work",
+    "org": "At home",
+    "source": {
+      "label": "k10-motorsports on GitHub",
+      "url": "https://github.com/k10-motorsports"
+    },
+    "html": "<p>In March 2026 I started building software for my racing rig with coding agents, and I haven't stopped. Seven months later it's 29 repositories and 2,259 commits on 128 days, one person and one model. It's the clearest record I have of how fast an idea of mine becomes something I use.</p>\n\n<p><strong>A telemetry plugin that became a platform.</strong> The first commit, on March 5, was a plugin that reads the car in real time. By May the racing rig had a live HUD over the game, race recording with a telemetry sidecar, lights in the room that follow the flags, and a web dashboard that reads my racing history and tells me whether tonight is a good night to race.</p>\n\n<figure><img src=\"/writing/racing-rig/2026-03-13-prodrive-dashboard.png\" alt=\"The first documented frame of the dashboard, March 13: an AI car-response message, fuel, tyres, a pedal histogram, ratings, gear and speed.\"><figcaption>The first documented frame of the dashboard, March 13: an AI car-response message, fuel, tyres, a pedal histogram, ratings, gear and speed.</figcaption></figure>\n\n<p><strong>Four platforms in four days.</strong> From April 23 to 26 I added native apps for iOS, macOS, Windows and Apple TV, split the one repository into seven, and moved every calculation behind one API so every screen shows the same numbers. A shared agents folder in every repository carries the instructions, so an agent working in any one of them knows the rest.</p>\n\n<p><strong>Tracks from real roads.</strong> In June I built a pipeline that turns OpenStreetMap roads and USGS elevation into tracks I can drive in Assetto Corsa: streets in Commerce City, the Lake Murray loop in San Diego, a rally stage in Rangely. I rebuilt the hard part three times. The rule that came out of it: a track only counts once I've driven it. A ledger keeps my words about what felt wrong, measures it, and closes the entry only after a drive.</p>\n\n<figure><img src=\"/writing/racing-rig/2026-06-05-sand-creek-selection-aid.jpg\" alt=\"The first input to the track pipeline: a marked-up aerial of a street loop in Commerce City. The screenshot is a selection aid, not data.\"><figcaption>The first input to the track pipeline: a marked-up aerial of a street loop in Commerce City. The screenshot is a selection aid, not data.</figcaption></figure>\n\n<figure><img src=\"/writing/racing-rig/2026-08-09-lake-murray-august.jpg\" alt=\"Lake Murray, the August build: real road and elevation, sketch-quality scenery.\"><figcaption>Lake Murray, the August build: real road and elevation, sketch-quality scenery.</figcaption></figure>\n\n<p><strong>Taking the cloud out.</strong> In September I brought it all back onto one machine on purpose. The racing service added its own track map, fuel and incident tools, and changed how outside apps sign in, so a hosted version depending on that sign-in was the wrong bet. Racing Desk runs for one driver on one rig: the calculations kept with their tests, the accounts, sync and database gone.</p>\n\n<figure><img src=\"/writing/racing-rig/2026-10-16-racing-desk-desk.jpg\" alt=\"Racing Desk running on the rig: whether to race now, composure, the hours that work, previous races and a lap chart.\"><figcaption>Racing Desk running on the rig: whether to race now, composure, the hours that work, previous races and a lap chart.</figcaption></figure>\n\n<figure><img src=\"/writing/racing-rig/2026-10-08-racing-desk-glance.jpg\" alt=\"The glance layout: everything a driver reads in a glance.\"><figcaption>The glance layout: everything a driver reads in a glance.</figcaption></figure>\n\n<p><strong>Liveries.</strong> The cars wear my own paint, the same shattered glass as the field behind this site, made with agents driving Illustrator through scripts.</p>\n\n<figure><img src=\"/writing/racing-rig/2026-09-lotus79-v2-to-v14.jpg\" alt=\"The Lotus 79 through ten versions of the livery.\"><figcaption>The Lotus 79 through ten versions of the livery.</figcaption></figure>"
+  },
+  {
+    "key": "work-viewsource",
+    "title": "viewsource: this site, and the three prototypes it came from",
+    "date": "2026-10-14",
+    "kind": "work",
+    "org": "At home",
+    "source": {
+      "label": "viewsource.alternate.org",
+      "url": "https://viewsource.alternate.org"
+    },
+    "html": "<p>On the morning of October 14, 2026 I made three prototypes, one HTML file each, no libraries. Doooom Shatter GL is ShatterBox rebuilt for the GPU: Voronoi cells whose flight is computed in the vertex shader, so a shatter scrubs live and never destroys the source. doooomgaze is the ambient background: the source art pre-shattered across the whole viewport, always moving, never touched, steered only by how you read, the clock and the music. dooombient is the instrument: ambient chords, a new composition each visit, with four pedals modeled per sample in an AudioWorklet.</p>\n\n<figure><img src=\"/writing/viewsource/2026-10-14-doooom-shatter-gl.png\" alt=\"Doooom Shatter GL: the word DOOOOM in chrome, 91 shards, seed 1998, scrubbed to 0.3 of the strike, with the source, fracture and physics controls down the right.\"><figcaption>Doooom Shatter GL: the word DOOOOM in chrome, 91 shards, seed 1998, scrubbed to 0.3 of the strike. A frame rendered on October 18 from the October 14 snapshot in prototypes/.</figcaption></figure>\n\n<figure><img src=\"/writing/viewsource/2026-10-14-doooomgaze.png\" alt=\"doooomgaze: an impact pattern of 496 shards across the whole viewport behind placeholder words, An analog child, a digital adult.\"><figcaption>doooomgaze, the fourth version: an impact pattern of 496 shards behind placeholder words. A frame rendered on October 18 from the October 14 snapshot.</figcaption></figure>\n\n<figure><img src=\"/writing/viewsource/2026-10-14-dooombient.png\" alt=\"dooombient: the year 2026 behind the three boards' lines, the chord, key and tempo under them, four pedals along the bottom and the timeline below.\"><figcaption>dooombient: one composition, with the four pedals along the bottom and the timeline under them. A frame rendered on October 18 from the October 14 snapshot; the sound is in the file.</figcaption></figure>\n\n<p>At 12:11 that day I made the first commit of this repository: a Next.js scaffold, the content as files, the spine, two stub chapters, and the three prototypes as dated snapshots. By 18:37 the token system was in and doooomgaze was ported onto it. Every piece of the air began that way, one file first, then a port onto the tokens, so the port starts exactly where the sketch left off.</p>\n\n<p>Forty-six hours after the first commit, on October 16 at 10:28, the fifth pull request merged and the site was whole for the first time: the field, the docks, the surface, my writing in full, and phones. I directed from a live browser window and Claude built.</p>"
+  },
+  {
+    "key": "work-automattic",
+    "title": "WordPress.com",
+    "date": "2012-01-11",
+    "end": "2016-03-01",
+    "kind": "work",
+    "org": "Automattic",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/automattic"
+    },
+    "html": "<p>I worked at <strong>Automattic</strong> for six years, and two of them were spent on <strong>Calypso, an API- and JavaScript-powered UI for WordPress</strong>. Calypso runs the WordPress desktop app, the WordPress.com UI, influences the UX of the WordPress mobile app and is built using Node.js + React.</p>\n\n<figure><img src=\"/writing/automattic/wp1.webp\" alt=\"\" /></figure>\n\n<p>WordPress.com is the largest installation of WordPress in the world with 131 million unique monthly users in the US. We were seeking to modernize our users’ experience by taking WordPress, which clearly still exists in its unchanged form and is in active development, abstract the core technology to an API, and build new experiences on top.</p>\n\n<figure><img src=\"/writing/automattic/wp2.webp\" alt=\"\" /></figure>\n\n<p>We had historically eschewed email, working together through the internally-developed P2 WordPress theme and IRC. Prior to Calypso, we usually launched code pretty quickly through Subversion to the main production codebase. Calypso changed all of that, moving a large portion of the design and development discussion to Slack and Github, adding beneficial layers of peer-based code and design review on top of each Pull Request. The end result was a more cohesive product, for us in the code and for our users in the experience. Designers started working more closely together on specific issues across teams, developers and designers collaborated in quicker iterations to get to better solutions, and the standards we used to build the app progressed along with evolving React and ES6 best practices.</p>\n\n<figure><img src=\"/writing/automattic/wp3.webp\" alt=\"\" /></figure>\n\n<p>Despite this increased flow of communication and priority-dovetailing, there were still inconsistencies within Calypso’s design. In September 2014, I organized a workshop for four designers to:</p>\n<ul>\n  <li>Look at the UX we’d achieved at breakneck speed over the past year and a half</li>\n  <li>Find UI inconsistencies and gotchas</li>\n  <li>Provide recommendations on how to bring the app into a more pure Atomic Design model</li>\n</ul>\n\n<figure><img src=\"/writing/automattic/Component-Map.webp\" alt=\"\" /></figure>\n\n<p>Since we were already using React, this made for a perfect time to adopt a more standards-driven UI design process, placing the idea of functional components at the heart of the design language. We reviewed every page, outlined the parts of it that differed from the UX of other parts of the app, and made general recommendations for how to bring the application more in-line with itself.</p>\n\n<p>The result of these workshops were 6 lengthy internal blog posts outlining the changes that we felt should be made, and created much discussion. Some recommendations were implemented by other teams and some of them were decided against by the wider group of contributors.</p>\n\n<p>There was a third group of recommendations which were generally agreed upon by everyone, so I took it upon myself to get them finished. I took specific problems that the team had seen crop up over and over again and created Pull Requests in Github to address them. I re-engineered the interfaces in question to use core Calypso React components, got my designs and code reviewed by my peers, and launched them into production. This work is evident on WordPress.com in the following ways:</p>\n<ul>\n  <li>Stats modules got simplified, including a cleaner way of clicking through into detailed information</li>\n  <li>A cleaner Site Settings section</li>\n  <li>Sharing Settings and Connected Applications use the same components to do the same interactions</li>\n  <li>Standardized patterns covering Connect/Disconnect, Remove/Delete and Disable actions</li>\n  <li>I created and edited core Calypso components as-needed to express improvements needed for implementation across the entire app</li>\n</ul>"
+  },
+  {
+    "key": "work-bank-of-america",
+    "title": "Bank of America",
+    "date": "2005-09-11",
+    "end": "2006-11-03",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/bank-of-america"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-barclays-ishares",
+    "title": "Barclays iShares",
+    "date": "2009-01-11",
+    "end": "2009-11-26",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/barclays-ishares"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-blackrock",
+    "title": "BlackRock",
+    "date": "2007-03-11",
+    "end": "2009-11-01",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/blackrock"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-breckenridge",
+    "title": "Breckenridge",
+    "date": "2003-08-11",
+    "end": "2004-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/breckenridge"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-ca-computer-associates",
+    "title": "Project Catchfly",
+    "date": "2016-01-07",
+    "end": "2017-05-01",
+    "kind": "work",
+    "org": "CA / Computer Associates",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/ca-computer-associates"
+    },
+    "html": "<p>Rally Software was a company providing Jira-like Agile tools, which got purchased by CA in 2015. As part of a broader initiative to modernize CA's software offerings, Project Catchfly was spun up as a startup within the large corporation.</p>\n\n<p>Within the first two days on Project Catchfly, I had outlined the problem the team was trying to solve, and had provided the first real mockup of their app.</p>\n\n<p>We quickly iterated through approaches to find the right solution. We held design sprint sessions, big-room planning sessons, and worked with a team in North Carolina building the mobile version of the app.</p>\n\n<p>I spent a lot of time taking Material UI (a Material Design component library implemented in React), and customizing it for our needs. This was also my first introduction to TypeScript.</p>\n\n<p>When the business needed me to step out of the codebase and into Sketch in order to iterate even faster on projections 1.5 years into the future, I re-built our component system as graphical assets in Sketch.</p>\n\n<p>When Project Catchfly was cancelled 9 months afer I started, I quickly pivoted to providing prototyping for the Agile Central (Rally) design team. Within a week, I had a custom component library rendering a Kanban board, that the designers were taking screenshots of to send to their developers as the final design.</p>"
+  },
+  {
+    "key": "work-commonwealth-of-pennsylvania",
+    "title": "Commonwealth of Pennsylvania",
+    "date": "2009-01-12",
+    "end": "2009-11-18",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/commonwealth-of-pennsylvania"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-community-funded",
+    "title": "Beleaf Design System",
+    "date": "2017-02-08",
+    "end": "2020-03-01",
+    "kind": "work",
+    "org": "Community Funded",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/community-funded"
+    },
+    "html": "<p><strong>Community Funded</strong> came to me with one need: the first version of their product that got them to where they were was now limiting their growth potential. Could I help steer them toward the right choices to make for version 2?</p>\n\n<p>And could I <strong>help them build it?</strong></p>\n\n<figure><img src=\"/writing/community-funded/card.webp\" alt=\"Community Funded\" /></figure>\n\n<p>After meeting with their founders, and finding that I could have a strong passion for their business, I enthusiastically agreed to help. V1 was heavily based on WordPress, something I have a unique amount of experience building and building for; React + Next.js were my suggestions for the front-end technologies, and three years later, we launched to live clients in the first quarter of 2020. I have worked hand-in-hand with the CTO, Chief Creative Officer, and VP of Product to craft not just a cohesive visual design system, but the codebase and UX patterns necessary to pull it off, in a real product, right now.</p>\n\n<p>We used an iterative, design sprint-based approach that included customers, clients, success managers, board members, and executives. This all-inclusive approach led to the product improving by leaps and bounds in short amounts of time, with ideas we knew were already vetted with users.</p>\n\n<p>I began my work with CF by asking questions, and iterating on Next.js-based prototypes complete with animation, beautfiul custom components, and an extensible architecture that worked as a bridge between quick prototyping and prodution-ready code.</p>\n\n<p>Using a modified Agile methodology, with an ad-hoc mixture of scrum, dailies, plannings sessions and spikes, we delivered a beautiful experience to delighted users, who often found that the extensive training needed to onboard for the first version of the prdouct, was now simply unnecesary.</p>"
+  },
+  {
+    "key": "work-discount-com",
+    "title": "Discount.com",
+    "date": "2003-12-11",
+    "end": "2004-11-05",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/discount-com"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-dynavox",
+    "title": "Dynavox",
+    "date": "2009-01-08",
+    "end": "2009-11-12",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/dynavox"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-echostar",
+    "title": "Echostar",
+    "date": "2004-10-11",
+    "end": "2004-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/echostar"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-einsteins-bagels",
+    "title": "Einstein’s Bagels",
+    "date": "2003-09-11",
+    "end": "2003-11-15",
+    "kind": "work",
+    "org": "Creation Chamber",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/einsteins-bagels"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-executive-wealth-management",
+    "title": "Executive Wealth Management",
+    "date": "2001-04-11",
+    "end": "2002-11-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/executive-wealth-management"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-friday-health-plans",
+    "title": "Friday Health Plans",
+    "date": "2020-01-07",
+    "end": "2020-09-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/friday-health-plans"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-great-west-healthcare",
+    "title": "Great-West Healthcare",
+    "date": "2005-04-11",
+    "end": "2005-11-20",
+    "kind": "work",
+    "org": "Spiremedia",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/great-west-healthcare"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-marriage-mirror",
+    "title": "Marriage Mirror",
+    "date": "2020-01-07",
+    "end": "2020-11-01",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/marriage-mirror"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-merrill-lynch",
+    "title": "Merrill Lynch",
+    "date": "2005-11-11",
+    "end": "2009-11-05",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/merrill-lynch"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-ping-identity",
+    "title": "Ping Identity",
+    "date": "2001-02-11",
+    "end": "2001-11-04",
+    "kind": "work",
+    "org": "Freelance",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/ping-identity"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-polldaddy",
+    "title": "Polldaddy",
+    "date": "2010-01-11",
+    "end": "2012-11-01",
+    "kind": "work",
+    "org": "Automattic",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/polldaddy"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-rl",
+    "title": "Rule Gallery",
+    "date": "2020-04-01",
+    "approximate": true,
+    "kind": "work",
+    "org": "Rule Gallery",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/rl"
+    },
+    "html": "<p>Rule is one of Denver's premier art galleries, representing some of the most talked-about names in both Denver and Marfa, Texas.</p>\n\n<p>Leveraging a sleek, minimalist feel, this website was a joy to work on, letting white space breathe, and giving the artwork space to speak for itself.</p>\n\n<p>This site uses Advanced Custom Fields for custom post types, Timber for templating, and a statically-built React app for browsing art.</p>\n\n<p>Due to COVID-19 restrictions, the gallery cannot be open to the public. We quickly put together a WooCommerce site to get cash flowing to the artsists in need again.</p>\n\n<p><a href=\"https://shop.rulegallery.com\">View the Shop</a></p>"
+  },
+  {
+    "key": "work-state-of-wisonsin",
+    "title": "State of Wisconsin",
+    "date": "2009-01-11",
+    "end": "2009-11-20",
+    "kind": "work",
+    "org": "Effective UI",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/state-of-wisonsin"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-the-new-york-times",
+    "title": "The New York Times",
+    "date": "2006-04-11",
+    "end": "2008-11-08",
+    "kind": "work",
+    "org": "Wall Street on Demand",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/visual/the-new-york-times"
+    },
+    "html": "<p>In the fall of 2006, I was part of a small team at Wall Street on Demand that pitched The New York Times on a replacement for their MarketWatch-powered (meaning competitor-powered) financial markets research portal. We continued to meet with the client periodically for about a year before work started in earnest.</p>\n\n<figure><img src=\"/writing/the-new-york-times/card.webp\" alt=\"The New York Times\" /></figure>\n\n<p>While our pitch work had been valuable in demonstrating our abilities from a cold start, we needed to start all over again once things were officially underway. This included meetings on-site with news editors, graphics editors, and web designers. We learned the ins-and-outs of their publishing system (since replaced with WordPress) so that we could better understand how their web content producers’ work flowed throughout the day and night.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt2.webp\" alt=\"\" /></figure>\n\n<p>We learned the intricacies of their standards for web design, content design, and print-based financial visualization, and weaved them together into a new set of rules. We worked with them to forge a hybrid model of displaying financial information on the web that felt at home within their ever-changing site.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt3.webp\" alt=\"\" /></figure>\n\n<p>As our main work would take over a complete CNAME subdomain of their site, our developers needed to build a new platform on our end that perfectly mimicked the look and feel of the actual nytimes.com. I worked hand-in-hand with the development team to build both HTML and Flash-based tools (hey it was 2008) for users to investigate market data. We also worked closely with the client’s developers to create ways in which our content could show up within the main news stories.</p>\n\n<figure><img src=\"/writing/the-new-york-times/nyt4.webp\" alt=\"\" /></figure>\n\n<p>In 2006, when we first pitched the client, I had been with the company a year, and was still a relatively new member of the design team, taking much direction from the Creative Director. By late 2007, when we started work from scratch, I was an Associate Creative Director myself, and oversaw 60-70% of the design and front-end engineering work, managing a range of 2-3 designers at a time. Our Creative Director oversaw the broad scope of work but many day-to-day management tasks were handled by me.</p>"
+  },
+  {
+    "key": "work-aeo",
+    "title": "An Earthen Ocean",
+    "date": "2012-01-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/aeo"
+    },
+    "html": "<p>Written and recorded in 2012, <strong>An Earthen Ocean</strong> was my first foray into self-produced (live) music on my laptop. Drawing heavily from post-rock influences, I'm still very proud of this album's ability to be abstract yet full of form.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/an-earthen-ocean\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-dec",
+    "title": "December",
+    "date": "2014-12-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/dec"
+    },
+    "html": "<p>Written and recorded in 2014, <strong>December</strong> was inspired by a trio of consecutive Decembers.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/december\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-mc",
+    "title": "Morocco",
+    "date": "2014-01-01",
+    "kind": "album",
+    "org": "For the Earth was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/mc"
+    },
+    "html": "<p>Written and recorded in 2014, <strong>Morocco</strong> was inspired by a trip to Morocco in 2012.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/morocco\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-states",
+    "title": "States",
+    "date": "2016-03-11",
+    "end": "2016-11-09",
+    "kind": "album",
+    "org": "For the Earth Was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/states"
+    },
+    "html": "<p>Written and recorded in 2016, <strong>States</strong> was a meditation on loneliness, meaningless meaning found elsewhere, and a feeling of impending doom.</p>\n\n<p><a href=\"https://soundcloud.com/alternatekev/sets/states\">Listen on SoundCloud</a></p>"
+  },
+  {
+    "key": "work-skinwalker",
+    "title": "Skinwalker",
+    "date": "2016-03-11",
+    "end": "2021-11-12",
+    "kind": "album",
+    "org": "FULL BLEED",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/skinwalker"
+    },
+    "html": ""
+  },
+  {
+    "key": "work-untitled",
+    "title": "Untitled",
+    "date": "2021-10-11",
+    "end": "2021-11-17",
+    "kind": "album",
+    "org": "For the Earth Was Empty of Form",
+    "source": {
+      "label": "alternate.org",
+      "url": "https://alternate.org/audio/untitled"
+    },
+    "html": ""
+  }
+]

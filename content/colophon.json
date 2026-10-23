@@ -1,0 +1,76 @@
+{
+  "status": "draft",
+  "sources": [
+    {
+      "label": "firsthand",
+      "note": "how I work with agents, in my own account"
+    }
+  ],
+  "sections": [
+    {
+      "key": "made",
+      "heading": "How this site is made",
+      "html": "<p>This page is the one place on the site that names tools.</p>"
+    },
+    {
+      "key": "stack",
+      "heading": "The stack",
+      "html": "<p>It’s a Next.js 16 app, in TypeScript, that prerenders every page to static HTML. React is the shell and nothing more. The parts that move are plain DOM, Pointer Events, WebGL and Web Audio, with no framework in between.</p><p>There are six runtime dependencies: Next.js, React, React DOM, Zod, MDX and gray-matter. I kept Next.js for what it does for the content (below). It is also most of the bytes on the page (see Speed).</p><p>The type is from my Adobe Fonts kit: Argent Pixel CF for the small lines, Le Monde Livre for the display and the prose.</p>"
+    },
+    {
+      "key": "content",
+      "heading": "Content is files",
+      "html": "<p>Everything the site says lives in <code>content/</code> as files: the spine (the five phases, the milestones, every design of this site) as JSON, the chapters as MDX, my old writing as cleaned HTML. These words too. There is no database and no CMS. Two headless backends died under earlier versions of this site. Files survive.</p><p>Every file is checked against a Zod schema before every build, and again when it’s read. The validator fails the build on a milestone without a source, an old post that tries to load a picture from somewhere else, or a phase intro that links to a piece that isn’t here.</p><p>In development the site reads that folder from disk, so an edit is a reload away. In production it reads the same folder from this repo on GitHub, at a ref, and caches it under one tag. A push sends a signed webhook to <code>/api/revalidate</code>, the tag goes stale, and the next visit to each page regenerates it in the background. A content commit goes live in seconds without a rebuild. (A new chapter still needs a build, because chapter URLs are fixed at build time.)</p>"
+    },
+    {
+      "key": "tokens",
+      "heading": "Tokens",
+      "html": "<p>Everything that colors, moves, shatters or sounds reads from <code>tokens/</code>: color, motion, shatter, sound and the docks. The field, the docks, the instrument and the stylesheet all read the same files, so they can’t drift apart. The CSS custom properties are generated from them and inlined in every page’s head; the field gets the same colors as linear RGB for its shader. Colors are written in OKLCH, so a halfway mix between two moods looks halfway.</p><p>A validator turns the rules into build failures. The strictest one checks text contrast through the reading column’s scrim, over the worst the field can show (a highlight clipped to white), in every color scheme, around the clock and along the whole timeline. If a token change would make a line hard to read anywhere, the build stops. It checks the instrument too: no delay longer than the modeled pedal can do, and board ratios that keep the boards in tune with each other.</p>"
+    },
+    {
+      "key": "surface",
+      "heading": "The surface",
+      "html": "<p>The home page is one surface, not a stack of pages. It opens on Hello and runs newest first, agents down to dial-up. Scrolling travels through time.</p><p>Pressing a phase dives into it (so does a pinch, ctrl + scroll wheel, or the “dive in” control above its name). Far away it’s a phase name. Closer, set small beside it, is what the web was then, with its milestones and this site’s designs from those years. Closer still, the sources. Escape steps back out. Type stays type at every scale: diving in moves the camera and never swaps the words. That’s David Small’s pattern, zoom as navigation.</p><p>I saw his Talmud Project at a Pratt Institute event in SoHo in October 2000: a whole body of text you could fly through, where getting closer was how you read it. It’s stayed with me ever since, and it’s where my interest in interactive information design comes from. This surface is my version of it, 26 years later. It lives in <code>lib/surface.ts</code>.</p><p>The work page takes the same idea down a corridor: every year is a stop, from now back to 1991, and scrolling moves the camera past the years still ahead of it.</p>"
+    },
+    {
+      "key": "transition",
+      "heading": "One transition",
+      "html": "<p>Nothing on this site appears or disappears at once. Words type in and erase the way the logotype does, and boxes (a dock’s frame, the popover) set in and withdraw in the same steps, like a line of type being set. It’s one module, <code>lib/type.ts</code>, timed from the dock tokens, and it is the only transition there is. Pages leave the same way: the words that are leaving type out first, and the docks, the field and the music stay.</p><p>One clock drives every word, so a page of words typing costs one timer, not one per word. With reduced motion, everything is simply there.</p><p>I made one exception. A dock lands where you drop it.</p>"
+    },
+    {
+      "key": "docks",
+      "heading": "The docks",
+      "html": "<p>Two bars dock to the edges of the window: the nav and the timeline. Nothing else docks. They are plain DOM and Pointer Events, not React; React only mounts them. The nav drags by its grip to the top or bottom edge, so its words stay upright, and locks to a corner or the center (arrow keys move it too). The timeline takes the edge opposite.</p><p>Where the nav sits picks the field’s color scheme, and where you are on the timeline picks the color inside it. A press on the timeline travels the page there, eased, never a jump.</p><p>Each bar is a pane of broken glass: the field behind it is seen through its own small shatter, every piece shifting what’s behind it by a different amount.</p>"
+    },
+    {
+      "key": "field",
+      "heading": "The field",
+      "html": "<p>The shattered glass behind everything is doooomgaze, plain WebGL with no library. It loads after the browser goes idle, only on devices that can keep it smooth, and nothing waits for it to read a word. It is never clickable. It doesn’t answer the pointer at all.</p><p>It moves only by data: the mood of whatever is nearest the middle of the screen, how fast you scroll, lingering, selecting text, pausing, the time of day, and the music. Every value chases its target on a critically damped spring, so nothing jumps. Each load gets a new seed, so it never shatters the same way twice.</p><p>A second shatter with its own seed masks the first into moving windows. At Hello my portrait shows through them. On the work page the art is cut from a circle instead of a rectangle; crossing years rushes the shards, and at the oldest year they gather back into the circle, almost whole, never quite.</p><p>A link to the site unfurls with a real frame of the field, captured from it running.</p>"
+    },
+    {
+      "key": "instrument",
+      "heading": "The instrument",
+      "html": "<p>The music is dooombient, made in Web Audio. My pedals are modeled per sample in an AudioWorklet: a flanger into a Carbon Copy delay into Infinite Jets into a Fathom reverb, on three boards at once (low, mid and air), locked in ratios so they stay in tune with each other. Chords only, from bright modes, at 48 bpm, so a chord turns over about every ten seconds.</p><p>Where you are on the timeline sets the pedals. Each phase has its own settings and they blend between phases. A big jump through time surges the boards, though not much louder than at rest.</p><p>It’s off by default for now; the switch is in the ambience popover. The audio starts with begin, because browsers allow no sound before a press, so turning it on later needs no second press. The instrument and its pedal models don’t load at all until sound first starts. The volume is set very low, because most people keep theirs at 100%.</p>"
+    },
+    {
+      "key": "speed",
+      "heading": "Speed, honestly",
+      "html": "<p>Speed is the experience, so the budgets are rules in CLAUDE.md: the first round trip under 14 KB compressed, no WebGL before first paint, the read tier under 50 KB of JavaScript, the field and the instrument after idle. Here’s where they stand, measured from the build on Oct 16, 2026.</p><p>Nothing needs JavaScript to read a word, and there is no WebGL before first paint. The field is about 14 KB gzipped and arrives after idle. The instrument is about 4 KB plus 6 KB of pedal models, and it only loads if you turn sound on.</p><p>The first round trip misses, badly, on the home page: its HTML is about 148 KB gzipped, because my old writing is inlined in the page instead of fetched when you dive in. The fonts cost a round trip to Adobe before first paint. This page’s HTML is about 11 KB, under the line.</p><p>The JavaScript misses too. The home page carries about 190 KB of it, gzipped, most of it Next.js and React. That’s the price of content that goes live without a rebuild, and I’m paying it for now.</p>"
+    },
+    {
+      "key": "phones",
+      "heading": "Phones",
+      "html": "<p>On a phone the site reads as a column: no zoom, every phase already open at reading size. The field still runs, at a lower pixel density, sized to the whole screen so the URL bar sliding in and out never rescales it. The docks take the top and the bottom, and nothing in them can widen the page. A device asking to save data, or too slight to keep the field smooth, gets the words alone.</p>"
+    },
+    {
+      "key": "agents",
+      "heading": "How I built it",
+      "html": "<p>I direct; Claude builds. I made this with Claude Code, art-directing every step from a live browser window: I watch, and I say what to change. Claude proposes and sketches. The calls on color, mood, type, layout and behavior are mine, and when a request is ambiguous it asks me one question instead of guessing in code.</p><p>The work ran in several chats at once (research, color, the docks, the instrument, the design system), each one handing off to the next through a written doc, so the next chat starts where the last one stopped.</p><p>Every piece of the air started as a prototype: one HTML file, no libraries. Then it was ported into the repo, onto the tokens. The prototypes are still there as dated snapshots, the reference each port is measured against.</p><p>The rules are files. CLAUDE.md holds the house rules every agent follows here: what never goes in the repo, the speed budgets, the one transition, and “leave it alone by default.” The motion rules for the field are a skill beside it, and so is the audit that keeps components and tokens from drifting. Work happens on branches and lands by pull request, in small commits written in plain language. Nothing is pushed without my go.</p><p>The repo started on Oct 14, 2026; the build cadence chart in the view source, again chapter carries the running count of commits and pull requests, and every commit that isn’t a merge is co-authored by Claude.</p>"
+    },
+    {
+      "key": "graveyard",
+      "heading": "The graveyard",
+      "html": "<p>Things I tried and changed.</p><ul><li>The home page went words-free for a while: just the field. The words came back as the surface you dive into.</li><li>The page ran oldest first and travelled down to Hello after you pressed begin. Now Hello is the top, everything runs newest first, and the page stays put.</li><li>The docks were going to slide anywhere along any edge. The nav sits top or bottom now, locked to the corners or the center.</li><li>A dropped dock was going to travel into place on a spring. Now it’s simply there.</li><li>Phones were going to get the words alone. They run the field now.</li><li>Sound was on by default. It’s off for now.</li><li>The surges through time were louder. I had them tamed.</li><li>“Components” was a phase name. It’s “Design systems.”</li></ul>"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+---
+title: view source, again
+phase: agents
+where: home
+order: 150
+start: 2026-10-13
+summary: How this site was built in 46 hours with agents; a design system of dimensions the reader moves through; and what it borrowed, from a 1995 filter to my own pedals. I decided every line.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: my own account
+milestones: [this-site]
+related: [chapter-doooom-shatter]
+objects: [viewsource-cadence, viewsource-lineage]
+---
+
+<Glance>
+October 13, 2026: a day of research into my own 26 years online, and October 14, 12:11pm: the first commit. October 16, 10:28am: a cohesive site after 46 hours of repository time, 22 commits, five pull requests, about 18,300 lines, every non-merge commit co-authored by Claude. Most of the parts came from things I'd already made, some of them in 1998.
+</Glance>
+
+I learned to build for the web in 1998 by clicking View Source and reading how other people did it. This site is the sixteenth design of alternate.org since January 2000, and the first I've built with agents.
+
+**One bus, many hands.** The design system under this page isn't a palette and a type scale. It's a set of dimensions, and you're moving along most of them without meaning to. Where you drag the nav picks the color scheme: centered on top it's Compass, each edge a key light from that direction; on the bottom Hue wheel, one low-chroma sweep; in a left corner Warm/cool, in a right corner Archive, the five phases' colors in order. Where you are on the timeline slides the color inside that scheme, 1998 at one end and now at the other, and a jump of a decade surges, in the field and in the music at once. Each chapter carries a mood in its frontmatter, a valence, an arousal and a point in the frame, and whichever sits nearest the middle of your screen weighs most. The hour of the day sits under all of it. So does how you read: scroll fast and the shards speed up; linger and the camera pushes in; select a line and the focus racks close; stop, and the field calms.
+
+All of that goes onto one bus, and every output reads from it: doooomgaze, the field; the docks, each a pane of broken glass refracting the field through its own small shatter; dooombient's three pedalboards, low, mid and air, locked in ratios so they stay in tune; and the stylesheet, whose custom properties come from the same token files the shader reads as linear RGB. Nothing has a color of its own, so nothing can drift. Every value chases its target on a spring (four of them, quick to tidal, and each number knows which one it follows), so a target that changes mid-flight bends the motion instead of restarting it.
+
+Then it feeds back. The instrument writes its position and energy into the field, which pulls the shatter point toward it. The field's color comes back up through the glass of the docks and the scrim under these words. And a validator reads all of it before every build: ink, quiet and accent through the scrim, over the worst the field can show (a highlight clipped to white), in every scheme, at every year, around the clock. If a token would make one line hard to read at 3am in 2004 with the nav in a corner, the build stops. One transition carries everything that appears or disappears: type in, type out. It's one instrument with a lot of hands on it, and the reader's are two of them.
+
+**How we worked.** I direct, Claude builds. It proposes and sketches; it does not choose colors, moods, type, layout or behavior. Open choices come back as questions, rendered so I can look at them instead of reading hex values. I told it to think of itself as a young me in 1999, eager and smart and less experienced, and that turned out to be exactly the right amount of deference. Several chats ran at once, one each for research, color, the docks, the instrument and the design system, handing off through written documents so the next started where the last stopped. Every piece of the ambient layer began as one HTML file with no dependencies (three of them, in one morning, which the Doooom Shatter chapter tells), then moved into the repository onto the tokens. After that it was a live window with hot reload: I watch, I say what to change, it changes. Nothing is pushed without my go.
+
+<Inhabit>
+The first commit to a site I'd show someone was 46 hours of repository time, October 14 at 12:11pm to October 16 at 10:28am. A long weekend and a work week of evenings; most of the fifteen before it took a season. By that morning, 22 commits, five pull requests, about 18,300 lines added. I did not write most of those lines. I decided every one of them. Those are the counts as of October 16; the chart carries the current ones, an hour at a time.
+
+<BuildCadence />
+
+Almost nothing here started in October. The field is ShatterBox, the KPT Vector Effects filter from 1995 that I used in 1998, rebuilt in September 2026 as Doooom Shatter, then ported into a vertex shader. The instrument is my own pedalboard, an MXR Carbon Copy, a Hologram Infinite Jets and a Walrus Audio Fathom, modeled per sample in an AudioWorklet, three times over. The docks are a 2020 docking investigation, a repo called Tangerine Dream that never shipped: always docked, never floating, drag a stub, not the bar. The zoom-as-navigation surface is David Small's Talmud Project, which I saw at a Pratt event in SoHo in October 2000. The 14 KB first-round-trip budget is the5k, 2001, with inflation. The type is the Adobe Fonts kit that started as a Typekit account around 2010. The earlier chapters are cut from my 2015 essays and 2016 case studies. The colophon's archive is the fifteen designs of this site since January 2000. And the charts on this page are drawn the way the HUD on my racing rig is.
+
+<Lineage />
+
+The usage strip under the Agents heading, a calendar drawn as a heatmap the way I pitched one in 2006, counts how many replies Claude Code gave me, a day at a time, across everything on this page: 9,984 replies over 56 days between July and October. It's not a count of output. The output is the rest of this page.
+
+The graveyard is on the colophon, and it's honest: a CMS that became files in Git, "not React" that became Next.js as a host, four dock slots that became anywhere on the edge that became top or bottom. Each of those was a decision I made after seeing the thing, not before. That's the part of designing in the browser I was taught early, and the part agents make cheap. Seeing the thing costs a few minutes now. So you see more things.
+</Inhabit>

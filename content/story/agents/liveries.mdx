@@ -1,0 +1,35 @@
+---
+title: an app in an evening
+phase: agents
+where: home
+order: 120
+start: 2026-09-22
+summary: In September 2026 my race cars got their own paint — the same shattered glass as the field behind this site, placed on eighteen cars by agents driving Illustrator through scripts — and then a livery-swap app, built between dinner and bed.
+status: draft
+clearance: own
+mood: { valence: 0.5, arousal: 0.8, x: 0.2, y: -0.1 }
+sources:
+  - label: doooom-iRacing-liveries on GitHub
+    url: https://github.com/alternatekev/doooom-iRacing-liveries
+  - label: The compiled record (content/objects/sim-racing-record)
+    note: commit times from the repositories, read 2026-10-16
+related: [chapter-doooom-shatter, chapter-sim-racing]
+objects:
+  - sim-racing-liveries
+---
+
+<Glance>
+On September 22, 2026 the Lotus 79 wore version 13 of a shattered-glass livery in the paint viewer. By September 30 there were eighteen cars. On September 24, between 5:56pm and 10:32pm, I built the app that installs them, in six commits.
+</Glance>
+
+Every car in the racing service can wear your own paint, if you can produce a 2048-pixel texture that fits a template. For years I drove in the defaults. In September, with the shatter filter from the Doooom Shatter chapter working again, I had a source image I actually wanted on a car.
+
+![The Lotus 79 through ten versions of the livery, v2 to v14.](/writing/racing-rig/2026-09-lotus79-v2-to-v14.jpg)
+
+Matte black, gloss shards, an orange 36. The first car was the Lotus 79, because of course it was. The agent drove Illustrator through scripts: shard field on the template, color patches where the body is, number block kept legible, logos and sponsor rows, export the texture and its spec map. Fourteen versions of the Lotus to get the flanks right. Then the same skill placed it on seventeen more cars, from a Miata to a Le Mans prototype. I hadn't scripted Illustrator since the plugin era. The agent reads the scripting guide faster than I can find it.
+
+The service's own paint-sharing tool wants an account and a subscription. I wanted a folder. September 24, 5:56pm: "Build doooom paints: Tauri v2 livery swapper." Paint shown on its card at 7:34. Backups moved out of the library at 10:32, and done.
+
+<Inhabit>
+A desktop app in Rust for a problem exactly one person has is the definition of software that never gets written. Three days later it moved into the one-rig desk from the racing chapter, as its Paints tab.
+</Inhabit>

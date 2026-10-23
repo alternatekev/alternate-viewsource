@@ -1,0 +1,41 @@
+---
+title: agents on a schedule, with guardrails
+phase: agents
+where: cisco
+order: 60
+start: 2026-08-27
+summary: Two agents have run unattended at Cisco since September 2026, a rollout page every weekday and a draft of my Monday leadership update, both read-only, dry-run unless I say otherwise, and told never to turn activity into completion.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: my own account
+milestones: [scheduled-agents]
+related: [chapter-a-harness-not-a-dashboard, chapter-the-chores]
+objects: []
+---
+
+<Glance>
+In late August 2026 I asked an agent how a rollout-tracking page should even work: a script I run by hand, or something it runs for me? Two days later it was a small, tested service publishing to the page the team already reads. Since September it has run every weekday. A second agent drafts my Monday update to leadership from the week's evidence.
+</Glance>
+
+The first agents I trusted to run while I wasn't watching were the two with the least to gain by lying.
+
+**The rollout page.** My modernization team moves the existing product onto the new design system page by page, behind feature flags. Someone had asked, months earlier, for a way to see how far along each page was. I asked an agent how I'd even architect it, and by the next evening there was a small service that reads the flags, works out each page's stage from what production is actually serving, and publishes a table to the page the team already reads.
+
+The agent's first draft treated a flag being on as a page being done. A reviewer on the team, one of the engineers doing the page-by-page work, caught it within a day: the table said done, and they knew the page wasn't, because they were still on it. They didn't file it as a bug. They explained what done means to the team, and the stage logic was rewritten to follow the team's own definitions of work-in-progress, alpha, beta and generally available. The page also de-emphasizes who flipped which flag, because a rollout dashboard is not a leaderboard.
+
+Then I asked for it on a schedule, because I wouldn't remember to run it and I wanted a log. So it runs every weekday morning, verifies the page updated, writes a line to my notes only when something materially changed, and asks me before it touches credentials or code. It missed a run once. The next day it recommended moving its own schedule into CI so it couldn't miss again. I took the advice.
+
+**The Monday draft.** Every Monday evening my three tech leads post their week. I asked for a tool that could more or less write it for me on Monday evenings, so none of it would be a surprise to me. It assembles an evidence packet from the week, the activity journal, the repositories, my notes, read-only views of chat, meetings, email and tickets, and writes a draft in our order, plus notes only I see that map every bullet to the evidence behind it.
+
+One rule in its instructions is the whole point: don't pad thin sections, don't turn activity into completion, and never infer that no work happened from missing evidence. A linked ticket is not a shipped feature. A quiet week is not an idle one.
+
+<Inhabit>
+Why schedule them at all? The chores from February were the chores I remembered to run. These are the ones I wouldn't. A dashboard I refresh by hand gets refreshed when I'm worried about it, and a Monday update written at 9pm is written from memory. The agent reads everything, every time, and tells me what it couldn't read.
+
+The guardrails: read-only tokens kept in CI secrets, never in the repo. Dry-run by default; the live mode is a flag I set. Every run logged where I'll see it. And the editorial contract: evidence, not inference; coverage, not confidence; say what you couldn't see.
+
+Whether the Monday draft is better than the one I'd have written, I don't know yet. I think so. I'll know when someone tells me something on a Tuesday that I didn't already know.
+</Inhabit>

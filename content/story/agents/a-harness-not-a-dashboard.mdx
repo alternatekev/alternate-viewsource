@@ -1,0 +1,43 @@
+---
+title: a harness, not a dashboard
+phase: agents
+where: cisco
+order: 50
+start: 2026-04-24
+summary: From April 2026 I built the system I run three teams with — it reads the work where it happens, says how fresh and how sure every answer is, and drafts while I decide. In August it stopped being a dashboard and became a harness.
+status: draft
+clearance: own
+mood: { valence: 0.2, arousal: 0.9, x: 0.3, y: 0.15 }
+sources:
+  - label: firsthand
+    note: my own account
+milestones: [agent-first-management]
+related: [chapter-agents-on-a-schedule, chapter-the-chores]
+objects: []
+---
+
+<Glance>
+In the spring of 2026 an agent rendered a management desktop app into Figma from a sentence. By summer it read my meetings, chat, email, tickets and repositories into one place. In late August I noticed I was talking to it through the agent more than looking at it, and that became the architecture.
+</Glance>
+
+In the spring of 2026 I went from running one team to running three, and the hours didn't change. A manager's job is mostly knowing: who said they'd do what, what moved since Tuesday, which of the fourteen things on fire matters to the person who's about to ask. That person is usually right to ask, and they've been waiting since Tuesday too. I'd been keeping all of it in a sticky note and a very good memory, and the memory was full.
+
+So I built the thing I needed, for one user. It started as one sentence to a design skill, asking for a desktop app that manages commitments, stakeholders, meetings and deliverables, which an agent rendered as real components onto a Figma canvas. Then it became an app, in our own design system, because I never ever want anything else. (That sentence is also a skill now.)
+
+**It reads where the work happens.** Meetings. Chat. Email. Tickets. Repositories, issues, pull requests, releases. A directory, so names become people and people become teams. And my own notes, which is the durable store: everything it learns that's worth keeping becomes a note I can read without it.
+
+**It says how fresh and how sure.** Every answer carries when its sources were last read and how confident it is. Advice older than a day or so is marked stale and left out. Missing evidence is never "nothing happened."
+
+It drafts while I decide. A priority inbox ranked by who is asking and what they're waiting for. "What did I miss?" after two weeks away, answered as a page. Proposed work items from the quarter's goals, which I edit before they're created, after I caught it rolling several into one.
+
+<Inhabit>
+The first thing I asked it to do to itself was a security and privacy audit. It found unauthenticated endpoints and over-broad scopes in its own code, and I fed its findings back to it as review comments. That's a working relationship.
+
+The pivot came in late August. By then there were three clients, native, web and desktop, and I was asking what the smartest way forward with one interface was. The answer was that the UI wasn't the point. I was talking to the system through the agent anyway. So the architecture flipped: a core with typed operations; a command-line tool that answers in a second without starting a server; the dashboard optional, for scanning. The agent is the interface. The dashboard is for when I want to look.
+
+Nobody builds a product for one manager. There's no budget line for "a system that knows what I know." Built with agents, on nights, it's the most useful software I have, and it's taught me how my teams actually work.
+
+What I'd hoped to learn, and what the agent confirmed, was how I use words to convey my entire idea: "Warm, direct, candid, and relationship-first." I'd rather it drafted in my voice than in its own. It does, now. I still read every word before it leaves.
+
+What's not here, on purpose: anything about the people. The system holds their work. This page holds mine.
+</Inhabit>
